@@ -2,11 +2,191 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Yuvia Flights Mini App</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; margin:24px; line-height:1.45}
+    h1{margin:0 0 16px}
+    .card{max-width:720px; border:1px solid #e5e7eb; border-radius:12px; padding:16px}
+    label{display:block; font-size:14px; color:#374151; margin:12px 0 6px}
+    input,select,button{font:inherit}
+    input,select{width:100%; padding:10px 12px; border:1px solid #d1d5db; border-radius:10px}
+    .row{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+    .row3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px}
+    .muted{color:#6b7280; font-size:13px}
+    .actions{display:flex; gap:10px; margin-top:14px}
+    button{padding:12px 16px; border:0; border-radius:10px; cursor:pointer}
+    .primary{background:#111827; color:#fff}
+    .ghost{background:#f3f4f6}
+    #status{margin-top:10px; font-size:13px}
+    .ok{color:#16a34a} .err{color:#dc2626}
+    .pill{display:inline-flex; align-items:center; gap:6px; background:#ecfdf5; color:#065f46; padding:4px 10px; border-radius:999px; font-size:13px}
+    .small{font-size:12px}
+  </style>
 </head>
 <body>
   <h1>Yuvia Flights Mini App</h1>
-  <p>Шаг 1: репозиторий готов ✅</p>
+  <div class="pill">Шаг 1: репозиторий готов ✅</div>
+
+  <div class="card" style="margin-top:16px">
+    <div class="muted">Шаг 2: заполните параметры — откроем поиск на Aviasales в новой вкладке.</div>
+
+    <div class="row" style="margin-top:10px">
+      <div>
+        <label>Город вылета</label>
+        <input id="from" placeholder="Москва" list="fromList" autocomplete="off">
+        <datalist id="fromList"></datalist>
+        <div class="muted small" id="fromHint"></div>
+      </div>
+      <div>
+        <label>Город назначения</label>
+        <input id="to" placeholder="Казань" list="toList" autocomplete="off">
+        <datalist id="toList"></datalist>
+        <div class="muted small" id="toHint"></div>
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:6px">
+      <div>
+        <label>Дата вылета (ДД.ММ.ГГГГ)</label>
+        <input id="dep" placeholder="15.11.2025">
+      </div>
+      <div>
+        <label>Дата возвращения (опционально)</label>
+        <input id="ret" placeholder="18.11.2025">
+      </div>
+    </div>
+
+    <div class="row3" style="margin-top:6px">
+      <div>
+        <label>Валюта</label>
+        <select id="cur">
+          <option value="rub">RUB ₽</option>
+          <option value="usd">USD $</option>
+          <option value="eur">EUR €</option>
+        </select>
+      </div>
+      <div>
+        <label>Пассажиры</label>
+        <select id="adults">
+          <option>1</option><option>2</option><option>3</option><option>4</option>
+        </select>
+      </div>
+      <div>
+        <label>Только в одну сторону</label>
+        <select id="oneway">
+          <option value="no" selected>Нет</option>
+          <option value="yes">Да</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="primary" id="go">Искать билеты</button>
+      <button class="ghost" id="swap">Поменять местами</button>
+    </div>
+
+    <div id="status" class="muted"></div>
+  </div>
+
+  <script>
+    // === Настройки ===
+    const MARKER = '672309'; // ← подставь свой marker (из Travelpayouts/Aviasales)
+    const AUTOCOMPLETE = term =>
+      `https://autocomplete.travelpayouts.com/places2?term=${encodeURIComponent(term)}&locale=ru&types[]=city`;
+
+    // Служебные переменные для выбранных IATA
+    let fromIATA = '', toIATA = '';
+
+    // Утилиты
+    const byId = id => document.getElementById(id);
+    const setStatus = (msg, cls='') => { const el=byId('status'); el.className = cls; el.textContent = msg; }
+
+    function ddmm(dateStr){
+      if(!dateStr) return '';
+      const p = dateStr.split('.');
+      if(p.length!==3) return '';
+      const d = p[0].padStart(2,'0');
+      const m = p[1].padStart(2,'0');
+      return d+m;
+    }
+
+    // Автодополнение — запрашиваем города, сохраняем IATA выбранного варианта
+    async function handleAuto(inputEl, listEl, hintEl, setter){
+      const q = inputEl.value.trim();
+      if(!q){ listEl.innerHTML=''; hintEl.textContent=''; setter(''); return; }
+      try{
+        const r = await fetch(AUTOCOMPLETE(q));
+        const data = await r.json();
+        const top = (Array.isArray(data) ? data.slice(0,6) : []);
+        listEl.innerHTML = top.map(x=>`<option value="${x.name}">${x.code}</option>`).join('');
+        // Если совпало точным именем — фиксируем IATA, иначе ждём выбора
+        const exact = top.find(x => x.name.toLowerCase() === q.toLowerCase());
+        if(exact){ setter(exact.code); hintEl.textContent = `IATA: ${exact.code}`; }
+        else { setter(''); hintEl.textContent = top.length ? `Варианты: ${top.map(x=>x.code).join(', ')}` : 'Ничего не найдено'; }
+      }catch(e){
+        setter('');
+        hintEl.textContent = 'Ошибка автодополнения';
+      }
+    }
+
+    // Привязки
+    const from = byId('from'), to = byId('to');
+    const fromList = byId('fromList'), toList = byId('toList');
+    const fromHint = byId('fromHint'), toHint = byId('toHint');
+
+    from.addEventListener('input', ()=>handleAuto(from, fromList, fromHint, code=>fromIATA=code));
+    to.addEventListener('input', ()=>handleAuto(to, toList, toHint, code=>toIATA=code));
+
+    // Перестановка городов
+    byId('swap').addEventListener('click', ()=>{
+      const a = from.value, b = to.value;
+      from.value = b; to.value = a;
+      // Сбросим IATA, чтобы пользователь подтвердил выбор (исключаем путаницу)
+      fromIATA = ''; toIATA = '';
+      fromHint.textContent = ''; toHint.textContent = '';
+      setStatus('Города поменяли местами. Проверьте подсказки IATA.', 'muted');
+      from.dispatchEvent(new Event('input'));
+      to.dispatchEvent(new Event('input'));
+    });
+
+    // Построение диплинка
+    byId('go').addEventListener('click', ()=>{
+      const dep = byId('dep').value.trim();
+      const ret = byId('ret').value.trim();
+      const currency = byId('cur').value;
+      const oneWay = byId('oneway').value === 'yes';
+      const adults = byId('adults').value;
+
+      if(!fromIATA || !toIATA){
+        setStatus('Нужно выбрать города из подсказок, чтобы подтвердить IATA.', 'err'); return;
+      }
+      if(!dep){ setStatus('Укажите дату вылета в формате ДД.ММ.ГГГГ.', 'err'); return; }
+
+      const depDDMM = ddmm(dep);
+      const retDDMM = ddmm(ret);
+
+      // /search/MOW1511/KZN1811 — c возвратом
+      // /search/MOW1511/KZN — в одну сторону
+      let path = '';
+      if(oneWay || !retDDMM){
+        path = `/search/${fromIATA}${depDDMM}/${toIATA}`;
+      }else{
+        path = `/search/${fromIATA}${depDDMM}/${toIATA}${retDDMM}`;
+      }
+
+      const params = new URLSearchParams({
+        marker: MARKER,
+        currency,
+        adults,
+        with_request: 'true'
+      });
+
+      const url = `https://www.aviasales.ru${path}?${params.toString()}`;
+      window.open(url, '_blank', 'noopener');
+      setStatus('Открыли поиск в новой вкладке ✅', 'ok');
+    });
+  </script>
 </body>
 </html>
+
