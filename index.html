@@ -318,6 +318,13 @@ document.addEventListener('click', (e)=>{
   if(box.contains(e.target) || e.target === input) return;
   closeSuggest();
 });
+  document.addEventListener('pointerdown', (e)=>{
+  if(!activeSuggest) return;
+  const {box, input} = activeSuggest;
+  if(box.contains(e.target) || e.target === input) return;
+  closeSuggest();
+}, true); // useCapture = true, чтобы отработать первым
+
 document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeSuggest(); }, true);
 document.addEventListener('scroll', ()=>closeSuggest(), true);
 window.addEventListener('resize', ()=>closeSuggest());
@@ -351,12 +358,12 @@ function attachSuggest(inputEl, onPick){
       Object.assign(row.style,{padding:'8px 10px', cursor:'pointer'});
       row.onmouseenter = ()=>row.style.background='#f1f5f9';
       row.onmouseleave = ()=>row.style.background='#fff';
-      row.onclick = ()=>{
-        inputEl.value = item.name;
-        onPick(item);
-        // даём примениться значению и закрываем
-        setTimeout(closeSuggest, 0);
-      };
+     row.onclick = ()=>{
+     inputEl.value = item.name;
+      onPick(item);
+     closeSuggest(); // закрываем МГНОВЕННО, без setTimeout
+     };
+
       box.appendChild(row);
     });
 
@@ -370,8 +377,13 @@ function attachSuggest(inputEl, onPick){
 
   // Закрытие при потере фокуса (с задержкой — чтобы успеть кликнуть пункт)
   inputEl.addEventListener('blur', ()=> setTimeout(()=>{
-    if(activeSuggest?.input === inputEl) closeSuggest();
-  }, 150));
+  if(activeSuggest?.input === inputEl) closeSuggest();
+}, 150));
+
+inputEl.addEventListener('focus', ()=>{
+  // при фокусе на этом поле закрываем любую старую подсказку (если она не для этого input)
+  if(activeSuggest && activeSuggest.input !== inputEl) closeSuggest();
+});
 }
 
 // Привязки
