@@ -9,6 +9,10 @@
     body{max-width:980px;margin:auto}
     .row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
     @media (max-width: 700px){.row{grid-template-columns:1fr}}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+    .chip{border:1px solid #e3e3e3;border-radius:999px;padding:6px 10px;cursor:pointer}
+    .muted{opacity:.75}
+    .alt-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
   </style>
 </head>
 <body>
@@ -77,12 +81,34 @@
         </label>
       </div>
 
-      <div class="row" style="grid-template-columns:auto auto">
-        <button type="submit"><strong>Искать билеты</strong></button>
-        <button id="swapBtn" type="button" class="secondary">Поменять местами</button>
+      <div class="row">
+        <label>
+          Гибкие даты
+          <select id="flex_mode" title="Дополнительно покажем альтернативные даты">
+            <option value="exact" selected>Точно в выбранные даты</option>
+            <option value="p3">±3 дня (подборка ссылок)</option>
+            <option value="p7">±7 дней (подборка ссылок)</option>
+            <option value="weekend">Выходные рядом</option>
+          </select>
+        </label>
+
+        <div style="display:flex;align-items:end;gap:8px">
+          <button type="submit"><strong>Искать билеты</strong></button>
+          <button id="swapBtn" type="button" class="secondary">Поменять местами</button>
+          <button id="copyBtn" type="button" class="secondary">Скопировать ссылку</button>
+        </div>
       </div>
     </form>
+
+    <div id="altBox" class="alt-links" hidden></div>
+
+    <details style="margin-top:18px">
+      <summary><strong>Недавние запросы</strong> (до 5)</summary>
+      <div id="recentBox" class="chips"></div>
+    </details>
   </article>
+
+  <p class="muted">Подсказка: «В одну сторону» очищает дату возврата. Гибкие даты — это просто набор удобных ссылок на соседние дни.</p>
 
   <script>
     // ====== ВАШ ПАРТНЁРСКИЙ ID ======
@@ -94,21 +120,43 @@
       const p = d.split('.'); if(p.length !== 3) return '';
       return `${p[2]}-${p[1]}-${p[0]}`;
     }
+    function fromText(d){ // "ДД.ММ.ГГГГ" -> Date
+      const p = d.split('.'); if(p.length !== 3) return null;
+      return new Date(Number(p[2]), Number(p[1])-1, Number(p[0]));
+    }
+    function fmtISO(date){ // Date -> "ГГГГ-ММ-ДД"
+      const y = date.getFullYear();
+      const m = String(date.getMonth()+1).padStart(2,'0');
+      const d = String(date.getDate()).padStart(2,'0');
+      return `${y}-${m}-${d}`;
+    }
+    function addDays(date, n){
+      const d = new Date(date); d.setDate(d.getDate()+n); return d;
+    }
+    function weekendAround(date){
+      // ближайшие выходные относительно выбранной даты: пятница -> воскресенье
+      const d = new Date(date);
+      const day = d.getDay(); // 0-вс, 5-пт, 6-сб
+      // смещаемся к пятнице
+      const shiftToFri = (day <= 5) ? (5 - day) : ((12 - day)); // если сб(6)->+6, вс(0)->+5
+      const fri = addDays(d, shiftToFri);
+      const sun = addDays(fri, 2);
+      return {depart: fri, ret: sun};
+    }
 
-    // --- простая обвязка автодополнения для IATA ---
+    // --- получение IATA ---
     async function cityToIata(city){
       try{
         const url = `https://autocomplete.travelpayouts.com/places2?term=${encodeURIComponent(city)}&locale=ru&types[]=city`;
         const resp = await fetch(url, {mode: 'cors'});
         const data = await resp.json();
-        // берём первый подходящий элемент с полем code
         return (Array.isArray(data) && data[0] && data[0].code) ? data[0].code : '';
       }catch(e){
         return '';
       }
     }
 
-    // --- логика формы ---
+    // --- элементы формы ---
     const form = document.getElementById('searchForm');
     const originI = document.getElementById('origin_city');
     const destI = document.getElementById('destination_city');
@@ -118,6 +166,9 @@
     const aduI = document.getElementById('adults');
     const oneWayI = document.getElementById('one_way');
     const directCbx = document.getElementById('direct_only');
+    const flexI = document.getElementById('flex_mode');
+    const altBox = document.getElementById('altBox');
+    const recentBox = document.getElementById('recentBox');
 
     // переключение one-way: очищаем возврат
     oneWayI.addEventListener('change', () => {
@@ -129,30 +180,70 @@
       const a = originI.value; originI.value = destI.value; destI.value = a;
     });
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
+    // кнопка "копировать ссылку"
+    document.getElementById('copyBtn').addEventListener('click', async () => {
+      const url = await buildMainLink();
+      if(!url){ alert('Заполните города и дату вылета'); return; }
+      try{
+        await navigator.clipboard.writeText(url);
+        alert('Ссылка скопирована');
+      }catch(e){
+        prompt('Скопируйте ссылку вручную:', url);
+      }
+    });
 
+    // сохранение/отрисовка последних запросов
+    const RECENT_KEY = 'yuvia_recent';
+    function pushRecent(q){
+      try{
+        const arr = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
+        arr.unshift(q);
+        // удаляем дубликаты по "from-to-date-ret-oneway"
+        const seen = new Set();
+        const dedup = [];
+        for(const it of arr){
+          const key = [it.o, it.d, it.dep, it.ret||'', it.ow].join('|');
+          if(!seen.has(key)){ seen.add(key); dedup.push(it); }
+        }
+        localStorage.setItem(RECENT_KEY, JSON.stringify(dedup.slice(0,5)));
+      }catch(e){}
+    }
+    function renderRecent(){
+      recentBox.innerHTML = '';
+      try{
+        const arr = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
+        arr.forEach(it=>{
+          const chip = document.createElement('span');
+          chip.className = 'chip';
+          chip.textContent = `${it.o} → ${it.d} • ${it.dep}${it.ret?`—${it.ret}`:''} • ${it.ow==='yes'?'OW':'RT'}`;
+          chip.onclick = async ()=>{
+            originI.value = it.o; destI.value = it.d;
+            depI.value = it.depText; retI.value = it.retText || '';
+            oneWayI.value = it.ow; curI.value = it.cur; aduI.value = it.ad;
+            const link = await buildMainLink();
+            if(link) window.open(link, '_blank');
+          };
+          recentBox.appendChild(chip);
+        });
+      }catch(e){}
+    }
+    renderRecent();
+
+    // конструктор главной ссылки
+    async function buildMainLink(customDates){
       const originCity = originI.value.trim();
       const destCity = destI.value.trim();
-      const depISO = toISO(depI.value.trim());
-      let retISO = toISO(retI.value.trim());
-
+      const depISO = customDates?.departISO ?? toISO(depI.value.trim());
+      let retISO = customDates?.returnISO ?? toISO(retI.value.trim());
       if(oneWayI.value === 'yes'){ retISO = ''; }
+      if(!originCity || !destCity || !depISO){ return ''; }
 
-      // получаем IATA для городов
       const [origin_iata, destination_iata] = await Promise.all([
         cityToIata(originCity),
         cityToIata(destCity)
       ]);
+      if(!origin_iata || !destination_iata){ return ''; }
 
-      // если не смогли определить IATA — просто открываем главную с marker
-      if(!origin_iata || !destination_iata || !depISO){
-        const fallback = `https://www.aviasales.ru/?marker=${encodeURIComponent(MARKER)}`;
-        window.open(fallback, '_blank');
-        return;
-      }
-
-      // собираем параметры запроса
       const params = new URLSearchParams();
       params.set('marker', MARKER);
       params.set('origin_iata', origin_iata);
@@ -162,12 +253,81 @@
       params.set('adults', aduI.value);
       params.set('currency', curI.value);
       if(directCbx.checked) params.set('direct', 'true');
-      params.set('with_request', 'true'); // сразу открыть результаты
+      params.set('with_request', 'true');
+      return `https://www.aviasales.ru/?${params.toString()}`;
+    }
 
-      const url = `https://www.aviasales.ru/?${params.toString()}`;
-      window.open(url, '_blank');
+    // обработчик формы
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      altBox.hidden = true; altBox.innerHTML = '';
+
+      // сохраняем в «недавние»
+      pushRecent({
+        o: originI.value.trim(),
+        d: destI.value.trim(),
+        dep: toISO(depI.value.trim()),
+        ret: toISO(retI.value.trim()) || '',
+        depText: depI.value.trim(),
+        retText: retI.value.trim() || '',
+        ow: oneWayI.value,
+        cur: curI.value,
+        ad: aduI.value
+      });
+      renderRecent();
+
+      const baseDep = fromText(depI.value.trim());
+      const baseRet = retI.value.trim() ? fromText(retI.value.trim()) : null;
+
+      // основной переход
+      const main = await buildMainLink();
+      if(!main){ alert('Заполните города и дату вылета'); return; }
+      window.open(main, '_blank');
+
+      // гибкие даты: показываем набор ссылок
+      const mode = flexI.value;
+      if(mode === 'exact') return;
+
+      const makeBtn = (title, url)=>{
+        const a = document.createElement('a');
+        a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+        a.className = 'secondary';
+        a.textContent = title;
+        return a;
+      };
+
+      const produceRange = async (radiusDays)=>{
+        // если round-trip, сохраняем длительность
+        let tripLen = 0;
+        if(baseRet){ tripLen = Math.max(1, Math.round((baseRet - baseDep)/86400000)); }
+        for(let d=-radiusDays; d<=radiusDays; d++){
+          const depart = addDays(baseDep, d);
+          const departISO = fmtISO(depart);
+          let returnISO = '';
+          if(oneWayI.value !== 'yes' && tripLen>0){
+            returnISO = fmtISO(addDays(depart, tripLen));
+          }
+          const url = await buildMainLink({departISO, returnISO});
+          if(url){
+            altBox.appendChild(makeBtn(`${depart.toLocaleDateString('ru-RU')}`, url));
+          }
+        }
+      };
+
+      if(mode === 'p3'){ await produceRange(3); }
+      if(mode === 'p7'){ await produceRange(7); }
+      if(mode === 'weekend'){
+        const {depart, ret} = weekendAround(baseDep);
+        const departISO = fmtISO(depart);
+        const returnISO = (oneWayI.value === 'yes') ? '' : fmtISO(ret);
+        const url = await buildMainLink({departISO, returnISO});
+        if(url){
+          altBox.appendChild(makeBtn(`Ближайшие выходные: ${depart.toLocaleDateString('ru-RU')} — ${ret.toLocaleDateString('ru-RU')}`, url));
+        }
+      }
+
+      if(altBox.children.length){ altBox.hidden = false; }
     });
   </script>
 </body>
 </html>
-
