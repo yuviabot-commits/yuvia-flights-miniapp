@@ -50,6 +50,12 @@
       .actions button{flex:1}
     }
     .hidden{display:none !important}
+    .version {
+  position: fixed; bottom: 8px; right: 10px;
+  font-size: 12px; color: #64748b; background: #f1f5f9;
+  border: 1px solid #e2e8f0; border-radius: 8px;
+  padding: 6px 8px; z-index: 9999;
+}
   </style>
 </head>
 <body>
@@ -335,56 +341,90 @@ async function suggestCity(q){
   const r = await fetch(url); if(!r.ok) return [];
   return await r.json();
 }
+// ===== единый dropdown для подсказок (singleton) =====
+let suggestBox = null;
+let suggestInput = null;
 
+function ensureSuggestBox(){
+  if (suggestBox) return suggestBox;
+  suggestBox = document.createElement('div');
+  suggestBox.id = 'suggestBox';
+  Object.assign(suggestBox.style, {
+    position:'absolute', background:'#fff', border:'1px solid #e2e8f0',
+    borderRadius:'8px', zIndex: 9999, minWidth:'220px',
+    boxShadow:'0 8px 24px rgba(15,23,42,.08)'
+  });
+  suggestBox.hidden = true;
+  document.body.appendChild(suggestBox);
+  return suggestBox;
+}
+function closeSuggest(){
+  if (suggestBox){
+    suggestBox.hidden = true;
+    suggestBox.innerHTML = '';
+    suggestInput = null;
+  }
+}
+function openSuggestFor(input, items, onPick){
+  const box = ensureSuggestBox();
+  box.innerHTML = '';
+  items.slice(0,7).forEach(item=>{
+    const row = document.createElement('div');
+    row.textContent = `${item.name}, ${item.country_name} (${item.code})`;
+    Object.assign(row.style, {padding:'8px 10px', cursor:'pointer'});
+    row.onmouseenter = ()=> row.style.background = '#f1f5f9';
+    row.onmouseleave = ()=> row.style.background = '#fff';
+    // чтобы клик по пункту не «сожрался» блюром:
+    row.onmousedown = (e)=>{ e.preventDefault(); };
+    row.onclick = ()=>{
+      input.value = item.name;
+      onPick(item);
+      closeSuggest(); // закрываем мгновенно
+    };
+    box.appendChild(row);
+  });
+  const r = input.getBoundingClientRect();
+  box.style.left = (r.left + window.scrollX) + 'px';
+  box.style.top  = (r.bottom + window.scrollY) + 'px';
+  box.style.width = r.width + 'px';
+  suggestInput = input;
+  box.hidden = false;
+}
+
+// закрытие при любом клике/тапе вне, скролле, ресайзе, Esc
+document.addEventListener('pointerdown', (e)=>{
+  if (!suggestBox || suggestBox.hidden) return;
+  if (e.target === suggestInput) return;
+  if (!suggestBox.contains(e.target)) closeSuggest();
+}, true);
+window.addEventListener('scroll', closeSuggest, true);
+window.addEventListener('resize', closeSuggest);
+document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeSuggest(); });
 function attachSuggest(inputEl, onPick){
   inputEl.addEventListener('input', async ()=>{
     const q = inputEl.value.trim();
-    closeSuggest(); // закрываем предыдущую подсказку при любом новом вводе
-    if(q.length<2) return;
-
+    if (q.length < 2){ closeSuggest(); return; }
     const list = await suggestCity(q);
-    if(!list.length) return;
-
-    const box = document.createElement('div');
-    Object.assign(box.style, {
-      position:'absolute', background:'#fff', border:'1px solid #e2e8f0',
-      borderRadius:'8px', zIndex:9999, width: inputEl.offsetWidth+'px',
-      maxHeight:'260px', overflowY:'auto', boxShadow:'0 6px 24px rgba(0,0,0,.08)'
-    });
-
-    list.slice(0,12).forEach(item=>{
-      const row = document.createElement('div');
-      row.textContent = `${item.name}, ${item.country_name} (${item.code})`;
-      Object.assign(row.style,{padding:'8px 10px', cursor:'pointer'});
-      row.onmouseenter = ()=>row.style.background='#f1f5f9';
-      row.onmouseleave = ()=>row.style.background='#fff';
-     row.onclick = ()=>{
-     inputEl.value = item.name;
-      onPick(item);
-     closeSuggest(); // закрываем МГНОВЕННО, без setTimeout
-     };
-
-      box.appendChild(row);
-    });
-
-    const r = inputEl.getBoundingClientRect();
-    box.style.left = (r.left + window.scrollX) + 'px';
-    box.style.top  = (r.bottom + window.scrollY) + 'px';
-
-    document.body.appendChild(box);
-    activeSuggest = {box, input: inputEl};
+    if (!list.length){ closeSuggest(); return; }
+    openSuggestFor(inputEl, list, onPick);
   });
 
-  // Закрытие при потере фокуса (с задержкой — чтобы успеть кликнуть пункт)
-  inputEl.addEventListener('blur', ()=> setTimeout(()=>{
-  if(activeSuggest?.input === inputEl) closeSuggest();
-}, 150));
+  inputEl.addEventListener('blur', ()=>{
+    // небольшая задержка, чтобы успел отработать click по пункту
+    setTimeout(closeSuggest, 120);
+  });
 
-inputEl.addEventListener('focus', ()=>{
-  // при фокусе на этом поле закрываем любую старую подсказку (если она не для этого input)
-  if(activeSuggest && activeSuggest.input !== inputEl) closeSuggest();
-});
+  inputEl.addEventListener('focus', ()=>{
+    // при фокусе можно заново открыть подсказку, если уже есть ввод
+    const q = inputEl.value.trim();
+    if (q.length >= 2){
+      suggestCity(q).then(list=>{
+        if (list.length) openSuggestFor(inputEl, list, onPick);
+      });
+    }
+  });
 }
+
 
 // Привязки
 attachSuggest(document.querySelector('#origin'), (item)=>{
@@ -752,5 +792,6 @@ toggleOneWay();
 initMinDateHints();
 restoreFromURL();
 </script>
+  <div class="version">версия 2</div>
 </body>
 </html>
