@@ -2,189 +2,170 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Yuvia Flights Mini App</title>
+  <link href="https://unpkg.com/@picocss/pico@2/css/pico.classless.min.css" rel="stylesheet">
   <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; margin:24px; line-height:1.45}
-    h1{margin:0 0 16px}
-    .card{max-width:720px; border:1px solid #e5e7eb; border-radius:12px; padding:16px}
-    label{display:block; font-size:14px; color:#374151; margin:12px 0 6px}
-    input,select,button{font:inherit}
-    input,select{width:100%; padding:10px 12px; border:1px solid #d1d5db; border-radius:10px}
-    .row{display:grid; grid-template-columns:1fr 1fr; gap:12px}
-    .row3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px}
-    .muted{color:#6b7280; font-size:13px}
-    .actions{display:flex; gap:10px; margin-top:14px}
-    button{padding:12px 16px; border:0; border-radius:10px; cursor:pointer}
-    .primary{background:#111827; color:#fff}
-    .ghost{background:#f3f4f6}
-    #status{margin-top:10px; font-size:13px}
-    .ok{color:#16a34a} .err{color:#dc2626}
-    .pill{display:inline-flex; align-items:center; gap:6px; background:#ecfdf5; color:#065f46; padding:4px 10px; border-radius:999px; font-size:13px}
-    .small{font-size:12px}
+    body{max-width:980px;margin:auto}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    @media (max-width: 700px){.row{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
   <h1>Yuvia Flights Mini App</h1>
-  <div class="pill">Шаг 1: репозиторий готов ✅</div>
+  <p><strong>Шаг 1:</strong> репозиторий готов ✅</p>
 
-  <div class="card" style="margin-top:16px">
-    <div class="muted">Шаг 2: заполните параметры — откроем поиск на Aviasales в новой вкладке.</div>
+  <article>
+    <header><strong>Шаг 2:</strong> заполните параметры — откроем поиск на Aviasales в новой вкладке.</header>
 
-    <div class="row" style="margin-top:10px">
-      <div>
-        <label>Город вылета</label>
-        <input id="from" placeholder="Москва" list="fromList" autocomplete="off">
-        <datalist id="fromList"></datalist>
-        <div class="muted small" id="fromHint"></div>
+    <form id="searchForm">
+      <div class="row">
+        <label>
+          Город вылета
+          <input id="origin_city" name="origin_city" type="text" placeholder="Москва" value="Москва" required>
+        </label>
+        <label>
+          Город назначения
+          <input id="destination_city" name="destination_city" type="text" placeholder="Казань" value="Казань" required>
+        </label>
       </div>
-      <div>
-        <label>Город назначения</label>
-        <input id="to" placeholder="Казань" list="toList" autocomplete="off">
-        <datalist id="toList"></datalist>
-        <div class="muted small" id="toHint"></div>
-      </div>
-    </div>
 
-    <div class="row" style="margin-top:6px">
-      <div>
-        <label>Дата вылета (ДД.ММ.ГГГГ)</label>
-        <input id="dep" placeholder="15.11.2025">
+      <div class="row">
+        <label>
+          Дата вылета (ДД.ММ.ГГГГ)
+          <input id="departure_date" name="departure_date" type="text" placeholder="15.11.2025" value="15.11.2025" required>
+        </label>
+        <label>
+          Дата возвращения (опционально)
+          <input id="return_date" name="return_date" type="text" placeholder="18.11.2025" value="18.11.2025">
+        </label>
       </div>
-      <div>
-        <label>Дата возвращения (опционально)</label>
-        <input id="ret" placeholder="18.11.2025">
-      </div>
-    </div>
 
-    <div class="row3" style="margin-top:6px">
-      <div>
-        <label>Валюта</label>
-        <select id="cur">
-          <option value="rub">RUB ₽</option>
-          <option value="usd">USD $</option>
-          <option value="eur">EUR €</option>
-        </select>
-      </div>
-      <div>
-        <label>Пассажиры</label>
-        <select id="adults">
-          <option>1</option><option>2</option><option>3</option><option>4</option>
-        </select>
-      </div>
-      <div>
-        <label>Только в одну сторону</label>
-        <select id="oneway">
-          <option value="no" selected>Нет</option>
-          <option value="yes">Да</option>
-        </select>
-      </div>
-    </div>
+      <div class="row">
+        <label>
+          Валюта
+          <select id="currency">
+            <option value="RUB" selected>RUB ₽</option>
+            <option value="USD">USD $</option>
+            <option value="EUR">EUR €</option>
+          </select>
+        </label>
 
-    <div class="actions">
-      <button class="primary" id="go">Искать билеты</button>
-      <button class="ghost" id="swap">Поменять местами</button>
-    </div>
+        <label>
+          Пассажиры
+          <select id="adults">
+            <option value="1" selected>1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+          </select>
+        </label>
+      </div>
 
-    <div id="status" class="muted"></div>
-  </div>
+      <div class="row">
+        <label>
+          Только в одну сторону
+          <select id="one_way">
+            <option value="no" selected>Нет</option>
+            <option value="yes">Да</option>
+          </select>
+        </label>
+
+        <label style="display:flex;align-items:center;gap:8px">
+          <input type="checkbox" id="direct_only">
+          Только прямые рейсы
+        </label>
+      </div>
+
+      <div class="row" style="grid-template-columns:auto auto">
+        <button type="submit"><strong>Искать билеты</strong></button>
+        <button id="swapBtn" type="button" class="secondary">Поменять местами</button>
+      </div>
+    </form>
+  </article>
 
   <script>
-    // === Настройки ===
-    const MARKER = '672309'; // ← подставь свой marker (из Travelpayouts/Aviasales)
-    const AUTOCOMPLETE = term =>
-      `https://autocomplete.travelpayouts.com/places2?term=${encodeURIComponent(term)}&locale=ru&types[]=city`;
+    // ====== ВАШ ПАРТНЁРСКИЙ ID ======
+    const MARKER = '672309';
 
-    // Служебные переменные для выбранных IATA
-    let fromIATA = '', toIATA = '';
-
-    // Утилиты
-    const byId = id => document.getElementById(id);
-    const setStatus = (msg, cls='') => { const el=byId('status'); el.className = cls; el.textContent = msg; }
-
-    function ddmm(dateStr){
-      if(!dateStr) return '';
-      const p = dateStr.split('.');
-      if(p.length!==3) return '';
-      const d = p[0].padStart(2,'0');
-      const m = p[1].padStart(2,'0');
-      return d+m;
+    // --- утилиты дат ---
+    function toISO(d){ // из "ДД.ММ.ГГГГ" -> "ГГГГ-ММ-ДД"
+      if(!d) return '';
+      const p = d.split('.'); if(p.length !== 3) return '';
+      return `${p[2]}-${p[1]}-${p[0]}`;
     }
 
-    // Автодополнение — запрашиваем города, сохраняем IATA выбранного варианта
-    async function handleAuto(inputEl, listEl, hintEl, setter){
-      const q = inputEl.value.trim();
-      if(!q){ listEl.innerHTML=''; hintEl.textContent=''; setter(''); return; }
+    // --- простая обвязка автодополнения для IATA ---
+    async function cityToIata(city){
       try{
-        const r = await fetch(AUTOCOMPLETE(q));
-        const data = await r.json();
-        const top = (Array.isArray(data) ? data.slice(0,6) : []);
-        listEl.innerHTML = top.map(x=>`<option value="${x.name}">${x.code}</option>`).join('');
-        // Если совпало точным именем — фиксируем IATA, иначе ждём выбора
-        const exact = top.find(x => x.name.toLowerCase() === q.toLowerCase());
-        if(exact){ setter(exact.code); hintEl.textContent = `IATA: ${exact.code}`; }
-        else { setter(''); hintEl.textContent = top.length ? `Варианты: ${top.map(x=>x.code).join(', ')}` : 'Ничего не найдено'; }
+        const url = `https://autocomplete.travelpayouts.com/places2?term=${encodeURIComponent(city)}&locale=ru&types[]=city`;
+        const resp = await fetch(url, {mode: 'cors'});
+        const data = await resp.json();
+        // берём первый подходящий элемент с полем code
+        return (Array.isArray(data) && data[0] && data[0].code) ? data[0].code : '';
       }catch(e){
-        setter('');
-        hintEl.textContent = 'Ошибка автодополнения';
+        return '';
       }
     }
 
-    // Привязки
-    const from = byId('from'), to = byId('to');
-    const fromList = byId('fromList'), toList = byId('toList');
-    const fromHint = byId('fromHint'), toHint = byId('toHint');
+    // --- логика формы ---
+    const form = document.getElementById('searchForm');
+    const originI = document.getElementById('origin_city');
+    const destI = document.getElementById('destination_city');
+    const depI = document.getElementById('departure_date');
+    const retI = document.getElementById('return_date');
+    const curI = document.getElementById('currency');
+    const aduI = document.getElementById('adults');
+    const oneWayI = document.getElementById('one_way');
+    const directCbx = document.getElementById('direct_only');
 
-    from.addEventListener('input', ()=>handleAuto(from, fromList, fromHint, code=>fromIATA=code));
-    to.addEventListener('input', ()=>handleAuto(to, toList, toHint, code=>toIATA=code));
-
-    // Перестановка городов
-    byId('swap').addEventListener('click', ()=>{
-      const a = from.value, b = to.value;
-      from.value = b; to.value = a;
-      // Сбросим IATA, чтобы пользователь подтвердил выбор (исключаем путаницу)
-      fromIATA = ''; toIATA = '';
-      fromHint.textContent = ''; toHint.textContent = '';
-      setStatus('Города поменяли местами. Проверьте подсказки IATA.', 'muted');
-      from.dispatchEvent(new Event('input'));
-      to.dispatchEvent(new Event('input'));
+    // переключение one-way: очищаем возврат
+    oneWayI.addEventListener('change', () => {
+      if(oneWayI.value === 'yes'){ retI.value = ''; }
     });
 
-    // Построение диплинка
-    byId('go').addEventListener('click', ()=>{
-      const dep = byId('dep').value.trim();
-      const ret = byId('ret').value.trim();
-      const currency = byId('cur').value;
-      const oneWay = byId('oneway').value === 'yes';
-      const adults = byId('adults').value;
+    // кнопка "поменять местами"
+    document.getElementById('swapBtn').addEventListener('click', () => {
+      const a = originI.value; originI.value = destI.value; destI.value = a;
+    });
 
-      if(!fromIATA || !toIATA){
-        setStatus('Нужно выбрать города из подсказок, чтобы подтвердить IATA.', 'err'); return;
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const originCity = originI.value.trim();
+      const destCity = destI.value.trim();
+      const depISO = toISO(depI.value.trim());
+      let retISO = toISO(retI.value.trim());
+
+      if(oneWayI.value === 'yes'){ retISO = ''; }
+
+      // получаем IATA для городов
+      const [origin_iata, destination_iata] = await Promise.all([
+        cityToIata(originCity),
+        cityToIata(destCity)
+      ]);
+
+      // если не смогли определить IATA — просто открываем главную с marker
+      if(!origin_iata || !destination_iata || !depISO){
+        const fallback = `https://www.aviasales.ru/?marker=${encodeURIComponent(MARKER)}`;
+        window.open(fallback, '_blank');
+        return;
       }
-      if(!dep){ setStatus('Укажите дату вылета в формате ДД.ММ.ГГГГ.', 'err'); return; }
 
-      const depDDMM = ddmm(dep);
-      const retDDMM = ddmm(ret);
+      // собираем параметры запроса
+      const params = new URLSearchParams();
+      params.set('marker', MARKER);
+      params.set('origin_iata', origin_iata);
+      params.set('destination_iata', destination_iata);
+      params.set('depart_date', depISO);
+      if(retISO) params.set('return_date', retISO);
+      params.set('adults', aduI.value);
+      params.set('currency', curI.value);
+      if(directCbx.checked) params.set('direct', 'true');
+      params.set('with_request', 'true'); // сразу открыть результаты
 
-      // /search/MOW1511/KZN1811 — c возвратом
-      // /search/MOW1511/KZN — в одну сторону
-      let path = '';
-      if(oneWay || !retDDMM){
-        path = `/search/${fromIATA}${depDDMM}/${toIATA}`;
-      }else{
-        path = `/search/${fromIATA}${depDDMM}/${toIATA}${retDDMM}`;
-      }
-
-      const params = new URLSearchParams({
-        marker: MARKER,
-        currency,
-        adults,
-        with_request: 'true'
-      });
-
-      const url = `https://www.aviasales.ru${path}?${params.toString()}`;
-      window.open(url, '_blank', 'noopener');
-      setStatus('Открыли поиск в новой вкладке ✅', 'ok');
+      const url = `https://www.aviasales.ru/?${params.toString()}`;
+      window.open(url, '_blank');
     });
   </script>
 </body>
