@@ -303,41 +303,86 @@ function restoreFromURL(){
   if(s.origin_city || s.dest_city) applyState(s);
 }
 
+/* ========= подсказки городов (IATA) — устойчивое закрытие ========= */
 let originIATA = '', destIATA = '';
+
+let activeSuggest = null; // {box:HTMLElement, input:HTMLElement}
+function closeSuggest(){
+  if(activeSuggest?.box) activeSuggest.box.remove();
+  activeSuggest = null;
+}
+// Глобальные слушатели для «железного» закрытия
+document.addEventListener('click', (e)=>{
+  if(!activeSuggest) return;
+  const {box, input} = activeSuggest;
+  if(box.contains(e.target) || e.target === input) return;
+  closeSuggest();
+});
+document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeSuggest(); }, true);
+document.addEventListener('scroll', ()=>closeSuggest(), true);
+window.addEventListener('resize', ()=>closeSuggest());
+
 async function suggestCity(q){
   if(!q || q.length<2) return [];
   const url = `https://autocomplete.travelpayouts.com/places2?term=${encodeURIComponent(q)}&locale=ru&types[]=city`;
   const r = await fetch(url); if(!r.ok) return [];
   return await r.json();
 }
+
 function attachSuggest(inputEl, onPick){
-  let box;
   inputEl.addEventListener('input', async ()=>{
     const q = inputEl.value.trim();
-    if(box){box.remove(); box=null;}
+    closeSuggest(); // закрываем предыдущую подсказку при любом новом вводе
     if(q.length<2) return;
+
     const list = await suggestCity(q);
     if(!list.length) return;
-    box = document.createElement('div');
-    Object.assign(box.style, {position:'absolute', background:'#fff', border:'1px solid #e2e8f0', borderRadius:'8px', zIndex:10, width: inputEl.offsetWidth+'px', maxHeight:'260px', overflowY:'auto'});
+
+    const box = document.createElement('div');
+    Object.assign(box.style, {
+      position:'absolute', background:'#fff', border:'1px solid #e2e8f0',
+      borderRadius:'8px', zIndex:9999, width: inputEl.offsetWidth+'px',
+      maxHeight:'260px', overflowY:'auto', boxShadow:'0 6px 24px rgba(0,0,0,.08)'
+    });
+
     list.slice(0,12).forEach(item=>{
-      const row=document.createElement('div');
+      const row = document.createElement('div');
       row.textContent = `${item.name}, ${item.country_name} (${item.code})`;
       Object.assign(row.style,{padding:'8px 10px', cursor:'pointer'});
-      row.onmouseenter=()=>row.style.background='#f1f5f9';
-      row.onmouseleave=()=>row.style.background='#fff';
-      row.onclick=()=>{ inputEl.value=item.name; onPick(item); box.remove(); box=null; };
+      row.onmouseenter = ()=>row.style.background='#f1f5f9';
+      row.onmouseleave = ()=>row.style.background='#fff';
+      row.onclick = ()=>{
+        inputEl.value = item.name;
+        onPick(item);
+        // даём примениться значению и закрываем
+        setTimeout(closeSuggest, 0);
+      };
       box.appendChild(row);
     });
+
     const r = inputEl.getBoundingClientRect();
-    box.style.left = r.left + window.scrollX + 'px';
-    box.style.top  = r.bottom + window.scrollY + 'px';
+    box.style.left = (r.left + window.scrollX) + 'px';
+    box.style.top  = (r.bottom + window.scrollY) + 'px';
+
     document.body.appendChild(box);
+    activeSuggest = {box, input: inputEl};
   });
-  document.addEventListener('click', (e)=>{ if(box && !box.contains(e.target) && e.target!==inputEl){box.remove(); box=null;} });
+
+  // Закрытие при потере фокуса (с задержкой — чтобы успеть кликнуть пункт)
+  inputEl.addEventListener('blur', ()=> setTimeout(()=>{
+    if(activeSuggest?.input === inputEl) closeSuggest();
+  }, 150));
 }
-attachSuggest($('#origin'), (item)=>{ originIATA=item.code; $('#originIataHint').textContent='IATA: '+originIATA; syncURLFromState({oi:originIATA, oc:$('#origin').value.trim()}); });
-attachSuggest($('#destination'), (item)=>{ destIATA=item.code; $('#destIataHint').textContent='IATA: '+destIATA; syncURLFromState({di:destIATA, dc:$('#destination').value.trim()}); });
+
+// Привязки
+attachSuggest(document.querySelector('#origin'), (item)=>{
+  originIATA = item.code;
+  document.querySelector('#originIataHint').textContent = 'IATA: ' + originIATA;
+});
+attachSuggest(document.querySelector('#destination'), (item)=>{
+  destIATA = item.code;
+  document.querySelector('#destIataHint').textContent = 'IATA: ' + destIATA;
+});
 
 /* ========= переключатель one-way ========= */
 function toggleOneWay(){
