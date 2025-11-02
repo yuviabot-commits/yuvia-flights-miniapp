@@ -9,6 +9,7 @@
     :root{
       --bg:#ffffff; --fg:#0f172a; --muted:#64748b; --line:#e2e8f0;
       --accent:#0369a1; --accent-fg:#fff; --chip:#f1f5f9;
+      --disabled:#f8fafc;
     }
     html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;}
     .wrap{max-width:980px;margin:0 auto;padding:24px;}
@@ -22,13 +23,13 @@
     input[type="text"], input[type="date"], select{
       width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:10px;outline:none;background:#fff;
     }
+    input[disabled]{background:var(--disabled);cursor:not-allowed}
     .row{display:flex;gap:12px;flex-wrap:wrap}
     .btn{padding:14px 18px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer}
     .btn.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
     .btn.ghost{background:#fff}
     .hint{color:var(--muted);font-size:14px;margin-top:8px}
     .chip{display:inline-block;background:var(--chip);padding:6px 10px;border-radius:999px;margin-right:8px;margin-top:8px;font-size:14px}
-    .link{color:var(--accent);text-decoration:none}
     .error{color:#b91c1c;font-size:14px;margin-top:6px}
     .divider{height:1px;background:var(--line);margin:14px 0}
   </style>
@@ -43,11 +44,11 @@
       <div class="grid grid-2" style="margin-top:10px">
         <div>
           <label>Город вылета</label>
-          <input id="origin_city" type="text" placeholder="Москва" value="Москва">
+          <input id="origin_city" type="text" placeholder="Москва" value="Москва" autocomplete="off">
         </div>
         <div>
           <label>Город назначения</label>
-          <input id="dest_city" type="text" placeholder="Казань" value="Казань">
+          <input id="dest_city" type="text" placeholder="Казань" value="Казань" autocomplete="off">
         </div>
         <div>
           <label>Дата вылета</label>
@@ -104,11 +105,11 @@
   </div>
 
   <script>
-    // ====== Настройки партнёрки (ничего секретного) ======
+    // ====== Настройки партнёрки ======
     const MARKER = 672309; // твой Partner ID
-    const UTM = 'yuvia_miniapp'; // пометка источника
+    const UTM = 'yuvia_miniapp';
 
-    // ====== Утилиты дат ======
+    // ====== Даты ======
     const pad2 = n => (n<10?'0':'') + n;
     const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate()+n); return x; };
     const toISO = d => d ? `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}` : '';
@@ -116,66 +117,109 @@
 
     // Следующие ПОЛНЫЕ выходные: СБ–ВС после указанной даты
     function weekendNextSatSun(date){
-      const d = new Date(date);            // 0=вс,1=пн,...,6=сб
-      const day = d.getDay();
+      const d = new Date(date);
+      const day = d.getDay();              // 0=вс,1=пн,...,6=сб
       let deltaToSat;
       if (day === 6) deltaToSat = 7;       // сегодня суббота -> следующая суббота
-      else if (day === 0) deltaToSat = 6;  // воскресенье -> следующая суббота
+      else if (day === 0) deltaToSat = 6;  // сегодня воскресенье -> следующая суббота
       else deltaToSat = 6 - day;           // будни -> ближайшая будущая суббота
       const sat = addDays(d, deltaToSat);
       const sun = addDays(sat, 1);
       return { depart: sat, ret: sun };
     }
 
-    // ====== Автоподстановка выходных ======
-    const flexSelect = document.getElementById('flex_mode');
-    const depInput   = document.getElementById('dep_date');
-    const retInput   = document.getElementById('ret_date');
-    const flexHint   = document.getElementById('flex_hint');
+    // ====== DOM ======
+    const originInput = document.getElementById('origin_city');
+    const destInput   = document.getElementById('dest_city');
+    const depInput    = document.getElementById('dep_date');
+    const retInput    = document.getElementById('ret_date');
+    const oneWaySel   = document.getElementById('one_way');
+    const flexSelect  = document.getElementById('flex_mode');
+    const flexHint    = document.getElementById('flex_hint');
+    const errBox      = document.getElementById('error');
 
+    // Минимальная дата = сегодня
+    const todayISO = toISO(new Date());
+    depInput.min = todayISO;
+    retInput.min = todayISO;
+
+    function showError(msg){ errBox.textContent = msg; errBox.style.display='block'; }
+    function hideError(){ errBox.style.display='none'; errBox.textContent=''; }
+
+    // ====== Гибкие даты ======
     function applyFlex(){
       const mode = flexSelect.value;
       flexHint.textContent = '';
       if (mode === 'weekend_next'){
         const w = weekendNextSatSun(new Date());
         depInput.value = toISO(w.depart);
-        retInput.value = toISO(w.ret);
-        flexHint.textContent = `Ближайшие выходные: ${pad2(w.depart.getDate())}.${pad2(w.depart.getMonth()+1)} — ${pad2(w.ret.getDate())}.${pad2(w.ret.getMonth()+1)}`;
+        depInput.min = todayISO;
+        if (oneWaySel.value === 'yes') {
+          // one-way: только суббота
+          retInput.value = '';
+          retInput.disabled = true;
+          flexHint.textContent = `Ближайшая суббота: ${pad2(w.depart.getDate())}.${pad2(w.depart.getMonth()+1)}`;
+        } else {
+          retInput.disabled = false;
+          retInput.value = toISO(w.ret);
+          retInput.min = depInput.value || todayISO;
+          flexHint.textContent = `Ближайшие выходные: ${pad2(w.depart.getDate())}.${pad2(w.depart.getMonth()+1)} — ${pad2(w.ret.getDate())}.${pad2(w.ret.getMonth()+1)}`;
+        }
       }
     }
     flexSelect.addEventListener('change', applyFlex);
 
-    // ====== Гранулярная валидация ======
-    const errBox = document.getElementById('error');
-    function showError(msg){ errBox.textContent = msg; errBox.style.display='block'; }
-    function hideError(){ errBox.style.display='none'; errBox.textContent=''; }
+    // ====== Переключение one-way ======
+    function applyOneWayState(){
+      if (oneWaySel.value === 'yes'){
+        // просто отключаем возвращение, НИЧЕГО не стираем в городах
+        retInput.disabled = true;
+      } else {
+        retInput.disabled = false;
+        // если даты возврата нет, поставим +3 дня от вылета
+        if (!retInput.value && depInput.value){
+          const d = addDays(new Date(depInput.value), 3);
+          retInput.value = toISO(d);
+        }
+      }
+    }
+    oneWaySel.addEventListener('change', ()=>{
+      applyOneWayState();
+      // при смене one-way, если включён режим выходных — заново применим логику
+      if (flexSelect.value === 'weekend_next') applyFlex();
+    });
 
-    // ====== Travelpayouts Autocomplete: город -> IATA ======
+    // При изменении даты вылета подтянем min для возврата
+    depInput.addEventListener('change', ()=>{
+      retInput.min = depInput.value || todayISO;
+      if (oneWaySel.value === 'no' && retInput.value && retInput.value < depInput.value){
+        retInput.value = depInput.value; // мягкая коррекция
+      }
+    });
+
+    // ====== IATA ======
     async function cityToIata(city){
       const url = `https://autocomplete.travelpayouts.com/places2?term=${encodeURIComponent(city)}&locale=ru&types[]=city`;
       const res = await fetch(url);
       const data = await res.json();
-      // берём первый подходящий city
       const item = (data||[]).find(x => x.type === 'city' && x.code);
       return item ? item.code : null;
     }
 
-    // ====== Конструктор диплинка Aviasales ======
+    // ====== Диплинк Aviasales ======
     function aviasalesLink({originIata, destIata, dep, ret, oneWay, adults, currency}){
-      // базовый слаг поиска: ORIGINddmmDEST[ddmm]
       const slug = originIata + toDDMM(dep) + destIata + (oneWay ? '' : toDDMM(ret));
       const params = new URLSearchParams({
         marker: MARKER,
         with_request: 'true',
         adults: String(adults || 1),
-        currency: currency || 'rub',
+        currency: (currency || 'rub').toLowerCase(),
         utm_source: UTM
       });
-      // официальный домен RU
       return `https://www.aviasales.ru/search/${slug}?${params.toString()}`;
     }
 
-    // ====== Недавние запросы (localStorage) ======
+    // ====== Недавние запросы ======
     const RECENT_KEY = 'yuvia_recent';
     function saveRecent(item){
       try{
@@ -204,13 +248,14 @@
           const rr = x.ret ? x.ret.split('-').reverse().join('.') : '';
           b.textContent = `${x.oCity} → ${x.dCity} • ${dd}${x.oneWay==='yes'?'':' — '+rr}`;
           b.addEventListener('click', ()=>{
-            document.getElementById('origin_city').value = x.oCity;
-            document.getElementById('dest_city').value = x.dCity;
+            originInput.value = x.oCity;
+            destInput.value = x.dCity;
             depInput.value = x.dep || '';
             retInput.value = x.ret || '';
-            document.getElementById('one_way').value = x.oneWay || 'no';
+            oneWaySel.value = x.oneWay || 'no';
             document.getElementById('adults').value = x.adults || '1';
             document.getElementById('currency').value = x.currency || 'rub';
+            applyOneWayState();
           });
           box.appendChild(b);
         }
@@ -219,16 +264,14 @@
 
     // ====== Кнопки ======
     document.getElementById('swapBtn').addEventListener('click', ()=>{
-      const a = document.getElementById('origin_city');
-      const b = document.getElementById('dest_city');
-      [a.value, b.value] = [b.value, a.value];
+      [originInput.value, destInput.value] = [destInput.value, originInput.value];
     });
 
     async function buildLinkFromForm(){
       hideError();
-      const oCity = document.getElementById('origin_city').value.trim();
-      const dCity = document.getElementById('dest_city').value.trim();
-      const oneWay = document.getElementById('one_way').value;
+      const oCity = originInput.value.trim();
+      const dCity = destInput.value.trim();
+      const oneWay = oneWaySel.value;
       const adults = document.getElementById('adults').value;
       const currency = document.getElementById('currency').value;
 
@@ -248,12 +291,11 @@
 
       const url = aviasalesLink({
         originIata, destIata,
-        dep, ret: ret || dep, // ret не используется при oneWay, но для формата оставим
+        dep, ret: ret || dep,
         oneWay: oneWay === 'yes',
         adults, currency
       });
 
-      // сохранить в «Недавние»
       saveRecent({
         oCity, dCity, dep: toISO(dep), ret: toISO(ret),
         oneWay, adults, currency
@@ -279,9 +321,16 @@
     });
 
     // ====== Инициализация ======
-    // По умолчанию ставим «следующие выходные» как в примере
-    flexSelect.value = 'weekend_next';
-    applyFlex();
+    function initDefaultDates(){
+      // стартуем с «Ближайшие выходные»
+      flexSelect.value = 'weekend_next';
+      applyFlex();
+      applyOneWayState();
+      // синхронизируем min возврата
+      retInput.min = depInput.value || todayISO;
+    }
+
+    initDefaultDates();
     renderRecent();
   </script>
 </body>
