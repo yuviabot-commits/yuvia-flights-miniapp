@@ -2,274 +2,500 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Yuvia Flights Mini App</title>
-  <link rel="preconnect" href="https://autocomplete.travelpayouts.com">
   <style>
-    :root{--bg:#fff;--fg:#0f172a;--muted:#64748b;--line:#e2e8f0;--accent:#0369a1;--accent-fg:#fff;--chip:#f1f5f9;--disabled:#f8fafc}
-    html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
-    .wrap{max-width:980px;margin:0 auto;padding:24px}
-    h1{font-size:32px;margin:8px 0 16px}
-    .badge{display:inline-block;padding:6px 10px;border-radius:10px;background:#e8f5e9;color:#166534;font-weight:600}
-    .card{border:1px solid var(--line);border-radius:12px;padding:20px;margin:18px 0}
-    .grid{display:grid;gap:14px}
-    @media (min-width:720px){.grid-2{grid-template-columns:1fr 1fr}}
-    label{font-size:14px;color:var(--muted);margin-bottom:6px;display:block}
-    input,select,button{font-size:16px}
-    input[type="text"],input[type="date"],select{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#fff}
-    input[disabled]{background:var(--disabled);cursor:not-allowed}
-    .row{display:flex;gap:12px;flex-wrap:wrap}
-    .btn{padding:14px 18px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer}
-    .btn.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
-    .hint{color:var(--muted);font-size:14px;margin-top:8px}
-    .chip{display:inline-block;background:var(--chip);padding:6px 10px;border-radius:999px;margin-right:8px;margin-top:8px;font-size:14px}
-    .error{color:#b91c1c;font-size:14px;margin-top:6px}
-    .divider{height:1px;background:var(--line);margin:14px 0}
+    :root{
+      --bg:#ffffff; --fg:#0f172a; --muted:#475569; --line:#e2e8f0; --brand:#0ea5e9; --brand-2:#0369a1;
+      --chip:#f1f5f9; --ok:#16a34a; --danger:#ef4444;
+    }
+    *{box-sizing:border-box}
+    body{margin:0; font:16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial; color:var(--fg); background:var(--bg)}
+    .wrap{max-width:1000px; margin:0 auto; padding:20px}
+    h1{font-size:28px; margin:8px 0 18px}
+    .card{border:1px solid var(--line); border-radius:14px; padding:16px; background:#fff}
+    .grid{display:grid; gap:12px}
+    .grid-2{grid-template-columns:1fr 1fr}
+    .grid-3{grid-template-columns:repeat(3, 1fr)}
+    .row{display:flex; gap:12px; align-items:center}
+    input, select, button{
+      font:inherit; padding:12px 14px; border:1px solid var(--line); border-radius:12px; background:#fff; width:100%
+    }
+    input:disabled{background:#f8fafc}
+    button{cursor:pointer; background:var(--brand); color:#fff; border-color:transparent}
+    button.secondary{background:#eef6fb; color:#0b4e6b}
+    button.ghost{background:#fff; color:var(--fg); border-color:var(--line)}
+    .actions{display:flex; gap:10px; flex-wrap:wrap}
+    .hint{color:var(--muted); font-size:13px}
+    .chip{padding:8px 12px; border-radius:999px; background:var(--chip); cursor:pointer; display:inline-flex; gap:8px; align-items:center}
+    .chips{display:flex; gap:8px; flex-wrap:wrap}
+    .section-title{margin:18px 0 8px; font-weight:600}
+    .divider{height:1px; background:var(--line); margin:12px 0}
+    .skeleton{background:linear-gradient(90deg, #f4f7fb 25%, #edf2f7 37%, #f4f7fb 63%); border-radius:8px; height:62px; animation:sh 1.2s infinite ease-in-out}
+    @keyframes sh{0%{background-position:-200px 0} 100%{background-position:calc(200px + 100%) 0}}
+    .result{display:grid; grid-template-columns:1fr auto; gap:8px; padding:14px; border:1px solid var(--line); border-radius:12px}
+    .result .price{font-weight:700; font-size:18px}
+    .bad{color:var(--danger)}
+    .ok{color:var(--ok)}
+    .toolbar{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+    .toolbar select{width:auto}
+    .filters{display:flex; gap:8px; flex-wrap:wrap}
+    .label{font-size:12px; color:var(--muted); margin-bottom:6px}
+    @media (max-width:900px){
+      .grid-2,.grid-3{grid-template-columns:1fr}
+      .result{grid-template-columns:1fr}
+      .actions button{flex:1}
+    }
   </style>
 </head>
 <body>
 <div class="wrap">
   <h1>Yuvia Flights Mini App</h1>
-  <span class="badge">Шаг 1: репозиторий готов ✅</span>
 
-  <div class="card">
-    <div class="hint">Шаг 2: заполните параметры — откроем поиск на Aviasales в новой вкладке.</div>
-
-    <div class="grid grid-2" style="margin-top:10px">
-      <div>
-        <label>Город вылета</label>
-        <input id="origin_city" type="text" placeholder="Москва" value="Москва" autocomplete="off">
-      </div>
-      <div>
-        <label>Город назначения</label>
-        <input id="dest_city" type="text" placeholder="Казань" value="Казань" autocomplete="off">
-      </div>
-      <div>
-        <label>Дата вылета</label>
-        <input id="dep_date" type="date">
-      </div>
-      <div>
-        <label>Дата возвращения (опционально)</label>
-        <input id="ret_date" type="date">
-      </div>
-      <div>
-        <label>Валюта</label>
-        <select id="currency">
-          <option value="rub" selected>RUB ₽</option>
-          <option value="usd">USD $</option>
-          <option value="eur">EUR €</option>
-        </select>
-      </div>
-      <div>
-        <label>Пассажиры</label>
-        <select id="adults">
-          <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option>
-        </select>
-      </div>
-      <div>
-        <label>Только в одну сторону</label>
-        <select id="one_way">
-          <option value="no" selected>Нет</option>
-          <option value="yes">Да</option>
-        </select>
-      </div>
-      <div>
-        <label>Гибкие даты</label>
-        <select id="flex_mode">
-          <option value="none" selected>Без гибких дат</option>
-          <option value="weekend_next">Ближайшие выходные (СБ–ВС)</option>
-        </select>
-        <div id="flex_hint" class="hint"></div>
-      </div>
+  <!-- Форма поиска -->
+  <div class="card grid grid-2" id="searchForm">
+    <div>
+      <div class="label">Город вылета</div>
+      <input id="origin" placeholder="Москва" autocomplete="off" />
+      <div class="hint" id="originIataHint"></div>
+    </div>
+    <div>
+      <div class="label">Город назначения</div>
+      <input id="destination" placeholder="Казань" autocomplete="off" />
+      <div class="hint" id="destIataHint"></div>
+    </div>
+    <div>
+      <div class="label">Дата вылета (ДД.ММ.ГГГГ)</div>
+      <input id="depart" placeholder="15.11.2025" />
+    </div>
+    <div>
+      <div class="label">Дата возвращения (опционально)</div>
+      <input id="ret" placeholder="18.11.2025" />
     </div>
 
-    <div class="row" style="margin-top:16px">
-      <button id="searchBtn" class="btn primary">Искать билеты</button>
-      <button id="swapBtn" class="btn">Поменять местами</button>
-      <button id="copyBtn" class="btn">Скопировать ссылку</button>
+    <div>
+      <div class="label">Валюта</div>
+      <select id="currency">
+        <option value="RUB">RUB ₽</option>
+        <option value="USD">USD $</option>
+        <option value="EUR">EUR €</option>
+      </select>
     </div>
-    <div id="error" class="error" style="display:none"></div>
+    <div>
+      <div class="label">Пассажиры</div>
+      <select id="adults">
+        <option>1</option><option>2</option><option>3</option>
+        <option>4</option><option>5</option><option>6</option>
+      </select>
+    </div>
 
-    <div class="divider"></div>
-    <div id="recentWrap">
-      <div class="hint">Недавние запросы (до 5):</div>
-      <div id="recent" class="row"></div>
+    <div>
+      <div class="label">Только в одну сторону</div>
+      <select id="oneway">
+        <option value="no">Нет</option>
+        <option value="yes">Да</option>
+      </select>
+    </div>
+    <div>
+      <div class="label">Гибкие даты</div>
+      <select id="flexMode">
+        <option value="none">Отключено</option>
+        <option value="weekend">Ближайшие выходные</option>
+        <option value="plus3">± 3 дня</option>
+        <option value="plus7">± 7 дней</option>
+      </select>
+    </div>
+
+    <div class="actions" style="grid-column:1/-1">
+      <button id="doSearch">Искать билеты</button>
+      <button class="secondary" id="swap">Поменять местами</button>
+      <button class="ghost" id="copyLink">Скопировать ссылку</button>
+      <button class="ghost" id="reset">Сброс</button>
+    </div>
+
+    <div class="hint" id="weekendHint" style="grid-column:1/-1; display:none"></div>
+  </div>
+
+  <!-- Недавние запросы -->
+  <div class="section-title">Недавние запросы</div>
+  <div class="chips" id="recentChips"></div>
+
+  <!-- Панель сортировок и фильтров -->
+  <div class="card" style="margin-top:12px">
+    <div class="toolbar">
+      <div class="label">Сортировка</div>
+      <select id="sortBy">
+        <option value="price_asc">Сначала дешёвые</option>
+        <option value="price_desc">Сначала дорогие</option>
+        <option value="duration_asc">Короткий путь</option>
+        <option value="depart_asc">Ранний вылет</option>
+      </select>
+
+      <div class="divider" style="width:1px; height:32px"></div>
+
+      <div class="filters">
+        <label class="chip"><input type="checkbox" id="directOnly" /> прямые</label>
+        <label class="chip">Цена до <input type="number" id="priceMax" style="width:110px;margin-left:6px" placeholder="руб" /></label>
+        <label class="chip">Авиакомпания:
+          <select id="airlineFilter" style="margin-left:6px">
+            <option value="">любая</option>
+          </select>
+        </label>
+      </div>
     </div>
   </div>
+
+  <!-- Результаты -->
+  <div class="section-title">Результаты</div>
+  <div id="results" class="grid"></div>
+
+  <!-- Соседние даты / матрица -->
+  <div class="section-title">Соседние даты</div>
+  <div id="matrix" class="chips"></div>
 </div>
 
 <script>
-  // ===== Партнёрка =====
-  const MARKER = 672309;
-  const UTM = 'yuvia_miniapp';
-
-  // ===== Даты =====
-  const pad2 = n => (n<10?'0':'')+n;
-  const addDays = (d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x;}
-  const toISO = d => d?`${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`:'';
-  const toDDMM = d => d?`${pad2(d.getDate())}${pad2(d.getMonth()+1)}`:'';
-
-  function weekendNextSatSun(date){
-    const d=new Date(date);const day=d.getDay();
-    let deltaToSat; if(day===6)deltaToSat=7; else if(day===0)deltaToSat=6; else deltaToSat=6-day;
-    const sat=addDays(d,deltaToSat), sun=addDays(sat,1);
-    return {depart:sat,ret:sun};
+/* ========= helpers ========= */
+const $ = (sel)=>document.querySelector(sel);
+const fmt2 = (n)=>String(n).padStart(2,'0');
+function parseDDMMYYYY(s){
+  if(!s) return null;
+  const m = s.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+  if(!m) return null; 
+  const d = new Date(+m[3], +m[2]-1, +m[1]);
+  if(isNaN(d)) return null;
+  return d;
+}
+function toISO(d){return d ? d.toISOString().slice(0,10) : "";}
+function toDDMM(d){return d ? fmt2(d.getDate()) + fmt2(d.getMonth()+1) : "";}
+function weekendAround(today=new Date()){
+  // ближайшие СБ-ВС, если уже выходные — след. неделя
+  const t = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const wd = t.getDay(); // 0=Вс ... 6=Сб
+  let sat = new Date(t);
+  sat.setDate(t.getDate() + ((6 - (wd||7)) % 7) || 7); // ближайшая суббота (минимум через 1 день)
+  if (wd === 6 || wd === 0) { // сегодня сб/вс — берём следующие
+    sat.setDate(sat.getDate() + 7);
   }
-
-  // ===== DOM =====
-  const originInput=document.getElementById('origin_city');
-  const destInput=document.getElementById('dest_city');
-  const depInput=document.getElementById('dep_date');
-  const retInput=document.getElementById('ret_date');
-  const oneWaySel=document.getElementById('one_way');
-  const flexSelect=document.getElementById('flex_mode');
-  const flexHint=document.getElementById('flex_hint');
-  const errBox=document.getElementById('error');
-
-  const todayISO=toISO(new Date());
-  depInput.min=todayISO; retInput.min=todayISO;
-
-  function showError(m){errBox.textContent=m;errBox.style.display='block'}
-  function hideError(){errBox.style.display='none';errBox.textContent=''}
-
-  function applyFlex(){
-    const mode=flexSelect.value; flexHint.textContent='';
-    if(mode==='weekend_next'){
-      const w=weekendNextSatSun(new Date());
-      depInput.value=toISO(w.depart);
-      depInput.min=todayISO;
-      if(oneWaySel.value==='yes'){
-        retInput.value='';
-        retInput.disabled=true;
-        flexHint.textContent=`Ближайшая суббота: ${pad2(w.depart.getDate())}.${pad2(w.depart.getMonth()+1)}`;
-      }else{
-        retInput.disabled=false;
-        retInput.value=toISO(w.ret);
-        retInput.min=depInput.value||todayISO;
-        flexHint.textContent=`Ближайшие выходные: ${pad2(w.depart.getDate())}.${pad2(w.depart.getMonth()+1)} — ${pad2(w.ret.getDate())}.${pad2(w.ret.getMonth()+1)}`;
-      }
-    }
-  }
-  flexSelect.addEventListener('change',applyFlex);
-
-  function applyOneWayState(){
-    if(oneWaySel.value==='yes'){
-      retInput.disabled=true; // города не трогаем
-    }else{
-      retInput.disabled=false;
-      if(!retInput.value && depInput.value){
-        retInput.value=toISO(addDays(new Date(depInput.value),3));
-      }
-    }
-  }
-  oneWaySel.addEventListener('change',()=>{applyOneWayState(); if(flexSelect.value==='weekend_next')applyFlex();});
-  depInput.addEventListener('change',()=>{retInput.min=depInput.value||todayISO; if(oneWaySel.value==='no'&&retInput.value&&retInput.value<depInput.value){retInput.value=depInput.value}});
-
-  // ===== IATA =====
-  async function cityToIata(city){
-    const url=`https://autocomplete.travelpayouts.com/places2?term=${encodeURIComponent(city)}&locale=ru&types[]=city`;
-    const res=await fetch(url); const data=await res.json();
-    const item=(data||[]).find(x=>x.type==='city'&&x.code);
-    return item?item.code:null;
-  }
-
-  // ===== Aviasales диплинк =====
-  function aviasalesLink({originIata,destIata,dep,ret,oneWay,adults,currency}){
-    // ВАЖНО: для one-way нужен хвост '1'
-    const slug = oneWay
-      ? (originIata + toDDMM(dep) + destIata + '1')
-      : (originIata + toDDMM(dep) + destIata + toDDMM(ret));
-    const params = new URLSearchParams({
-      marker: MARKER,
-      with_request: 'true',
-      adults: String(adults||1),
-      currency: (currency||'rub').toLowerCase(),
-      utm_source: UTM
-    });
-    return `https://www.aviasales.ru/search/${slug}?${params.toString()}`;
-  }
-
-  // ===== Недавние =====
-  const RECENT_KEY='yuvia_recent';
-  function saveRecent(item){
-    try{
-      const list=JSON.parse(localStorage.getItem(RECENT_KEY)||'[]');
-      list.unshift(item);
-      const uniques=[]; const seen=new Set();
-      for(const x of list){
-        const key=JSON.stringify([x.oCity,x.dCity,x.dep,x.ret,x.oneWay,x.adults,x.currency]);
-        if(!seen.has(key)){seen.add(key); uniques.push(x);} if(uniques.length>=5)break;
-      }
-      localStorage.setItem(RECENT_KEY,JSON.stringify(uniques));
-      renderRecent();
-    }catch(e){}
-  }
-  function renderRecent(){
-    const box=document.getElementById('recent'); box.innerHTML='';
-    try{
-      const list=JSON.parse(localStorage.getItem(RECENT_KEY)||'[]');
-      for(const x of list){
-        const b=document.createElement('button'); b.className='chip';
-        const dd=x.dep?x.dep.split('-').reverse().join('.'):'';
-        const rr=x.ret?x.ret.split('-').reverse().join('.'):'';
-        b.textContent=`${x.oCity} → ${x.dCity} • ${dd}${x.oneWay==='yes'?'':' — '+rr}`;
-        b.addEventListener('click',()=>{
-          originInput.value=x.oCity; destInput.value=x.dCity;
-          depInput.value=x.dep||''; retInput.value=x.ret||'';
-          oneWaySel.value=x.oneWay||'no';
-          document.getElementById('adults').value=x.adults||'1';
-          document.getElementById('currency').value=x.currency||'rub';
-          applyOneWayState();
-        });
-        box.appendChild(b);
-      }
-    }catch(e){}
-  }
-
-  // ===== Кнопки =====
-  document.getElementById('swapBtn').addEventListener('click',()=>{[originInput.value,destInput.value]=[destInput.value,originInput.value]});
-
-  async function buildLinkFromForm(){
-    hideError();
-    const oCity=originInput.value.trim(), dCity=destInput.value.trim();
-    const oneWay=oneWaySel.value, adults=document.getElementById('adults').value, currency=document.getElementById('currency').value;
-
-    if(!oCity||!dCity){showError('Введите города вылета и назначения.');return null;}
-
-    const dep=depInput.value?new Date(depInput.value):null;
-    const ret=retInput.value?new Date(retInput.value):null;
-
-    if(!dep){showError('Укажите дату вылета.');return null;}
-    if(oneWay==='no'&&!ret){showError('Укажите дату возвращения или включите режим "в одну сторону".');return null;}
-    if(oneWay==='no'&&ret<dep){showError('Дата возвращения должна быть не раньше даты вылета.');return null;}
-
-    const [originIata,destIata]=await Promise.all([cityToIata(oCity),cityToIata(dCity)]);
-    if(!originIata||!destIata){showError('Не удалось распознать города. Попробуйте указать точнее.');return null;}
-
-    const url=aviasalesLink({
-      originIata,destIata,
-      dep,ret:ret||dep,
-      oneWay:oneWay==='yes',
-      adults,currency
-    });
-
-    saveRecent({oCity,dCity,dep:toISO(dep),ret:toISO(ret),oneWay,adults,currency});
-    return url;
-  }
-
-  document.getElementById('searchBtn').addEventListener('click',async()=>{const url=await buildLinkFromForm(); if(url)window.open(url,'_blank');});
-  document.getElementById('copyBtn').addEventListener('click',async()=>{const url=await buildLinkFromForm(); if(!url)return; try{await navigator.clipboard.writeText(url);alert('Ссылка скопирована!')}catch(e){prompt('Скопируйте ссылку вручную:',url)}});
-
-  // ===== init =====
-  function initDefaultDates(){
-    const todayISO=toISO(new Date());
-    depInput.min=todayISO; retInput.min=todayISO;
-    document.getElementById('flex_mode').value='weekend_next';
-    applyFlex(); applyOneWayState();
-    retInput.min=depInput.value||todayISO;
-  }
-  initDefaultDates();
+  const sun = new Date(sat); sun.setDate(sat.getDate()+1);
+  return {sat, sun};
+}
+function saveRecent(item){
+  const key='recent';
+  const list = JSON.parse(localStorage.getItem(key)||'[]');
+  const norm = JSON.stringify(item);
+  const idx = list.findIndex(x=>JSON.stringify(x)===norm);
+  if(idx!==-1) list.splice(idx,1);
+  list.unshift(item);
+  while(list.length>5) list.pop();
+  localStorage.setItem(key, JSON.stringify(list));
   renderRecent();
+}
+function renderRecent(){
+  const cont = $('#recentChips'); cont.innerHTML='';
+  const list = JSON.parse(localStorage.getItem('recent')||'[]');
+  list.forEach((r,i)=>{
+    const chip = document.createElement('div'); chip.className='chip';
+    chip.textContent = `${r.origin_city} → ${r.dest_city} ${r.depart||''}${r.oneway==='yes'?' (OW)':''}`;
+    chip.onclick=()=>{applyState(r);};
+    cont.appendChild(chip);
+  });
+}
+function applyState(st){
+  $('#origin').value = st.origin_city || '';
+  $('#destination').value = st.dest_city || '';
+  $('#depart').value = st.depart || '';
+  $('#ret').value = st.ret || '';
+  $('#currency').value = st.currency || 'RUB';
+  $('#adults').value = st.adults || '1';
+  $('#oneway').value = st.oneway || 'no';
+  $('#flexMode').value = st.flex || 'none';
+  // iata hints
+  originIATA = st.origin_iata || '';
+  destIATA = st.dest_iata || '';
+  $('#originIataHint').textContent = originIATA?('IATA: '+originIATA):'';
+  $('#destIataHint').textContent = destIATA?('IATA: '+destIATA):'';
+  toggleOneWay();
+}
+/* ========= подсказки городов (IATA) ========= */
+let originIATA = '', destIATA = '';
+async function suggestCity(q){
+  if(!q || q.length<2) return [];
+  const url = `https://autocomplete.travelpayouts.com/places2?term=${encodeURIComponent(q)}&locale=ru&types[]=city`;
+  const r = await fetch(url); if(!r.ok) return [];
+  return await r.json();
+}
+function attachSuggest(inputEl, onPick){
+  let box;
+  inputEl.addEventListener('input', async ()=>{
+    const q = inputEl.value.trim();
+    if(box){box.remove(); box=null;}
+    if(q.length<2) return;
+    const list = await suggestCity(q);
+    if(!list.length) return;
+    box = document.createElement('div');
+    Object.assign(box.style, {position:'absolute', background:'#fff', border:'1px solid #e2e8f0', borderRadius:'8px', zIndex:10, width: inputEl.offsetWidth+'px'});
+    list.slice(0,7).forEach(item=>{
+      const row=document.createElement('div');
+      row.textContent = `${item.name}, ${item.country_name} (${item.code})`;
+      Object.assign(row.style,{padding:'8px 10px', cursor:'pointer'});
+      row.onmouseenter=()=>row.style.background='#f1f5f9';
+      row.onmouseleave=()=>row.style.background='#fff';
+      row.onclick=()=>{ inputEl.value=item.name; onPick(item); box.remove(); box=null; };
+      box.appendChild(row);
+    });
+    const r = inputEl.getBoundingClientRect();
+    box.style.left = r.left + window.scrollX + 'px';
+    box.style.top  = r.bottom + window.scrollY + 'px';
+    document.body.appendChild(box);
+  });
+  document.addEventListener('click', (e)=>{ if(box && !box.contains(e.target) && e.target!==inputEl){box.remove(); box=null;} });
+}
+attachSuggest($('#origin'), (item)=>{ originIATA=item.code; $('#originIataHint').textContent='IATA: '+originIATA; });
+attachSuggest($('#destination'), (item)=>{ destIATA=item.code; $('#destIataHint').textContent='IATA: '+destIATA; });
+
+/* ========= переключатель one-way ========= */
+function toggleOneWay(){
+  const ow = $('#oneway').value==='yes';
+  const ret = $('#ret');
+  if(ow){ ret.value=''; ret.disabled=true; } else { ret.disabled=false; }
+}
+$('#oneway').addEventListener('change', toggleOneWay);
+
+/* ========= гибкие даты (ближайшие выходные) ========= */
+function updateWeekendHint(){
+  const fm = $('#flexMode').value;
+  const h = $('#weekendHint');
+  if(fm!=='weekend'){ h.style.display='none'; return; }
+  const {sat,sun}=weekendAround(new Date());
+  h.style.display='block';
+  h.textContent = `Ближайшие выходные: ${fmt2(sat.getDate())}.${fmt2(sat.getMonth()+1)}.${sat.getFullYear()} — ${fmt2(sun.getDate())}.${fmt2(sun.getMonth()+1)}.${sun.getFullYear()}`;
+}
+$('#flexMode').addEventListener('change', updateWeekendHint);
+
+/* ========= диплинк на Aviasales ========= */
+const MARKER = 672309;
+function buildDeeplink({ori, dst, d1, d2, currency, adults, oneway}){
+  const DD1 = d1 ? (fmt2(d1.getDate()) + fmt2(d1.getMonth()+1)) : '';
+  const DD2 = d2 ? (fmt2(d2.getDate()) + fmt2(d2.getMonth()+1)) : '';
+  let slug = '';
+  if(oneway==='yes'){
+    slug = `/${ori}${DD1}${dst}1`;
+  } else {
+    slug = `/${ori}${DD1}${dst}${DD2}1`;
+  }
+  const params = new URLSearchParams({
+    marker: MARKER,
+    with_request: 'true',
+    adults: String(adults||1),
+    currency: (currency||'RUB').toLowerCase(),
+    utm_source: 'yuvia_miniapp'
+  });
+  return `https://www.aviasales.ru/search${slug}?${params.toString()}`;
+}
+
+/* ========= загрузка результатов через наш /api ========= */
+let allResults = []; // нормализованные перелёты
+function showLoading(){
+  const r = $('#results'); r.innerHTML='';
+  for(let i=0;i<3;i++){ const s=document.createElement('div'); s.className='skeleton'; r.appendChild(s); }
+}
+function showMatrix(chips){
+  const m = $('#matrix'); m.innerHTML='';
+  chips.forEach(c=>{
+    const el = document.createElement('div'); el.className='chip';
+    el.textContent = `${c.dstr} · от ${c.price} ${c.currency}`;
+    el.onclick = ()=>{ $('#depart').value=c.dstr; doSearch(); };
+    m.appendChild(el);
+  });
+}
+function renderAirlinesFilter(){
+  const sel = $('#airlineFilter'); 
+  const set = new Set(allResults.map(x=>x.airline).filter(Boolean));
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">любая</option>' + [...set].sort().map(a=>`<option>${a}</option>`).join('');
+  if(set.has(cur)) sel.value = cur;
+}
+function renderResults(){
+  const r = $('#results'); r.innerHTML='';
+  // применяем фильтры
+  const directOnly = $('#directOnly').checked;
+  const priceMax = parseInt($('#priceMax').value,10)||Infinity;
+  const airlineF = $('#airlineFilter').value||'';
+  let list = allResults.filter(x=>{
+    if(directOnly && x.transfers>0) return false;
+    if(x.price > priceMax) return false;
+    if(airlineF && x.airline!==airlineF) return false;
+    return true;
+  });
+  // сортировка
+  const s = $('#sortBy').value;
+  list.sort((a,b)=>{
+    if(s==='price_asc') return a.price-b.price;
+    if(s==='price_desc') return b.price-a.price;
+    if(s==='duration_asc') return a.duration-b.duration;
+    if(s==='depart_asc') return (a.depTime||'').localeCompare(b.depTime||'');
+    return 0;
+  });
+  if(!list.length){
+    const empty=document.createElement('div'); empty.className='card';
+    empty.innerHTML = `<div class="bad">Ничего не нашли.</div>
+      <div class="hint">Попробуй поменять даты, валюту или снять фильтры. Ниже — цены на соседние дни.</div>`;
+    r.appendChild(empty);
+    return;
+  }
+  list.forEach(x=>{
+    const el = document.createElement('div'); el.className='result';
+    const left = document.createElement('div');
+    left.innerHTML = `
+      <div><b>${x.origin}</b> → <b>${x.destination}</b> · ${x.depDateStr}${x.retDateStr?(' — '+x.retDateStr):''}</div>
+      <div class="hint">${x.airline || 'авиакомпания неизвестна'} · пересадок: ${x.transfers} · длительность: ${x.durStr||'—'}</div>
+    `;
+    const right = document.createElement('div'); right.style.textAlign='right';
+    right.innerHTML = `
+      <div class="price">${x.price.toLocaleString('ru-RU')} ${x.currency}</div>
+      <div class="row" style="justify-content:flex-end; margin-top:6px">
+        <a href="${x.deeplink}" target="_blank"><button>На Aviasales</button></a>
+      </div>
+    `;
+    el.appendChild(left); el.appendChild(right);
+    r.appendChild(el);
+  });
+}
+['change','input'].forEach(ev=>{
+  $('#sortBy').addEventListener(ev, renderResults);
+  $('#priceMax').addEventListener(ev, renderResults);
+  $('#directOnly').addEventListener(ev, renderResults);
+  $('#airlineFilter').addEventListener(ev, renderResults);
+});
+async function callJSON(url){
+  const r = await fetch(url);
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  return await r.json();
+}
+async function doSearch(){
+  // валидация ввода
+  const oriCity = $('#origin').value.trim();
+  const dstCity = $('#destination').value.trim();
+  if(!oriCity || !dstCity){ alert('Укажи города вылета и назначения'); return; }
+  // если нет IATA — попробуем получить
+  async function ensureIata(city){ 
+    if(city===oriCity && originIATA) return originIATA;
+    if(city===dstCity && destIATA) return destIATA;
+    const s = await suggestCity(city); return s[0]?.code || '';
+  }
+  const ori = await ensureIata(oriCity);
+  const dst = await ensureIata(dstCity);
+  if(!ori || !dst){ alert('Не удалось определить IATA код городов'); return; }
+  const ow = $('#oneway').value;
+  const cur = $('#currency').value;
+  const adults = +$('#adults').value || 1;
+  // даты
+  let d1 = parseDDMMYYYY($('#depart').value);
+  let d2 = parseDDMMYYYY($('#ret').value);
+  const flex = $('#flexMode').value;
+  if(flex==='weekend'){
+    const {sat,sun}=weekendAround(new Date());
+    d1=sat; if(ow!=='yes') d2=sun;
+    $('#depart').value = `${fmt2(d1.getDate())}.${fmt2(d1.getMonth()+1)}.${d1.getFullYear()}`;
+    if(ow!=='yes') $('#ret').value = `${fmt2(d2.getDate())}.${fmt2(d2.getMonth()+1)}.${d2.getFullYear()}`;
+  }
+  if(!d1){ alert('Укажи дату вылета формата ДД.ММ.ГГГГ'); return; }
+  if(ow!=='yes' && d2 && d2<d1){ alert('Дата возврата не может быть раньше вылета'); return; }
+
+  // сохраняем в «недавние»
+  saveRecent({
+    origin_city: oriCity, dest_city: dstCity,
+    origin_iata: ori, dest_iata: dst,
+    depart: $('#depart').value, ret: $('#ret').value,
+    currency: cur, adults: String(adults), oneway: ow, flex
+  });
+
+  // рендер загрузки
+  showLoading();
+
+  // матрица соседних дат, если flex != none
+  try{
+    const matrixParams = new URLSearchParams({
+      origin: ori, destination: dst, currency: cur, center: toISO(d1)
+    });
+    if(flex==='plus3') matrixParams.set('range','3');
+    else if(flex==='plus7') matrixParams.set('range','7');
+    else matrixParams.set('range','0');
+    const m = await callJSON(`/api/matrix?${matrixParams.toString()}`);
+    const chips = (m.data||[]).slice(0,12).map(it=>({
+      dstr: it.date_str, price: it.price, currency: it.currency
+    }));
+    showMatrix(chips);
+  }catch(e){ /* тихо пропускаем матрицу */ }
+
+  // основной поиск
+  const q = new URLSearchParams({
+    origin: ori, destination: dst, currency: cur,
+    oneway: ow==='yes'?'1':'0',
+    depart: toISO(d1), ret: (ow==='yes'||!d2)?'':toISO(d2),
+    adults: String(adults)
+  });
+  let json;
+  try{
+    json = await callJSON(`/api/search?${q.toString()}`);
+  }catch(e){
+    $('#results').innerHTML = `<div class="card"><div class="bad">Ошибка запроса: ${e.message}</div></div>`;
+    return;
+  }
+  // нормализация
+  const list = (json.data||[]).filter(x=>x.price>0 && x.origin===ori && x.destination===dst);
+  allResults = list.map(x=>{
+    const depDateStr = x.depart_date ? x.depart_date.split('T')[0].split('-').reverse().join('.') : '';
+    const retDateStr = x.return_date ? x.return_date.split('T')[0].split('-').reverse().join('.') : '';
+    const deeplink = buildDeeplink({
+      ori, dst, d1: d1, d2: (ow==='yes'?null:d2), currency: cur, adults, oneway: ow
+    });
+    return {
+      origin: x.origin, destination: x.destination,
+      price: Math.round(x.price), currency: x.currency || cur,
+      airline: x.airline || '',
+      transfers: (typeof x.transfers==='number') ? x.transfers : (x.number_of_changes ?? 0),
+      duration: x.duration || (x.duration_to ?? 0),
+      durStr: x.duration_str || '',
+      depTime: x.depart_time || '',
+      depDateStr, retDateStr,
+      deeplink
+    };
+  });
+  renderAirlinesFilter();
+  renderResults();
+}
+
+/* ========= кнопки ========= */
+$('#doSearch').addEventListener('click', doSearch);
+$('#swap').addEventListener('click', ()=>{
+  const a=$('#origin').value, b=$('#destination').value;
+  $('#origin').value=b; $('#destination').value=a;
+  const ia=originIATA; originIATA=destIATA; destIATA=ia;
+  $('#originIataHint').textContent = originIATA?('IATA: '+originIATA):'';
+  $('#destIataHint').textContent = destIATA?('IATA: '+destIATA):'';
+});
+$('#copyLink').addEventListener('click', ()=>{
+  const ori=originIATA, dst=destIATA;
+  const d1=parseDDMMYYYY($('#depart').value), d2=parseDDMMYYYY($('#ret').value);
+  const link = buildDeeplink({
+    ori, dst, d1, d2, currency: $('#currency').value, adults: +$('#adults').value||1, oneway: $('#oneway').value
+  });
+  navigator.clipboard.writeText(link).then(()=>alert('Ссылка скопирована'));
+});
+$('#reset').addEventListener('click', ()=>{
+  $('#searchForm').querySelectorAll('input').forEach(i=>i.value='');
+  $('#currency').value='RUB'; $('#adults').value='1'; $('#oneway').value='no'; $('#flexMode').value='none';
+  originIATA=''; destIATA=''; $('#originIataHint').textContent=''; $('#destIataHint').textContent='';
+  $('#results').innerHTML=''; $('#matrix').innerHTML=''; updateWeekendHint();
+});
+
+/* ========= init ========= */
+updateWeekendHint();
+renderRecent();
+toggleOneWay();
 </script>
 </body>
 </html>
+
