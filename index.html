@@ -478,14 +478,18 @@ function buildDeeplink({ori, dst, d1, d2, currency, adults, oneway}){
 }
 
 /* ========= API helpers ========= */
-const API_BASE = 'yuvia-flights-api.yuviabot.workers.dev';
+const API_BASE = 'https://yuvia-flights-api.yuviabot.workers.dev';
+
 async function callJSON(path){
   // если передали относительный путь, дописываем адрес воркера
-  const url = path.startsWith('http') ? path : API_BASE + path;
+  const url = path.startsWith('http')
+    ? path
+    : `${API_BASE}${path}`;
   const r = await fetch(url);
-  if(!r.ok) throw new Error('HTTP '+r.status);
+  if (!r.ok) throw new Error('HTTP ' + r.status);
   return await r.json();
 }
+
 
 /* ========= состояние результатов ========= */
 let allResults = []; // нормализованные перелёты (массив)
@@ -795,6 +799,6 @@ toggleOneWay();
 initMinDateHints();
 restoreFromURL();
 </script>
-  <div class="version">версия 3</div>
+  <div class="version">версия 4</div>
 </body>
 </html>
