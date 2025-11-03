@@ -6,64 +6,449 @@
   <title>Yuvia Flights Mini App</title>
   <style>
     :root{
-      --bg:#ffffff; --fg:#0f172a; --muted:#475569; --line:#e2e8f0; --brand:#0ea5e9; --brand-2:#0369a1;
-      --chip:#f1f5f9; --ok:#16a34a; --danger:#ef4444;
+      --bg:#f5f2ec;
+      --surface:#fdfcf9;
+      --surface-soft:#f8f4ee;
+      --fg:#151820;
+      --muted:#6b7280;
+      --line:#e4ddd1;
+      --accent:#1f6f6b;       /* глубокий зелёно-бирюзовый */
+      --accent-soft:#e76f51;  /* тёплый коралловый */
+      --chip:#f3ebe0;
+      --ok:#16a34a;
+      --danger:#e11d48;
     }
-    *{box-sizing:border-box}
-    body{margin:0; font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial; color:var(--fg); background:var(--bg)}
-    .wrap{max-width:1100px; margin:0 auto; padding:20px}
-    h1{font-size:28px; margin:8px 0 18px}
-    .card{border:1px solid var(--line); border-radius:14px; padding:16px; background:#fff}
-    .grid{display:grid; gap:12px}
-    .grid-2{grid-template-columns:1fr 1fr}
-    .grid-3{grid-template-columns:repeat(3, 1fr)}
-    .row{display:flex; gap:12px; align-items:center}
+
+    *{box-sizing:border-box;}
+
+    body{
+      margin:0;
+      font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Inter,Arial;
+      color:var(--fg);
+      background:radial-gradient(circle at top left, #fdf7ee 0%, var(--bg) 55%, #f1ece4 100%);
+    }
+
+    .wrap{
+      max-width:1100px;
+      margin:0 auto;
+      padding:18px 16px 26px;
+    }
+
+    /* ---------- Шапка / бренд ---------- */
+
+    .app-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      margin-bottom:20px;
+      gap:12px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .logo-circle{
+      width:40px;
+      height:40px;
+      border-radius:999px;
+      background:linear-gradient(145deg, var(--accent-soft), #f8c9a9);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow:0 10px 30px rgba(0,0,0,.08);
+    }
+
+    .brand-name{
+      font-size:20px;
+      letter-spacing:0.08em;
+      text-transform:lowercase;
+      font-weight:600;
+    }
+
+    .brand-tagline{
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .badge-mini{
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid rgba(15,23,42,.08);
+      background:rgba(255,255,255,.6);
+      color:var(--muted);
+    }
+
+    /* ---------- Карточки / сетки ---------- */
+
+    .card{
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:18px;
+      background:var(--surface);
+      box-shadow:0 14px 40px rgba(15,23,42,.06);
+    }
+
+    .card-soft{
+      background:var(--surface-soft);
+      box-shadow:0 10px 30px rgba(15,23,42,.03);
+    }
+
+    .grid{display:grid; gap:12px;}
+    .grid-2{grid-template-columns:1fr 1fr;}
+    .grid-3{grid-template-columns:repeat(3, 1fr);}
+
+    .row{display:flex; gap:10px; align-items:center;}
+
+    .label{
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:5px;
+      letter-spacing:.02em;
+      text-transform:uppercase;
+    }
+
     input, select, button{
-      font:inherit; padding:12px 14px; border:1px solid var(--line); border-radius:12px; background:#fff; width:100%
+      font:inherit;
+      padding:11px 13px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:#fff;
+      width:100%;
+      outline:none;
+      transition:border-color .18s ease, box-shadow .18s ease, background .18s ease, transform .08s ease;
     }
-    input:disabled{background:#f8fafc}
-    button{cursor:pointer; background:var(--brand); color:#fff; border-color:transparent}
-    button.secondary{background:#eef6fb; color:#0b4e6b}
-    button.ghost{background:#fff; color:var(--fg); border-color:var(--line)}
-    .actions{display:flex; gap:10px; flex-wrap:wrap}
-    .hint{color:var(--muted); font-size:13px}
-    .chip{padding:8px 12px; border-radius:999px; background:var(--chip); cursor:pointer; display:inline-flex; gap:8px; align-items:center}
-    .chips{display:flex; gap:8px; flex-wrap:wrap}
-    .section-title{margin:18px 0 8px; font-weight:600}
-    .divider{height:1px; background:var(--line); margin:12px 0}
-    .skeleton{background:linear-gradient(90deg,#f4f7fb 25%,#edf2f7 37%,#f4f7fb 63%); border-radius:8px; height:62px; animation:sh 1.2s infinite ease-in-out}
-    @keyframes sh{0%{background-position:-200px 0} 100%{background-position:calc(200px + 100%) 0}}
-    .result{display:grid; grid-template-columns:1fr auto; gap:8px; padding:14px; border:1px solid var(--line); border-radius:12px}
-    .result .price{font-weight:700; font-size:18px}
-    .bad{color:var(--danger)}
-    .ok{color:var(--ok)}
-    .toolbar{position:sticky; top:0; z-index:2; background:#fff; border:1px solid var(--line); border-radius:12px; padding:10px; display:flex; gap:8px; align-items:center; flex-wrap:wrap}
-    .toolbar select{width:auto}
-    .filters{display:flex; gap:8px; flex-wrap:wrap}
-    .label{font-size:12px; color:var(--muted); margin-bottom:6px}
-    .pill{display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border:1px solid var(--line); border-radius:999px}
-    .range{display:flex; align-items:center; gap:6px}
-    .two-col{display:grid; grid-template-columns:280px 1fr; gap:12px}
+
+    input:focus, select:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 1px rgba(31,111,107,.12);
+    }
+
+    input:disabled{
+      background:#f3f1eb;
+      color:var(--muted);
+      cursor:not-allowed;
+    }
+
+    button{
+      cursor:pointer;
+      border-color:transparent;
+      background:var(--accent-soft);
+      color:#fff;
+      font-weight:500;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      white-space:nowrap;
+    }
+
+    button:hover{
+      transform:translateY(-1px);
+      box-shadow:0 10px 20px rgba(231,111,81,.22);
+    }
+
+    button.secondary{
+      background:rgba(31,111,107,.06);
+      color:var(--accent);
+      border-color:rgba(31,111,107,.15);
+      box-shadow:none;
+    }
+
+    button.secondary:hover{
+      box-shadow:0 8px 18px rgba(15,23,42,.08);
+    }
+
+    button.ghost{
+      background:#fff;
+      color:var(--fg);
+      border-color:var(--line);
+      box-shadow:none;
+    }
+
+    button.ghost:hover{
+      box-shadow:0 8px 18px rgba(15,23,42,.06);
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .actions button{
+      padding-inline:18px;
+      height:42px;
+    }
+
+    .hint{
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .section-title{
+      margin:18px 0 8px;
+      font-weight:600;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+      font-size:12px;
+      color:#4b5563;
+    }
+
+    .chips{display:flex; gap:8px; flex-wrap:wrap;}
+
+    .chip{
+      padding:7px 11px;
+      border-radius:999px;
+      background:var(--chip);
+      cursor:pointer;
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      font-size:13px;
+      border:1px solid rgba(148,119,94,.2);
+    }
+
+    .chip:hover{background:#ede2d3;}
+
+    .two-col{
+      display:grid;
+      grid-template-columns:280px 1fr;
+      gap:12px;
+      align-items:flex-start;
+      margin-top:14px;
+    }
+
     @media (max-width:900px){
-      .grid-2,.grid-3,.two-col{grid-template-columns:1fr}
-      .result{grid-template-columns:1fr}
-      .actions button{flex:1}
+      .grid-2,.grid-3,.two-col{grid-template-columns:1fr;}
+      .actions button{flex:1;}
+      .app-header{flex-direction:column;}
     }
-    .hidden{display:none !important}
-    .version {
-  position: fixed; bottom: 8px; right: 10px;
-  font-size: 12px; color: #64748b; background: #f1f5f9;
-  border: 1px solid #e2e8f0; border-radius: 8px;
-  padding: 6px 8px; z-index: 9999;
-}
+
+    /* ---------- Фильтры / тулбар ---------- */
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:#faf6f0;
+      font-size:13px;
+    }
+
+    .pill input{width:auto; padding:0; border:none;}
+
+    .pill:hover{background:#f2e7da;}
+
+    .toolbar{
+      position:sticky;
+      top:0;
+      z-index:2;
+      background:rgba(253,252,249,.96);
+      border-radius:14px;
+      border:1px solid rgba(228,221,209,.7);
+      padding:10px 12px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      backdrop-filter:blur(8px);
+    }
+
+    .toolbar select{width:auto;}
+
+    .summary-chip{
+      margin-left:auto;
+      padding:6px 10px;
+      border-radius:999px;
+      background:rgba(250,244,234,.9);
+      font-size:12px;
+      color:#4b5563;
+      border:1px solid rgba(214,192,167,.6);
+      white-space:nowrap;
+    }
+
+    /* ---------- Результаты ---------- */
+
+    .result{
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:8px;
+      padding:14px 16px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:var(--surface);
+      box-shadow:0 10px 26px rgba(15,23,42,.04);
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+
+    .result:hover{
+      transform:translateY(-2px);
+      box-shadow:0 14px 34px rgba(15,23,42,.09);
+      border-color:rgba(31,111,107,.25);
+    }
+
+    .result .price{
+      font-weight:700;
+      font-size:18px;
+    }
+
+    .bad{color:var(--danger);}
+    .ok{color:var(--ok);}
+
+    .skeleton{
+      background:linear-gradient(90deg,#f4f0ea 25%,#eee6da 37%,#f4f0ea 63%);
+      border-radius:10px;
+      height:62px;
+      animation:sh 1.2s infinite ease-in-out;
+    }
+
+    @keyframes sh{
+      0%{background-position:-200px 0;}
+      100%{background-position:calc(200px + 100%) 0;}
+    }
+
+    /* ---------- Оверлей поиска с птичкой ---------- */
+
+    .search-overlay{
+      position:fixed;
+      inset:0;
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+      padding-top:120px;
+      background:radial-gradient(circle at top, rgba(245,242,236,.92) 0%, rgba(245,242,236,.88) 40%, rgba(245,242,236,.8) 70%, transparent 100%);
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .2s ease;
+      z-index:40;
+    }
+
+    .search-overlay.visible{
+      opacity:1;
+      pointer-events:auto;
+    }
+
+    .search-overlay-card{
+      background:var(--surface);
+      border-radius:18px;
+      padding:16px 18px 14px;
+      border:1px solid var(--line);
+      box-shadow:0 18px 45px rgba(15,23,42,.16);
+      min-width:260px;
+    }
+
+    .flight-path{
+      position:relative;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:10px;
+      padding-inline:6px;
+    }
+
+    .path-dot{
+      width:9px;
+      height:9px;
+      border-radius:999px;
+      background:var(--accent-soft);
+      box-shadow:0 0 0 4px rgba(231,111,81,.15);
+    }
+
+    .path-line{
+      flex:1;
+      height:2px;
+      background:linear-gradient(90deg, rgba(31,111,107,.2), rgba(231,111,81,.55));
+      margin:0 6px;
+      border-radius:999px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .path-line::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background-image:radial-gradient(circle,#fff 0,#fff 30%,transparent 31%);
+      background-size:22px 2px;
+      opacity:.8;
+      animation:line-move 1.2s linear infinite;
+    }
+
+    @keyframes line-move{
+      0%{background-position:0 0;}
+      100%{background-position:22px 0;}
+    }
+
+    .bird-flight{
+      position:absolute;
+      top:50%;
+      left:14px;
+      width:30px;
+      transform:translate(-50%,-60%);
+      animation:bird-fly 1.5s ease-in-out infinite;
+    }
+
+    @keyframes bird-fly{
+      0%{transform:translate(-10%,-60%) scale(.96);}
+      45%{transform:translate(104%,-66%) scale(1.04);}
+      55%{transform:translate(104%,-66%) scale(1.04);}
+      100%{transform:translate(-10%,-60%) scale(.96);}
+    }
+
+    .search-overlay-hint{
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    /* ---------- версия ---------- */
+    .version{
+      position:fixed;
+      bottom:8px;
+      right:10px;
+      font-size:12px;
+      color:#64748b;
+      background:rgba(248,244,237,.92);
+      border:1px solid #e2d6c3;
+      border-radius:8px;
+      padding:6px 8px;
+      z-index:9999;
+      backdrop-filter:blur(6px);
+    }
   </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>Yuvia Flights Mini App</h1>
+
+  <!-- Шапка с логотипом-птичкой -->
+  <header class="app-header">
+    <div class="brand">
+      <div class="logo-circle">
+        <svg viewBox="0 0 40 32" aria-hidden="true" width="24" height="24">
+          <path d="M5 20c3-6 8-10 15-10 5 0 9 2 11.5 5.5" fill="none"
+                stroke="#143f3d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M15 11c1.8 1.2 3.6 1.7 6.2 1.8 2.6.1 4.6-.3 7.3-1.5L34 9l-1.8 5.2C30.5 20.5 26.5 24 20.5 24 14.5 24 9.8 21.3 7 17"
+                fill="none" stroke="#e76f51" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="18" cy="13.2" r="0.8" fill="#143f3d"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-name">yuvia</div>
+        <div class="brand-tagline">умный помощник для перелётов</div>
+      </div>
+    </div>
+    <div class="badge-mini">mini app</div>
+  </header>
 
   <!-- Форма поиска -->
-  <div class="card grid grid-2" id="searchForm">
+  <div class="card card-soft grid grid-2" id="searchForm">
     <div>
       <div class="label">Город вылета</div>
       <input id="origin" placeholder="Москва" autocomplete="off" />
@@ -132,21 +517,21 @@
   <div class="section-title">Недавние запросы</div>
   <div class="chips" id="recentChips"></div>
 
-  <!-- Панель сортировок и фильтров + контент -->
+  <!-- Фильтры + результаты -->
   <div class="two-col" id="resultsBlock">
-    <!-- Боковая панель фильтров -->
-    <div class="card" id="filtersCard">
+    <!-- Левая колонка: фильтры -->
+    <div class="card card-soft" id="filtersCard">
       <div class="section-title">Фильтры</div>
 
       <div class="label">Пересадки</div>
-      <div class="filters">
+      <div class="chips" style="margin-bottom:4px">
         <label class="pill"><input type="radio" name="stops" value="any" checked/> любые</label>
         <label class="pill"><input type="radio" name="stops" value="0" /> только прямые</label>
         <label class="pill"><input type="radio" name="stops" value="1" /> не более 1</label>
       </div>
 
       <div class="label" style="margin-top:10px">Время вылета</div>
-      <div class="filters">
+      <div class="chips">
         <label class="pill"><input type="checkbox" class="depwin" value="night"/> ночь (00–06)</label>
         <label class="pill"><input type="checkbox" class="depwin" value="morning"/> утро (06–12)</label>
         <label class="pill"><input type="checkbox" class="depwin" value="day"/> день (12–18)</label>
@@ -154,7 +539,7 @@
       </div>
 
       <div class="label" style="margin-top:10px">Время прилёта</div>
-      <div class="filters">
+      <div class="chips">
         <label class="pill"><input type="checkbox" class="arrwin" value="night"/> ночь</label>
         <label class="pill"><input type="checkbox" class="arrwin" value="morning"/> утро</label>
         <label class="pill"><input type="checkbox" class="arrwin" value="day"/> день</label>
@@ -162,12 +547,12 @@
       </div>
 
       <div class="label" style="margin-top:10px">Длительность (часы, максимум)</div>
-      <div class="range">
+      <div class="row">
         <input type="number" id="durMax" min="0" step="1" placeholder="например, 5" style="width:120px">
       </div>
 
       <div class="label" style="margin-top:10px">Цена</div>
-      <div class="range">
+      <div class="row">
         <input type="number" id="priceMin" placeholder="мин" style="width:110px">
         <span>—</span>
         <input type="number" id="priceMax" placeholder="макс" style="width:110px">
@@ -184,17 +569,17 @@
       </div>
     </div>
 
-    <!-- Правая колонка: сортировки + результаты + матрица -->
+    <!-- Правая колонка: сортировка, результаты, соседние даты -->
     <div>
       <div class="toolbar" id="toolbar">
-        <div class="label">Сортировка</div>
+        <div class="label" style="margin-bottom:0">Сортировка</div>
         <select id="sortBy">
           <option value="price_asc">Сначала дешёвые</option>
           <option value="price_desc">Сначала дорогие</option>
           <option value="duration_asc">Короткий путь</option>
           <option value="depart_asc">Ранний вылет</option>
         </select>
-        <div class="chip" id="summaryChip" title="Краткая сводка по результатам">—</div>
+        <div class="summary-chip" id="summaryChip" title="Краткая сводка по результатам">—</div>
       </div>
 
       <div class="section-title">Результаты</div>
@@ -203,6 +588,26 @@
       <div class="section-title">Соседние даты</div>
       <div id="matrix" class="chips"></div>
     </div>
+  </div>
+</div>
+
+<!-- Оверлей поиска с птичкой -->
+<div id="searchOverlay" class="search-overlay">
+  <div class="search-overlay-card">
+    <div class="flight-path">
+      <span class="path-dot"></span>
+      <div class="path-line">
+        <svg class="bird-flight" viewBox="0 0 40 32" aria-hidden="true">
+          <path d="M5 20c3-6 8-10 15-10 5 0 9 2 11.5 5.5" fill="none"
+                stroke="#143f3d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M15 11c1.8 1.2 3.6 1.7 6.2 1.8 2.6.1 4.6-.3 7.3-1.5L34 9l-1.8 5.2C30.5 20.5 26.5 24 20.5 24 14.5 24 9.8 21.3 7 17"
+                fill="none" stroke="#e76f51" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="18" cy="13.2" r="0.8" fill="#143f3d"/>
+        </svg>
+      </div>
+      <span class="path-dot"></span>
+    </div>
+    <div class="search-overlay-hint">Ищем для тебя удобные варианты…</div>
   </div>
 </div>
 
@@ -259,7 +664,7 @@ function saveRecent(item){
 function renderRecent(){
   const cont = $('#recentChips'); cont.innerHTML='';
   const list = JSON.parse(localStorage.getItem('recent')||'[]');
-  list.forEach((r,i)=>{
+  list.forEach((r)=>{
     const chip = document.createElement('div'); chip.className='chip';
     chip.textContent = `${r.origin_city} → ${r.dest_city} ${r.depart||''}${r.oneway==='yes'?' (OW)':''}`;
     chip.onclick=()=>{applyState(r); doSearch();};
@@ -309,31 +714,8 @@ function restoreFromURL(){
   if(s.origin_city || s.dest_city) applyState(s);
 }
 
-/* ========= подсказки городов (IATA) — устойчивое закрытие ========= */
+/* ========= подсказки городов / IATA (единый дропдаун) ========= */
 let originIATA = '', destIATA = '';
-
-let activeSuggest = null; // {box:HTMLElement, input:HTMLElement}
-function closeSuggest(){
-  if(activeSuggest?.box) activeSuggest.box.remove();
-  activeSuggest = null;
-}
-// Глобальные слушатели для «железного» закрытия
-document.addEventListener('click', (e)=>{
-  if(!activeSuggest) return;
-  const {box, input} = activeSuggest;
-  if(box.contains(e.target) || e.target === input) return;
-  closeSuggest();
-});
-  document.addEventListener('pointerdown', (e)=>{
-  if(!activeSuggest) return;
-  const {box, input} = activeSuggest;
-  if(box.contains(e.target) || e.target === input) return;
-  closeSuggest();
-}, true); // useCapture = true, чтобы отработать первым
-
-document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeSuggest(); }, true);
-document.addEventListener('scroll', ()=>closeSuggest(), true);
-window.addEventListener('resize', ()=>closeSuggest());
 
 async function suggestCity(q){
   if(!q || q.length<2) return [];
@@ -341,7 +723,7 @@ async function suggestCity(q){
   const r = await fetch(url); if(!r.ok) return [];
   return await r.json();
 }
-// ===== единый dropdown для подсказок (singleton) =====
+
 let suggestBox = null;
 let suggestInput = null;
 
@@ -352,7 +734,8 @@ function ensureSuggestBox(){
   Object.assign(suggestBox.style, {
     position:'absolute', background:'#fff', border:'1px solid #e2e8f0',
     borderRadius:'8px', zIndex: 9999, minWidth:'220px',
-    boxShadow:'0 8px 24px rgba(15,23,42,.08)'
+    boxShadow:'0 8px 24px rgba(15,23,42,.08)',
+    fontSize:'14px'
   });
   suggestBox.hidden = true;
   document.body.appendChild(suggestBox);
@@ -374,12 +757,11 @@ function openSuggestFor(input, items, onPick){
     Object.assign(row.style, {padding:'8px 10px', cursor:'pointer'});
     row.onmouseenter = ()=> row.style.background = '#f1f5f9';
     row.onmouseleave = ()=> row.style.background = '#fff';
-    // чтобы клик по пункту не «сожрался» блюром:
     row.onmousedown = (e)=>{ e.preventDefault(); };
     row.onclick = ()=>{
       input.value = item.name;
       onPick(item);
-      closeSuggest(); // закрываем мгновенно
+      closeSuggest();
     };
     box.appendChild(row);
   });
@@ -391,7 +773,6 @@ function openSuggestFor(input, items, onPick){
   box.hidden = false;
 }
 
-// закрытие при любом клике/тапе вне, скролле, ресайзе, Esc
 document.addEventListener('pointerdown', (e)=>{
   if (!suggestBox || suggestBox.hidden) return;
   if (e.target === suggestInput) return;
@@ -400,6 +781,7 @@ document.addEventListener('pointerdown', (e)=>{
 window.addEventListener('scroll', closeSuggest, true);
 window.addEventListener('resize', closeSuggest);
 document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeSuggest(); });
+
 function attachSuggest(inputEl, onPick){
   inputEl.addEventListener('input', async ()=>{
     const q = inputEl.value.trim();
@@ -410,12 +792,10 @@ function attachSuggest(inputEl, onPick){
   });
 
   inputEl.addEventListener('blur', ()=>{
-    // небольшая задержка, чтобы успел отработать click по пункту
     setTimeout(closeSuggest, 120);
   });
 
   inputEl.addEventListener('focus', ()=>{
-    // при фокусе можно заново открыть подсказку, если уже есть ввод
     const q = inputEl.value.trim();
     if (q.length >= 2){
       suggestCity(q).then(list=>{
@@ -425,16 +805,8 @@ function attachSuggest(inputEl, onPick){
   });
 }
 
-
-// Привязки
-attachSuggest(document.querySelector('#origin'), (item)=>{
-  originIATA = item.code;
-  document.querySelector('#originIataHint').textContent = 'IATA: ' + originIATA;
-});
-attachSuggest(document.querySelector('#destination'), (item)=>{
-  destIATA = item.code;
-  document.querySelector('#destIataHint').textContent = 'IATA: ' + destIATA;
-});
+attachSuggest($('#origin'), (item)=>{ originIATA=item.code; $('#originIataHint').textContent='IATA: '+originIATA; });
+attachSuggest($('#destination'), (item)=>{ destIATA=item.code; $('#destIataHint').textContent='IATA: '+destIATA; });
 
 /* ========= переключатель one-way ========= */
 function toggleOneWay(){
@@ -479,20 +851,15 @@ function buildDeeplink({ori, dst, d1, d2, currency, adults, oneway}){
 
 /* ========= API helpers ========= */
 const API_BASE = 'https://yuvia-flights-api.yuviabot.workers.dev';
-
 async function callJSON(path){
-  // если передали относительный путь, дописываем адрес воркера
-  const url = path.startsWith('http')
-    ? path
-    : `${API_BASE}${path}`;
+  const url = path.startsWith('http') ? path : API_BASE + path;
   const r = await fetch(url);
-  if (!r.ok) throw new Error('HTTP ' + r.status);
+  if(!r.ok) throw new Error('HTTP '+r.status);
   return await r.json();
 }
 
-
 /* ========= состояние результатов ========= */
-let allResults = []; // нормализованные перелёты (массив)
+let allResults = []; // нормализованные перелёты
 let baseCurrency = 'RUB';
 
 function showLoading(){
@@ -513,7 +880,6 @@ function renderAirlinesFilter(){
   const set = new Set(allResults.map(x=>x.airline).filter(Boolean));
   const cur = new Set(Array.from(sel.selectedOptions||[]).map(o=>o.value));
   sel.innerHTML = [...set].sort().map(a=>`<option value="${a}">${a}</option>`).join('');
-  // восстановим выбор
   Array.from(sel.options).forEach(o=>{ if(cur.has(o.value)) o.selected=true; });
 }
 function renderAirportsFilter(){
@@ -547,14 +913,13 @@ function withinWindow(timeStr, windowsSelected){
 function applyFiltersAndSort(){
   const r = $('#results'); r.innerHTML='';
   if(!allResults.length){
-    const empty=document.createElement('div'); empty.className='card';
+    const empty=document.createElement('div'); empty.className='card card-soft';
     empty.innerHTML = `<div class="bad">Ничего не нашли.</div>
       <div class="hint">Попробуй поменять даты, валюту или снять фильтры. Ниже — цены на соседние дни.</div>`;
     r.appendChild(empty);
     return;
   }
 
-  // чтение фильтров
   const stops = (document.querySelector('input[name="stops"]:checked')||{}).value || 'any';
   const depWins = Array.from(document.querySelectorAll('.depwin:checked')).map(x=>x.value);
   const arrWins = Array.from(document.querySelectorAll('.arrwin:checked')).map(x=>x.value);
@@ -581,7 +946,6 @@ function applyFiltersAndSort(){
     return true;
   });
 
-  // сортировка
   const s = $('#sortBy').value;
   list.sort((a,b)=>{
     if(s==='price_asc')  return a.price-b.price;
@@ -592,14 +956,13 @@ function applyFiltersAndSort(){
   });
 
   if(!list.length){
-    const empty=document.createElement('div'); empty.className='card';
+    const empty=document.createElement('div'); empty.className='card card-soft';
     empty.innerHTML = `<div class="bad">После применения фильтров ничего не осталось.</div>
       <div class="hint">Сними часть фильтров или расширь диапазоны.</div>`;
     r.appendChild(empty);
     return;
   }
 
-  // вывод
   list.forEach(x=>{
     const el = document.createElement('div'); el.className='result';
     const left = document.createElement('div');
@@ -620,7 +983,7 @@ function applyFiltersAndSort(){
   });
 }
 
-;['change','input'].forEach(ev=>{
+['change','input'].forEach(ev=>{
   $('#sortBy').addEventListener(ev, applyFiltersAndSort);
   $('#priceMin').addEventListener(ev, applyFiltersAndSort);
   $('#priceMax').addEventListener(ev, applyFiltersAndSort);
@@ -634,7 +997,7 @@ function applyFiltersAndSort(){
 
 /* ========= матрица и поиск ========= */
 function showError(msg){
-  $('#results').innerHTML = `<div class="card"><div class="bad">Ошибка: ${msg}</div><div class="hint">Попробуй повторить поиск позже.</div></div>`;
+  $('#results').innerHTML = `<div class="card card-soft"><div class="bad">Ошибка: ${msg}</div><div class="hint">Попробуй повторить поиск позже.</div></div>`;
 }
 function normalizeFlight(x, {ori, dst, cur, d1, d2, oneway, adults}){
   const depDateStr = x.depart_date ? x.depart_date.split('T')[0].split('-').reverse().join('.') : '';
@@ -663,7 +1026,7 @@ function showMatrixSafe(ori,dst,cur,d1,flex){
   const params = new URLSearchParams({ origin:ori, destination:dst, currency:cur, center: toISO(d1) });
   if(flex==='plus3') params.set('range','3');
   else if(flex==='plus7') params.set('range','7');
-  else if(flex==='weekend') params.set('range','1'); // для вида
+  else if(flex==='weekend') params.set('range','1');
   else params.set('range','0');
   return callJSON(`/api/matrix?${params.toString()}`)
     .then(m=>{
@@ -673,13 +1036,19 @@ function showMatrixSafe(ori,dst,cur,d1,flex){
     .catch(()=>{ /* тихо */ });
 }
 
+/* ========= оверлей поиска ========= */
+function setSearching(on){
+  const ov = document.getElementById('searchOverlay');
+  if(!ov) return;
+  if(on) ov.classList.add('visible');
+  else ov.classList.remove('visible');
+}
+
 async function doSearch(){
-  // валидация ввода
   const oriCity = $('#origin').value.trim();
   const dstCity = $('#destination').value.trim();
   if(!oriCity || !dstCity){ alert('Укажи города вылета и назначения'); return; }
 
-  // если нет IATA — попробуем получить
   async function ensureIata(city){
     const s = await suggestCity(city); return s[0]?.code || '';
   }
@@ -692,7 +1061,6 @@ async function doSearch(){
   const cur = $('#currency').value; baseCurrency = cur;
   const adults = +$('#adults').value || 1;
 
-  // даты
   let d1 = clampToFuture(parseDDMMYYYY($('#depart').value));
   let d2 = parseDDMMYYYY($('#ret').value);
   const flex = $('#flexMode').value;
@@ -708,7 +1076,6 @@ async function doSearch(){
   if(ow!=='yes' && d2 && d2<d1){ $('#retHint').textContent='Возврат не может быть раньше вылета'; alert('Дата возврата раньше вылета'); return; }
   if(ow==='yes'){ $('#retHint').textContent=''; }
 
-  // Сохранить в «недавние» + URL
   const state = {
     origin_city: oriCity, dest_city: dstCity,
     origin_iata: ori, dest_iata: dst,
@@ -720,13 +1087,10 @@ async function doSearch(){
     oc:oriCity, dc:dstCity, d:state.depart, r:state.ret, cur:cur, ad:adults, ow:ow, fx:flex, oi:ori, di:dst
   });
 
-  // загрузка
+  setSearching(true);
   showLoading();
-
-  // матрица соседних дат
   showMatrixSafe(ori,dst,cur,d1,flex);
 
-  // основной поиск
   const q = new URLSearchParams({
     origin: ori, destination: dst, currency: cur,
     oneway: ow==='yes'?'1':'0',
@@ -739,17 +1103,18 @@ async function doSearch(){
     json = await callJSON(`/api/search?${q.toString()}`);
   }catch(e){
     showError(e.message||'network');
+    setSearching(false);
     return;
   }
-  // нормализация + валидация
+
   const listRaw = (json.data||[]).filter(x=>x.price>0 && x.origin===ori && x.destination===dst);
   allResults = listRaw.map(x=>normalizeFlight(x,{ori,dst,cur,d1,d2,oneway:ow,adults}));
 
-  // обновление фильтров и сводки
   renderAirlinesFilter();
   renderAirportsFilter();
   summarize();
   applyFiltersAndSort();
+  setSearching(false);
 }
 
 /* ========= кнопки ========= */
@@ -790,15 +1155,14 @@ $('#clearFilters').addEventListener('click', ()=>{
 function initMinDateHints(){
   $('#departHint').textContent = `Не раньше ${ddmmyyyy(todayLocal)}`;
 }
-attachSuggest($('#origin'), (item)=>{ originIATA=item.code; $('#originIataHint').textContent='IATA: '+originIATA; });
-attachSuggest($('#destination'), (item)=>{ destIATA=item.code; $('#destIataHint').textContent='IATA: '+destIATA; });
-
 updateWeekendHint();
 renderRecent();
 toggleOneWay();
 initMinDateHints();
 restoreFromURL();
 </script>
-  <div class="version">версия 4</div>
+
+<div class="version">версия 5</div>
 </body>
 </html>
+
