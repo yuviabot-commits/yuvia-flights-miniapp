@@ -268,23 +268,30 @@
     .advanced.hidden{display:none;}
 
     /* сетка для формы поиска — ровные поля */
-  .search-grid{
+ .search-grid{
   display:grid;
-  /* делаем колонки более ровными и расширяем колонку с пассажирами */
+  /* чуть больше места датам и пассажирам + побольше расстояние между колонками */
   grid-template-columns:
-    minmax(0,1.3fr) 44px minmax(0,1.3fr)  /* Откуда · стрелка · Куда */
-    minmax(0,1.2fr)                       /* Даты (2 поля внутри) */
-    minmax(0,0.9fr)                       /* Пассажиры – шире, чтобы влезла подпись */
-    auto;                                 /* кнопки */
-  gap:12px;
+    minmax(0,1.3fr)   /* Откуда */
+    44px              /* стрелка */
+    minmax(0,1.3fr)   /* Куда */
+    minmax(0,1.1fr)   /* Даты */
+    minmax(130px,0.9fr) /* Пассажиры (минимум 130px, чтобы ничего не наезжало) */
+    auto;             /* кнопки */
+  column-gap:16px;
+  row-gap:8px;
   align-items:flex-end;
 }
 
-/* на всякий случай, чтобы блоки не расталкивали сетку */
+/* чтобы колонки не расталкивали друг друга */
 .search-grid > div{
   min-width:0;
 }
 
+/* отдельный класс для ячейки с пассажирами — даём ей чуть воздуха */
+.search-passengers{
+  min-width:130px;
+}
 
     .swap-inline{
       display:flex;
@@ -418,13 +425,14 @@
         <div class="hint" id="retHint"></div>
       </div>
 
-      <div>
-        <div class="label">Пассажиры</div>
-        <select id="adults">
-          <option>1</option><option>2</option><option>3</option>
-          <option>4</option><option>5</option><option>6</option>
-        </select>
-      </div>
+   <div class="search-passengers">
+  <div class="label">Пассажиры</div>
+  <select id="adults">
+    <option>1</option><option>2</option><option>3</option>
+    <option>4</option><option>5</option><option>6</option>
+  </select>
+</div>
+
 
       <div class="row" style="gap:8px; justify-content:flex-end;">
         <button class="btn-primary" id="doSearch">Искать</button>
@@ -569,7 +577,7 @@
   </div>
 </div>
 
-<div class="version">версия 6</div>
+<div class="version">версия 7</div>
 
 <script>
 /* ========= helpers ========= */
@@ -1202,7 +1210,26 @@ $('#depart').addEventListener('change',()=>{
   }
 });
 
+function normalizeDateInputField(el){
+  if(!el) return;
+  const v = el.value.trim();
+  if(!v) return;
+  const d = parseDateSmart(v); // понимает и ISO, и ДД.ММ.ГГГГ
+  if(d){
+    el.value = toISO(d);       // приводим к ISO, чтобы type="date" был доволен
+  }
+}
+
+  
 /* ========= init ========= */
+
+['depart','ret'].forEach(id=>{
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.addEventListener('blur', ()=>normalizeDateInputField(el));
+  el.addEventListener('change', ()=>normalizeDateInputField(el));
+});
+
 updateWeekendHint();
 renderRecent();
 toggleOneWay();
