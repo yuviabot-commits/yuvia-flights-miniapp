@@ -6,17 +6,16 @@
   <title>Yuvia · Поиск авиабилетов</title>
   <style>
     :root{
-      /* Палитра под логотип */
       --bg:#ffffff;                 /* чисто белый фон */
       --surface:#ffffff;
-      --ink:#053227;                /* тёмная ель */
+      --ink:#053227;
       --muted:#6b7280;
 
-      --accent:#075e54;             /* тёмный зелёный */
+      --accent:#075e54;
       --accent-soft:#e3f3ee;
-      --accent-soft-2:#fff7e3;      /* мягкий жёлтый (почти не используется) */
-      --berry:#b1365b;              /* цвет крыла */
-      --sun:#f6c453;                /* жёлтый круг */
+      --accent-soft-2:#fff7e3;
+      --berry:#b1365b;
+      --sun:#f6c453;
 
       --danger:#dc2626;
       --ok:#16a34a;
@@ -122,7 +121,6 @@
     .chip{
       border-radius:var(--radius-pill);
       padding:7px 11px;
-      /* ягодные чипсы под цвет крыла */
       background:rgba(177,54,91,0.08);
       color:#7a1238;
       border:1px solid rgba(177,54,91,0.35);
@@ -159,7 +157,6 @@
       font-size:13px;
       background:#f9fafb;
     }
-
     .filters-block .pill input{
       width:auto;
       padding:0;
@@ -264,11 +261,11 @@
 
     .advanced.hidden{display:none;}
 
-    /* два поля дат в одном ряду, 50/50 */
+    /* блок дат */
     .dates-row{
       display:grid;
       grid-template-columns:repeat(2, minmax(0,1fr));
-      column-gap:6px;
+      column-gap:8px;
       align-items:center;
     }
 
@@ -276,26 +273,64 @@
       display:flex;
       align-items:center;
       gap:6px;
-    }
-    .date-input{
-      flex:1;
-      min-width:0;
-    }
-    .date-btn{
-      width:34px;
-      height:34px;
+      padding:4px 8px;
       border-radius:12px;
       border:1px solid var(--line);
       background:#ffffff;
+    }
+    .date-field:focus-within{
+      border-color:rgba(34,197,133,0.9);
+      box-shadow:0 0 0 1px rgba(34,197,133,0.4);
+    }
+
+    .date-input{
+      flex:1;
+      min-width:0;
+      border:none;
+      padding:4px 2px;
+      background:transparent;
+    }
+    .date-input:focus{
+      outline:none;
+      box-shadow:none;
+      border:none;
+    }
+
+    .date-btn{
+      border:none;
+      background:transparent;
+      padding:0;
+      width:24px;
+      height:24px;
+      border-radius:6px;
       display:flex;
       align-items:center;
       justify-content:center;
-      font-size:16px;
       cursor:pointer;
     }
     .date-btn:hover{
       background:#f1f5f9;
     }
+    .date-btn::before{
+      content:"";
+      display:block;
+      width:15px;
+      height:13px;
+      border-radius:3px;
+      border:2px solid var(--accent);
+      position:relative;
+      box-sizing:border-box;
+    }
+    .date-btn::after{
+      content:"";
+      position:absolute;
+      width:11px;
+      height:2px;
+      background:var(--accent);
+      top:7px;
+      border-radius:999px;
+    }
+
     .date-native{
       position:absolute;
       opacity:0;
@@ -304,15 +339,15 @@
       height:0;
     }
 
-    /* сетка для формы поиска — ровные поля */
+    /* сетка формы поиска */
     .search-row{
       display:grid;
       grid-template-columns:
-        minmax(0,1.3fr)    /* Откуда */
-        44px               /* стрелка */
-        minmax(0,1.3fr)    /* Куда */
-        minmax(0,1.2fr)    /* Даты */
-        minmax(130px,0.9fr)/* Пассажиры */;
+        minmax(0,1.25fr)    /* Откуда */
+        44px                /* стрелка */
+        minmax(0,1.25fr)    /* Куда */
+        minmax(0,1.6fr)     /* Даты */
+        minmax(130px,0.8fr);/* Пассажиры */
       column-gap:16px;
       row-gap:10px;
       align-items:end;
@@ -345,7 +380,6 @@
       background:linear-gradient(135deg,#ecfdf5,#e0f2fe);
     }
 
-    /* нижний ряд с кнопками */
     .search-actions-row{
       margin-top:16px;
       justify-content:flex-end;
@@ -360,7 +394,6 @@
       }
     }
 
-    /* поле цены в фильтрах */
     .row-price{
       display:flex;
       gap:6px;
@@ -379,7 +412,6 @@
       -moz-appearance:textfield;
     }
 
-    /* overlay загрузки */
     .loading-overlay{
       position:fixed;
       inset:0;
@@ -413,7 +445,6 @@
       }
     }
 
-    /* версия в углу */
     .version{
       position:fixed;
       bottom:8px;
@@ -430,7 +461,6 @@
 </head>
 <body>
 <div class="wrap">
-  <!-- Бренд -->
   <header class="brand">
     <img src="Yuvia-logo.png" alt="Yuvia" class="brand-logo">
     <div class="brand-text">
@@ -442,7 +472,6 @@
 
   <!-- Форма поиска -->
   <div class="card" id="searchForm">
-    <!-- основная строка -->
     <div class="search-row">
       <div>
         <div class="label">Откуда</div>
@@ -466,13 +495,13 @@
           <div class="date-field">
             <input id="depart" class="date-input" type="text"
                    placeholder="ДД.ММ.ГГГГ" inputmode="numeric" />
-            <button type="button" class="date-btn" data-target="departNative">📅</button>
+            <button type="button" class="date-btn" data-target="departNative"></button>
             <input id="departNative" class="date-native" type="date" />
           </div>
           <div class="date-field">
             <input id="ret" class="date-input" type="text"
                    placeholder="ДД.ММ.ГГГГ" inputmode="numeric" />
-            <button type="button" class="date-btn" data-target="retNative">📅</button>
+            <button type="button" class="date-btn" data-target="retNative"></button>
             <input id="retNative" class="date-native" type="date" />
           </div>
         </div>
@@ -489,7 +518,6 @@
       </div>
     </div>
 
-    <!-- ряд с кнопками -->
     <div class="row search-actions-row">
       <button class="btn-primary" id="doSearch">Искать</button>
       <button class="btn-ghost" id="toggleAdvanced">Расширенный поиск</button>
@@ -550,13 +578,10 @@
     </div>
   </div>
 
-  <!-- Недавние запросы -->
   <div class="section-title">Недавние запросы</div>
   <div class="chips" id="recentChips"></div>
 
-  <!-- Фильтры + результаты -->
   <div class="two-col">
-    <!-- Фильтры -->
     <div class="card filters-block">
       <div class="section-title" style="margin-top:0">Фильтры</div>
 
@@ -602,7 +627,6 @@
       <button class="btn-ghost" id="clearFilters" style="margin-top:12px;width:100%">Сбросить фильтры</button>
     </div>
 
-    <!-- Результаты -->
     <div>
       <div class="toolbar">
         <div class="label" style="margin:0">Сортировка</div>
@@ -624,7 +648,6 @@
   </div>
 </div>
 
-<!-- Оверлей загрузки -->
 <div id="loadingOverlay" class="loading-overlay hidden">
   <div class="loading-inner">
     <img src="Yuvia-logo.png" class="loading-bird" alt="Yuvia">
@@ -632,7 +655,7 @@
   </div>
 </div>
 
-<div class="version">версия 9</div>
+<div class="version">версия 9.1</div>
 
 <script>
 /* ========= helpers ========= */
@@ -642,13 +665,11 @@ const todayLocal = (()=>{ const t=new Date(); return new Date(t.getFullYear(),t.
 
 function parseDateSmart(s){
   if(!s) return null;
-  // ISO: YYYY-MM-DD
   if(/^\d{4}-\d{2}-\d{2}$/.test(s)){
     const [y,m,d] = s.split('-').map(Number);
     const dt = new Date(y, m-1, d);
     return isNaN(dt)?null:dt;
   }
-  // DD.MM.YYYY
   if(/^\d{1,2}\.\d{1,2}\.\d{4}$/.test(s)){
     const [dd,mm,yy] = s.split('.').map(Number);
     const dt = new Date(yy, mm-1, dd);
@@ -661,7 +682,7 @@ function ddmmyyyy(d){return `${fmt2(d.getDate())}.${fmt2(d.getMonth()+1)}.${d.ge
 
 function weekendAround(today=new Date()){
   const t = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  const wd = t.getDay(); // 0=Вс ... 6=Сб
+  const wd = t.getDay();
   let sat = new Date(t);
   sat.setDate(t.getDate() + ((6 - (wd||7)) % 7) || 7);
   if (wd === 6 || wd === 0) { sat.setDate(sat.getDate() + 7); }
@@ -708,16 +729,14 @@ function applyState(st){
   $('#origin').value = st.origin_city || '';
   $('#destination').value = st.dest_city || '';
 
-  // даты из состояния
   if(st.depart){
     const d = parseDateSmart(st.depart);
     if(d){
       $('#depart').value = ddmmyyyy(d);
       $('#departNative').value = toISO(d);
     }
-  } else {
-    $('#depart').value = '';
-    $('#departNative').value = '';
+  }else{
+    $('#depart').value=''; $('#departNative').value='';
   }
   if(st.ret){
     const d2 = parseDateSmart(st.ret);
@@ -725,9 +744,8 @@ function applyState(st){
       $('#ret').value = ddmmyyyy(d2);
       $('#retNative').value = toISO(d2);
     }
-  } else {
-    $('#ret').value='';
-    $('#retNative').value='';
+  }else{
+    $('#ret').value=''; $('#retNative').value='';
   }
 
   $('#currency').value = st.currency || 'RUB';
@@ -888,7 +906,7 @@ $('#flexMode').addEventListener('change',()=>{
   syncURLFromState({fx:$('#flexMode').value});
 });
 
-/* ========= диплинк на Aviasales ========= */
+/* ========= диплинк ========= */
 const MARKER = 672309;
 function buildDeeplink({ori, dst, d1, d2, currency, adults, oneway}){
   const DD1 = d1 ? (fmt2(d1.getDate()) + fmt2(d1.getMonth()+1)) : '';
@@ -919,7 +937,7 @@ async function callJSON(path){
   return await r.json();
 }
 
-/* ========= состояние результатов ========= */
+/* ========= результаты ========= */
 let allResults = [];
 let baseCurrency = 'RUB';
 
@@ -1078,52 +1096,6 @@ function applyFiltersAndSort(){
   });
 }
 
-['change','input'].forEach(ev=>{
-  $('#sortBy').addEventListener(ev,applyFiltersAndSort);
-  $('#priceMin').addEventListener(ev,applyFiltersAndSort);
-  $('#priceMax').addEventListener(ev,applyFiltersAndSort);
-  $('#durMax').addEventListener(ev,applyFiltersAndSort);
-  $('#airlineFilter').addEventListener(ev,applyFiltersAndSort);
-  $('#airportFilter').addEventListener(ev,applyFiltersAndSort);
-  document.querySelectorAll('input[name="stops"]').forEach(n=>n.addEventListener(ev,applyFiltersAndSort));
-  document.querySelectorAll('.depwin').forEach(n=>n.addEventListener(ev,applyFiltersAndSort));
-  document.querySelectorAll('.arrwin').forEach(n=>n.addEventListener(ev,applyFiltersAndSort));
-});
-
-/* ========= нормализация рейса ========= */
-function normalizeFlight(x,{ori,dst,cur,d1,d2,oneway,adults}){
-  const depDateStr = x.depart_date ? x.depart_date.split('T')[0].split('-').reverse().join('.') : '';
-  const retDateStr = x.return_date ? x.return_date.split('T')[0].split('-').reverse().join('.') : '';
-  const depTime = x.depart_time || x.departure_time || '';
-  const arrTime = x.arrival_time || x.arr_time || '';
-  const hh = depTime ? parseInt(depTime.slice(0,2),10) : null;
-  const airlineCode = x.airline_code || x.airline_iata || x.airline || '';
-  const dur = x.duration || x.duration_to || 0;
-  const duration_hours = x.duration_hours ?? Math.round((dur||0)/60);
-
-  const deeplink = buildDeeplink({ori,dst,d1,d2:(oneway==='yes'?null:d2),currency:cur,adults,oneway});
-
-  return {
-    origin:x.origin,
-    destination:x.destination,
-    origin_airport:x.origin_airport || x.origin_airport_code || x.origin_airport_iata || '',
-    dest_airport:x.destination_airport || x.destination_airport_code || x.destination_airport_iata || '',
-    price:Math.round(x.price ?? x.value ?? 0),
-    currency:x.currency || cur,
-    airline:x.airline || airlineCode || '',
-    airlineCode,
-    transfers:(typeof x.transfers==='number')?x.transfers:(x.number_of_changes ?? 0),
-    duration:dur,
-    duration_to:dur,
-    duration_hours,
-    durStr:duration_hours?`${duration_hours} ч`:'',
-    depTime, arrTime,
-    depSort:(hh===null?0:hh*60 + (parseInt(depTime.slice(3,5),10)||0)),
-    depDateStr, retDateStr,
-    deeplink
-  };
-}
-
 /* ========= matrix helper ========= */
 function showMatrixSafe(ori,dst,cur,d1,flex){
   const params = new URLSearchParams({origin:ori,destination:dst,currency:cur,center:toISO(d1)});
@@ -1139,15 +1111,14 @@ function showMatrixSafe(ori,dst,cur,d1,flex){
     .catch(()=>{});
 }
 
-/* ========= loading overlay ========= */
+/* ========= overlay ========= */
 function setLoading(on){
   const ov = $('#loadingOverlay');
   if(!ov) return;
   ov.classList.toggle('hidden',!on);
 }
 
-/* ========= ДАТЫ: текст + календарь ========= */
-
+/* ========= даты: нормализация ========= */
 function initMinDateHints(){
   const iso = toISO(todayLocal);
   $('#departNative').min = iso;
@@ -1256,7 +1227,7 @@ async function doSearch(){
   }
   if(ow!=='yes' && d2 && d2<d1){
     $('#retHint').textContent='Возврат не может быть раньше вылета';
-    alert('Дата возврата раньше вылета'); 
+    alert('Дата возврата раньше вылета');
     return;
   }
   if(ow==='yes'){ $('#retHint').textContent=''; }
