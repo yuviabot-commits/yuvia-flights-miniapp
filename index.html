@@ -260,19 +260,20 @@
     /* ------- Форма поиска: 3 строки ------- */
 
     /* 1-я строка – поля */
-    .search-row{
-      display:grid;
-      grid-template-columns:
-        minmax(0,1.25fr)   /* Откуда */
-        64px               /* стрелка */
-        minmax(0,1.25fr)   /* Куда */
-        minmax(0,1.1fr)    /* Дата вылета */
-        minmax(0,1.1fr)    /* Дата возвращения */
-        minmax(170px,0.9fr);/* Пассажиры */
-      column-gap:16px;
-      row-gap:8px;
-      align-items:end;
-    }
+.search-row{
+  display:grid;
+  grid-template-columns:
+    minmax(0,1.2fr)    /* Откуда */
+    40px               /* стрелка */
+    minmax(0,1.2fr)    /* Куда */
+    minmax(0,1.1fr)    /* Дата вылета */
+    minmax(0,1.1fr)    /* Дата возвращения */
+    minmax(0,1.1fr);   /* Пассажиры — теперь как остальные */
+  column-gap:12px;     /* поля стали ближе друг к другу */
+  row-gap:6px;
+  align-items:center;  /* все элементы выровнены по центру по вертикали */
+}
+
     .search-row > *{min-width:0;}
 
     /* 2-я строка – подсказки */
@@ -757,7 +758,7 @@
   </div>
 </div>
 
-<div class="version">версия 9.5</div>
+<div class="version">версия 9.6</div>
 
 <script>
 /* ========= helpers ========= */
@@ -781,7 +782,14 @@ function parseDateSmart(s){
   }
   return null;
 }
-function toISO(d){return d ? d.toISOString().slice(0,10) : "";}
+function toISO(d){
+  if(!d) return "";
+  const y = d.getFullYear();
+  const m = fmt2(d.getMonth() + 1);
+  const day = fmt2(d.getDate());
+  return `${y}-${m}-${day}`;
+}
+
 function ddmmyyyy(d){return `${fmt2(d.getDate())}.${fmt2(d.getMonth()+1)}.${d.getFullYear()}`;}
 
 function weekendAround(today=new Date()){
