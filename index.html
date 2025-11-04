@@ -268,12 +268,23 @@
     .advanced.hidden{display:none;}
 
     /* сетка для формы поиска — ровные поля */
-    .search-grid{
-      display:grid;
-      grid-template-columns:minmax(0,1.2fr) 44px minmax(0,1.2fr) minmax(0,1.4fr) 120px auto;
-      gap:12px;
-      align-items:flex-end;
-    }
+  .search-grid{
+  display:grid;
+  /* делаем колонки более ровными и расширяем колонку с пассажирами */
+  grid-template-columns:
+    minmax(0,1.3fr) 44px minmax(0,1.3fr)  /* Откуда · стрелка · Куда */
+    minmax(0,1.2fr)                       /* Даты (2 поля внутри) */
+    minmax(0,0.9fr)                       /* Пассажиры – шире, чтобы влезла подпись */
+    auto;                                 /* кнопки */
+  gap:12px;
+  align-items:flex-end;
+}
+
+/* на всякий случай, чтобы блоки не расталкивали сетку */
+.search-grid > div{
+  min-width:0;
+}
+
 
     .swap-inline{
       display:flex;
