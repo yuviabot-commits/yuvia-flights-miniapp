@@ -63,9 +63,6 @@
       .grid-2{grid-template-columns:1fr}
       .row{flex-wrap:wrap}
       .two-col{grid-template-columns:1fr}
-      .search-grid{
-        grid-template-columns:minmax(0,1fr) 40px minmax(0,1fr);
-      }
     }
 
     input, select, button{
@@ -266,39 +263,65 @@
     }
 
     .advanced.hidden{display:none;}
-/* два поля дат в одном ряду, 50/50 */
-.dates-row{
-  display:grid;
-  grid-template-columns:repeat(2, minmax(0,1fr));
-  column-gap:6px;
-  align-items:center;
-}
+
+    /* два поля дат в одном ряду, 50/50 */
+    .dates-row{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0,1fr));
+      column-gap:6px;
+      align-items:center;
+    }
+
+    .date-field{
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+    .date-input{
+      flex:1;
+      min-width:0;
+    }
+    .date-btn{
+      width:34px;
+      height:34px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:#ffffff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:16px;
+      cursor:pointer;
+    }
+    .date-btn:hover{
+      background:#f1f5f9;
+    }
+    .date-native{
+      position:absolute;
+      opacity:0;
+      pointer-events:none;
+      width:0;
+      height:0;
+    }
 
     /* сетка для формы поиска — ровные поля */
- .search-grid{
-  display:grid;
-  /* чуть больше места датам и пассажирам + побольше расстояние между колонками */
-  grid-template-columns:
-    minmax(0,1.3fr)   /* Откуда */
-    44px              /* стрелка */
-    minmax(0,1.3fr)   /* Куда */
-    minmax(0,1.1fr)   /* Даты */
-    minmax(130px,0.9fr) /* Пассажиры (минимум 130px, чтобы ничего не наезжало) */
-    auto;             /* кнопки */
-  column-gap:16px;
-  row-gap:8px;
-  align-items:flex-end;
-}
+    .search-row{
+      display:grid;
+      grid-template-columns:
+        minmax(0,1.3fr)    /* Откуда */
+        44px               /* стрелка */
+        minmax(0,1.3fr)    /* Куда */
+        minmax(0,1.2fr)    /* Даты */
+        minmax(130px,0.9fr)/* Пассажиры */;
+      column-gap:16px;
+      row-gap:10px;
+      align-items:end;
+    }
+    .search-row > *{min-width:0;}
 
-/* чтобы колонки не расталкивали друг друга */
-.search-grid > div{
-  min-width:0;
-}
-
-/* отдельный класс для ячейки с пассажирами — даём ей чуть воздуха */
-.search-passengers{
-  min-width:130px;
-}
+    .search-passengers{
+      min-width:130px;
+    }
 
     .swap-inline{
       display:flex;
@@ -322,6 +345,21 @@
       background:linear-gradient(135deg,#ecfdf5,#e0f2fe);
     }
 
+    /* нижний ряд с кнопками */
+    .search-actions-row{
+      margin-top:16px;
+      justify-content:flex-end;
+    }
+    @media (max-width:900px){
+      .search-row{
+        grid-template-columns:1fr;
+      }
+      .search-actions-row{
+        justify-content:flex-start;
+        flex-wrap:wrap;
+      }
+    }
+
     /* поле цены в фильтрах */
     .row-price{
       display:flex;
@@ -340,41 +378,6 @@
     .row-price input[type="number"]{
       -moz-appearance:textfield;
     }
-/* Верхняя строка формы поиска: ровная сетка */
-.search-row{
-  display:grid;
-  grid-template-columns:
-    minmax(0,1.25fr)   /* Откуда */
-    56px               /* стрелка между городами */
-    minmax(0,1.25fr)   /* Куда */
-    minmax(0,1.2fr)    /* Даты (2 поля внутри) */
-    minmax(130px,0.9fr)/* Пассажиры */
-    auto;              /* Кнопки */
-  column-gap:16px;
-  row-gap:10px;
-  align-items:end;
-}
-
-/* чтобы колонки не распирали друг друга */
-.search-row > *{
-  min-width:0;
-}
-
-/* блок с кнопками в правом краю */
-.search-actions{
-  justify-content:flex-end;
-}
-
-/* адаптив: на узких экранах всё в одну колонку */
-@media (max-width:900px){
-  .search-row{
-    grid-template-columns:1fr;
-  }
-  .search-actions{
-    justify-content:flex-start;
-    flex-wrap:wrap;
-  }
-}
 
     /* overlay загрузки */
     .loading-overlay{
@@ -440,7 +443,7 @@
   <!-- Форма поиска -->
   <div class="card" id="searchForm">
     <!-- основная строка -->
-     <div class="row search-row">
+    <div class="search-row">
       <div>
         <div class="label">Откуда</div>
         <input id="origin" placeholder="Москва" autocomplete="off" />
@@ -458,32 +461,38 @@
       </div>
 
       <div>
-    <div style="flex:1 1 220px">
-  <div class="label">Даты</div>
-  <div class="row dates-row">
-    <input id="depart" type="text"
-           placeholder="ДД.ММ.ГГГГ" inputmode="numeric" />
-    <input id="ret" type="text"
-           placeholder="ДД.ММ.ГГГГ" inputmode="numeric" />
-  </div>
-  <div class="hint" id="departHint"></div>
-  <div class="hint" id="retHint"></div>
-</div>
-
-
-   <div class="search-passengers">
-  <div class="label">Пассажиры</div>
-  <select id="adults">
-    <option>1</option><option>2</option><option>3</option>
-    <option>4</option><option>5</option><option>6</option>
-  </select>
-</div>
-
-
-<div class="row search-actions" style="gap:8px; align-items:flex-end">
-  <button class="btn-primary" id="doSearch">Искать</button>
-  <button class="btn-ghost" id="toggleAdvanced">Расширенный поиск</button>
+        <div class="label">Даты</div>
+        <div class="dates-row">
+          <div class="date-field">
+            <input id="depart" class="date-input" type="text"
+                   placeholder="ДД.ММ.ГГГГ" inputmode="numeric" />
+            <button type="button" class="date-btn" data-target="departNative">📅</button>
+            <input id="departNative" class="date-native" type="date" />
+          </div>
+          <div class="date-field">
+            <input id="ret" class="date-input" type="text"
+                   placeholder="ДД.ММ.ГГГГ" inputmode="numeric" />
+            <button type="button" class="date-btn" data-target="retNative">📅</button>
+            <input id="retNative" class="date-native" type="date" />
+          </div>
+        </div>
+        <div class="hint" id="departHint"></div>
+        <div class="hint" id="retHint"></div>
       </div>
+
+      <div class="search-passengers">
+        <div class="label">Пассажиры</div>
+        <select id="adults">
+          <option>1</option><option>2</option><option>3</option>
+          <option>4</option><option>5</option><option>6</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- ряд с кнопками -->
+    <div class="row search-actions-row">
+      <button class="btn-primary" id="doSearch">Искать</button>
+      <button class="btn-ghost" id="toggleAdvanced">Расширенный поиск</button>
     </div>
 
     <!-- расширенный блок -->
@@ -623,7 +632,7 @@
   </div>
 </div>
 
-<div class="version">версия 8</div>
+<div class="version">версия 9</div>
 
 <script>
 /* ========= helpers ========= */
@@ -698,8 +707,29 @@ function renderRecent(){
 function applyState(st){
   $('#origin').value = st.origin_city || '';
   $('#destination').value = st.dest_city || '';
-  $('#depart').value = st.depart || '';
-  $('#ret').value = st.ret || '';
+
+  // даты из состояния
+  if(st.depart){
+    const d = parseDateSmart(st.depart);
+    if(d){
+      $('#depart').value = ddmmyyyy(d);
+      $('#departNative').value = toISO(d);
+    }
+  } else {
+    $('#depart').value = '';
+    $('#departNative').value = '';
+  }
+  if(st.ret){
+    const d2 = parseDateSmart(st.ret);
+    if(d2){
+      $('#ret').value = ddmmyyyy(d2);
+      $('#retNative').value = toISO(d2);
+    }
+  } else {
+    $('#ret').value='';
+    $('#retNative').value='';
+  }
+
   $('#currency').value = st.currency || 'RUB';
   $('#adults').value = st.adults || '1';
   $('#oneway').value = st.oneway || 'no';
@@ -830,8 +860,15 @@ attachSuggest($('#destination'), (item)=>{ destIATA=item.code; $('#destIataHint'
 function toggleOneWay(){
   const ow = $('#oneway').value==='yes';
   const ret = $('#ret');
-  if(ow){ ret.value=''; ret.disabled=true; $('#retHint').textContent=''; }
-  else { ret.disabled=false; }
+  const retNative = $('#retNative');
+  if(ow){
+    ret.value='';
+    retNative.value='';
+    ret.disabled=true;
+    $('#retHint').textContent='';
+  } else {
+    ret.disabled=false;
+  }
 }
 $('#oneway').addEventListener('change',()=>{
   toggleOneWay();
@@ -899,7 +936,10 @@ function showMatrix(chips){
     el.textContent = `${c.dstr} · от ${c.price} ${c.currency}`;
     el.onclick=()=>{
       const dt = parseDateSmart(c.dstr);
-      if(dt) $('#depart').value = toISO(dt);
+      if(dt){
+        $('#depart').value = ddmmyyyy(dt);
+        $('#departNative').value = toISO(dt);
+      }
       syncURLFromState({d:$('#depart').value});
       doSearch();
     };
@@ -1106,6 +1146,71 @@ function setLoading(on){
   ov.classList.toggle('hidden',!on);
 }
 
+/* ========= ДАТЫ: текст + календарь ========= */
+
+function initMinDateHints(){
+  const iso = toISO(todayLocal);
+  $('#departNative').min = iso;
+  $('#retNative').min = iso;
+  $('#departHint').textContent = `Не раньше ${ddmmyyyy(todayLocal)}`;
+}
+
+function normalizeTextDate(id){
+  const input = $('#'+id);
+  if(!input) return;
+  let d = parseDateSmart(input.value.trim());
+  if(!d) return;
+  d = clampToFuture(d);
+  input.value = ddmmyyyy(d);
+  const native = $('#'+id+'Native');
+  if(native) native.value = toISO(d);
+  if(id==='depart'){
+    const iso = toISO(d);
+    const retNative = $('#retNative');
+    if(retNative) retNative.min = iso;
+    const r = parseDateSmart($('#ret').value.trim());
+    if(r && r<d){
+      $('#ret').value='';
+      $('#retNative').value='';
+      $('#retHint').textContent='';
+    }
+  }
+}
+
+['depart','ret'].forEach(id=>{
+  const el = $('#'+id);
+  if(el){
+    el.addEventListener('blur',()=>normalizeTextDate(id));
+    el.addEventListener('change',()=>normalizeTextDate(id));
+  }
+  const native = $('#'+id+'Native');
+  if(native){
+    native.addEventListener('change',()=>{
+      const d = parseDateSmart(native.value);
+      if(!d) return;
+      const clamped = clampToFuture(d);
+      $('#'+id).value = ddmmyyyy(clamped);
+      native.value = toISO(clamped);
+      if(id==='depart'){
+        const iso = toISO(clamped);
+        const retNative = $('#retNative');
+        if(retNative) retNative.min = iso;
+      }
+    });
+  }
+});
+
+/* кнопки календаря */
+document.querySelectorAll('.date-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const targetId = btn.dataset.target;
+    const native = document.getElementById(targetId);
+    if(!native) return;
+    if(native.showPicker){ native.showPicker(); }
+    else native.focus();
+  });
+});
+
 /* ========= основной поиск ========= */
 async function doSearch(){
   const oriCity = $('#origin').value.trim();
@@ -1133,12 +1238,27 @@ async function doSearch(){
   if(flex==='weekend'){
     const {sat,sun}=weekendAround(new Date());
     d1=sat; if(ow!=='yes') d2=sun;
-    $('#depart').value = toISO(d1);
-    if(ow!=='yes') $('#ret').value = toISO(d2);
+    $('#depart').value = ddmmyyyy(d1);
+    $('#departNative').value = toISO(d1);
+    if(ow!=='yes'){
+      $('#ret').value = ddmmyyyy(d2);
+      $('#retNative').value = toISO(d2);
+    } else {
+      $('#ret').value='';
+      $('#retNative').value='';
+    }
   }
   if(!d1){ $('#departHint').textContent='Укажи дату вылета'; alert('Укажи дату вылета'); return; }
-  if(d1<todayLocal){ d1=todayLocal; $('#depart').value=toISO(d1); }
-  if(ow!=='yes' && d2 && d2<d1){ $('#retHint').textContent='Возврат не может быть раньше вылета'; alert('Дата возврата раньше вылета'); return; }
+  if(d1<todayLocal){
+    d1=todayLocal;
+    $('#depart').value=ddmmyyyy(d1);
+    $('#departNative').value=toISO(d1);
+  }
+  if(ow!=='yes' && d2 && d2<d1){
+    $('#retHint').textContent='Возврат не может быть раньше вылета';
+    alert('Дата возврата раньше вылета'); 
+    return;
+  }
   if(ow==='yes'){ $('#retHint').textContent=''; }
 
   const state = {
@@ -1212,6 +1332,7 @@ $('#copyLink').addEventListener('click',()=>{
 $('#reset').addEventListener('click',()=>{
   $('#origin').value=''; $('#destination').value='';
   $('#depart').value=''; $('#ret').value='';
+  $('#departNative').value=''; $('#retNative').value='';
   $('#currency').value='RUB'; $('#adults').value='1';
   $('#oneway').value='no'; $('#flexMode').value='none';
   originIATA=''; destIATA='';
@@ -1236,45 +1357,7 @@ $('#toggleAdvanced').addEventListener('click',e=>{
   $('#toggleAdvanced').textContent = isHidden ? 'Скрыть расширенный поиск' : 'Расширенный поиск';
 });
 
-/* ========= даты: ограничения ========= */
-function initMinDateHints(){
-  // показываем только подсказку — дальше JS уже проверяет даты
-  $('#departHint').textContent = `Не раньше ${ddmmyyyy(todayLocal)}`;
-}
-
-$('#depart').addEventListener('change',()=>{
-  let d = parseDateSmart($('#depart').value);
-  d = clampToFuture(d);
-  if(!d) return;
-  $('#depart').value = toISO(d);
-  $('#ret').min = toISO(d);
-  const r = parseDateSmart($('#ret').value);
-  if(r && r<d){
-    $('#ret').value='';
-    $('#retHint').textContent='';
-  }
-});
-
-function normalizeDateInputField(el){
-  if(!el) return;
-  const v = el.value.trim();
-  if(!v) return;
-  const d = parseDateSmart(v); // понимает и ISO, и ДД.ММ.ГГГГ
-  if(d){
-    el.value = toISO(d);       // приводим к ISO, чтобы type="date" был доволен
-  }
-}
-
-  
 /* ========= init ========= */
-
-['depart','ret'].forEach(id=>{
-  const el = document.getElementById(id);
-  if(!el) return;
-  el.addEventListener('blur', ()=>normalizeDateInputField(el));
-  el.addEventListener('change', ()=>normalizeDateInputField(el));
-});
-
 updateWeekendHint();
 renderRecent();
 toggleOneWay();
