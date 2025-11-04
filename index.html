@@ -257,39 +257,43 @@
 
     .advanced.hidden{display:none;}
 
-    /* ------- Форма поиска: 3 строки ------- */
+    /* ------- Форма поиска ------- */
 
     /* 1-я строка – поля */
-/* одна строка с полями, пропорции как у поисковиков */
-.search-row{
-  display:grid;
-  grid-template-columns:
-    1.2fr   /* Откуда – чуть шире */
-    36px    /* стрелка */
-    1.2fr   /* Куда – тоже шире */
-    1fr     /* Дата вылета */
-    1fr     /* Дата возвращения */
-    0.9fr;  /* Пассажиры – немного уже, чтобы не давить */
-  column-gap:12px;   /* поля ближе друг к другу */
-  row-gap:6px;
-  align-items:center; /* стрелка и поля по вертикали по центру */
-}
+    .search-row{
+      display:grid;
+      grid-template-columns:
+        1.15fr   /* Откуда */
+        32px     /* стрелка */
+        1.15fr   /* Куда */
+        0.9fr    /* Дата вылета */
+        0.9fr    /* Дата возврата */
+        0.9fr;   /* Пассажиры */
+      column-gap:12px;
+      row-gap:8px;
+      align-items:start;
+    }
 
-
-    .search-row > *{min-width:0;}
+    /* (заготовка на будущее, можно не трогать) */
+    .search-row .field{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      min-width:0;
+    }
 
     /* 2-я строка – подсказки */
     .search-hints-row{
       margin-top:4px;
       display:grid;
       grid-template-columns:
-        minmax(0,1.1fr)
-        40px
-        minmax(0,1.1fr)
-        minmax(0,1.1fr)
-        minmax(0,1.1fr)
-        minmax(0,1.1fr);
-      column-gap:14px;
+        1.15fr   /* Откуда */
+        32px     /* стрелка */
+        1.15fr   /* Куда */
+        0.9fr    /* Дата вылета */
+        0.9fr    /* Дата возврата */
+        0.9fr;   /* Пассажиры */
+      column-gap:12px;
       align-items:start;
     }
     .search-hints-row .hint{margin-top:0;}
@@ -302,58 +306,61 @@
       gap:10px;
     }
 
-    /* стрелка обмена городов */
-   .swap-cell{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-.swap-btn{
-  border:none;
-  background:transparent;
-  box-shadow:none;
-  padding:0;
-  font-size:22px;
-  line-height:1;
-  color:var(--accent);
-  cursor:pointer;
-}
-
+    /* стрелка обмена городов – по центру между полями */
+    .swap-cell{
+      display:flex;
+      align-items:center;      /* по высоте по центру */
+      justify-content:center;  /* по ширине по центру */
+    }
+    .swap-cell .swap-btn{
+      padding:0;
+      border:none;
+      background:transparent;
+      font-size:20px;
+      line-height:1;
+      color:#075e54;
+      cursor:pointer;
+    }
     .swap-btn:hover{
       background:#ecfdf5;
     }
-  
+
+    /* Дата возврата чуть ближе к дате вылета */
+    .field-date-return{
+      margin-left:-6px;
+    }
+
     /* Пассажиры – триггер */
     .pax-field{position:relative;}
-   .pax-trigger{
-  width:100%;
-  border-radius:12px;
-  border:1px solid var(--line);
-  padding:8px 34px 8px 12px;
-  background:#ffffff;
-  display:flex;
-  flex-direction:column;
-  align-items:flex-start;
-  justify-content:center;
-  cursor:pointer;
-  position:relative;
-  color:var(--ink);              /* общий цвет текста внутри кнопки */
-}
+    .pax-trigger{
+      width:100%;
+      border-radius:12px;
+      border:1px solid var(--line);
+      padding:10px 34px 10px 12px;   /* как у input */
+      background:#ffffff;
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+      justify-content:center;
+      cursor:pointer;
+      position:relative;
+      color:var(--ink);
+      min-height:42px;               /* высота, близкая к обычному полю */
+    }
 
-.pax-main{
-  font-size:14px;
-  font-weight:600;
-  color:var(--ink);              /* яркий, основной текст: "2 пассажира" */
-}
+    .pax-main{
+      font-size:14px;
+      font-weight:600;
+      color:var(--ink);              /* яркий, основной текст: "2 пассажира" */
+    }
 
-.pax-sub{
-  font-size:11px;
-  color:#9ca3af;                 /* более светлый серый для "эконом" */
-  margin-top:1px;
-  text-transform:none;
-  letter-spacing:0.02em;
-}
+    .pax-sub{
+      font-size:11px;
+      color:#9ca3af;                 /* более светлый серый для "эконом" */
+      margin-top:1px;
+      text-transform:none;
+      letter-spacing:0.02em;
+    }
     .pax-chevron{
       position:absolute;
       right:10px;
@@ -441,8 +448,7 @@
       color:#ffffff;
     }
 
-    /* подсказка про класс под выпадашкой пассажиров убираем –
-       просто оставляем место пустым */
+    /* подсказка под пассажирами – просто пустое место */
     .pax-hint-placeholder{
       min-height:16px;
       font-size:12px;
@@ -461,6 +467,9 @@
       }
       .swap-cell{
         justify-content:flex-start;
+      }
+      .field-date-return{
+        margin-left:0;
       }
       .pax-panel{
         right:auto;
@@ -547,15 +556,14 @@
       </div>
 
       <div>
-  <div class="label">Дата вылета</div>
-  <input id="depart" type="date" />
-</div>
+        <div class="label">Дата вылета</div>
+        <input id="depart" type="date" />
+      </div>
 
-<div>
-  <div class="label">Дата возвращения</div>
-  <input id="ret" type="date" />
-</div>
-   
+      <div class="field-date-return">
+        <div class="label">Дата возвращения</div>
+        <input id="ret" type="date" />
+      </div>
 
       <div class="pax-field">
         <div class="label">Пассажиры</div>
@@ -1423,7 +1431,6 @@ function normalizeReturnDate(){
 });
 
 
-
 /* ========= блок пассажиров ========= */
 const paxState = {adults:1, children:0, infants:0, cabin:'eco'};
 
@@ -1501,4 +1508,3 @@ initPaxFromAdultsSelect();
 </script>
 </body>
 </html>
-
