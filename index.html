@@ -14,9 +14,9 @@
 
       --accent:#075e54;             /* тёмный зелёный */
       --accent-soft:#e3f3ee;
-      --accent-soft-2:#fff7e3;      /* мягкий жёлтый (почти не используется) */
-      --berry:#b1365b;              /* цвет крыла */
-      --sun:#f6c453;                /* жёлтый круг */
+      --accent-soft-2:#fff7e3;
+      --berry:#b1365b;
+      --sun:#f6c453;
 
       --danger:#dc2626;
       --ok:#16a34a;
@@ -46,7 +46,7 @@
       border-radius:var(--radius-lg);
       border:1px solid rgba(148,163,184,0.28);
       box-shadow:var(--shadow-soft);
-      padding:16px 18px;
+      padding:16px 18px 18px;
     }
 
     /* форма поиска чуть темнее */
@@ -59,12 +59,6 @@
     .grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
     .row{display:flex; gap:10px; align-items:center}
 
-    @media (max-width:900px){
-      .grid-2{grid-template-columns:1fr}
-      .row{flex-wrap:wrap}
-      .two-col{grid-template-columns:1fr}
-    }
-
     input, select, button{
       font:inherit;
       border-radius:12px;
@@ -73,7 +67,7 @@
       background:#ffffff;
     }
 
-    input:focus, select:focus, button:focus{
+    input:focus, select:focus{
       outline:none;
       border-color:rgba(34,197,133,0.9);
       box-shadow:0 0 0 1px rgba(34,197,133,0.4);
@@ -109,7 +103,7 @@
       border-color:rgba(148,163,184,0.6);
     }
 
-    .hint{font-size:12px;color:var(--muted);margin-top:2px}
+    .hint{font-size:12px;color:var(--muted);margin-top:3px}
     .label{font-size:12px;color:var(--muted);margin-bottom:4px}
 
     .section-title{
@@ -122,7 +116,6 @@
     .chip{
       border-radius:var(--radius-pill);
       padding:7px 11px;
-      /* ягодные чипсы под цвет крыла */
       background:rgba(177,54,91,0.08);
       color:#7a1238;
       border:1px solid rgba(177,54,91,0.35);
@@ -263,174 +256,248 @@
     }
 
     .advanced.hidden{display:none;}
-    .hidden{display:none !important;}
 
-    /* Сетка формы поиска: 1-я строка поля, 2-я подсказки, 3-я кнопки */
-    .search-grid{
+    /* ------- Форма поиска: 3 строки ------- */
+
+    /* 1-я строка – поля */
+    .search-row{
       display:grid;
       grid-template-columns:
-        minmax(0,1.4fr)   /* Откуда */
-        52px              /* стрелка */
-        minmax(0,1.4fr)   /* Куда */
-        minmax(0,1.1fr)   /* вылет */
-        minmax(0,1.1fr)   /* возвращение */
-        minmax(130px,0.8fr); /* пассажиры */
+        minmax(0,1.25fr)   /* Откуда */
+        64px               /* стрелка */
+        minmax(0,1.25fr)   /* Куда */
+        minmax(0,1.1fr)    /* Дата вылета */
+        minmax(0,1.1fr)    /* Дата возвращения */
+        minmax(170px,0.9fr);/* Пассажиры */
       column-gap:16px;
-      row-gap:4px;
+      row-gap:8px;
       align-items:end;
     }
-    .search-grid > div{min-width:0;}
+    .search-row > *{min-width:0;}
 
-    @media (max-width:900px){
-      .search-grid{
-        grid-template-columns:1fr;
-      }
+    /* 2-я строка – подсказки */
+    .search-hints-row{
+      margin-top:4px;
+      display:grid;
+      grid-template-columns:
+        minmax(0,1.25fr)
+        64px
+        minmax(0,1.25fr)
+        minmax(0,1.1fr)
+        minmax(0,1.1fr)
+        minmax(170px,0.9fr);
+      column-gap:16px;
+      align-items:start;
+    }
+    .search-hints-row .hint{margin-top:0;}
+
+    /* 3-я строка – кнопки */
+    .search-actions-row{
+      margin-top:14px;
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
     }
 
-    .swap-inline{
+    /* стрелка обмена городов */
+    .swap-cell{
       display:flex;
       align-items:center;
       justify-content:center;
     }
     .swap-btn{
-      width:36px;
-      height:36px;
+      width:44px;
+      height:44px;
       border-radius:999px;
-      border:1px solid rgba(148,163,184,0.7);
+      border:1px solid rgba(7,94,84,0.45);
       background:#ffffff;
       display:flex;
       align-items:center;
       justify-content:center;
-      font-size:18px;
+      font-size:22px;
       line-height:1;
-      box-shadow:0 8px 20px rgba(15,23,42,0.12);
+      color:var(--accent);
+      box-shadow:0 10px 25px rgba(15,23,42,0.12);
     }
     .swap-btn:hover{
-      background:linear-gradient(135deg,#ecfdf5,#e0f2fe);
+      background:#ecfdf5;
     }
 
-    .search-actions-row{
-      grid-column:4 / 7;
-      display:flex;
-      justify-content:flex-end;
-      gap:12px;
-      margin-top:8px;
-    }
-    @media (max-width:900px){
-      .search-actions-row{
-        grid-column:1 / -1;
-        justify-content:flex-start;
-        flex-wrap:wrap;
-      }
-    }
-
-    /* поле цены в фильтрах */
-    .row-price{
-      display:flex;
-      gap:6px;
+    /* дата + иконка календаря */
+    .date-wrap{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 40px;
+      column-gap:6px;
       align-items:center;
     }
-    .row-price input[type="number"]{
-      flex:1;
-      min-width:0;
-    }
-    .row-price input[type="number"]::-webkit-outer-spin-button,
-    .row-price input[type="number"]::-webkit-inner-spin-button{
-      -webkit-appearance:none;
-      margin:0;
-    }
-    .row-price input[type="number"]{
-      -moz-appearance:textfield;
-    }
-
-    /* Пассажиры: кнопка и попап */
-    .input-like{
+    .date-wrap input[type="date"]{
       width:100%;
-      text-align:left;
+    }
+    .date-icon-btn{
+      width:40px;
+      height:40px;
       border-radius:12px;
       border:1px solid var(--line);
       background:#ffffff;
-      padding:10px 12px;
-      color:inherit;
-      font:inherit;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:0;
+      box-shadow:0 6px 16px rgba(15,23,42,0.1);
     }
-    .input-like::after{
-      content:"";
-      float:right;
-      margin-top:4px;
-      border:4px solid transparent;
-      border-top-color:#6b7280;
+    .date-icon{
+      width:22px;
+      height:22px;
+      border-radius:6px;
+      background:linear-gradient(145deg,#60a5fa,#2563eb);
+      position:relative;
     }
-    .passengers-wrap{position:relative;}
+    .date-icon::before{
+      content:'';
+      position:absolute;
+      inset:0;
+      border-radius:6px;
+      border-top:3px solid #1d4ed8;
+      border-left:3px solid #1d4ed8;
+      border-right:3px solid #1d4ed8;
+    }
 
-    .passenger-popup{
+    /* Пассажиры – триггер */
+    .pax-field{position:relative;}
+    .pax-trigger{
+      width:100%;
+      border-radius:12px;
+      border:1px solid var(--line);
+      padding:8px 34px 8px 12px;
+      background:#ffffff;
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+      justify-content:center;
+      cursor:pointer;
+      position:relative;
+    }
+    .pax-main{
+      font-size:14px;
+      font-weight:500;
+    }
+    .pax-sub{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:1px;
+    }
+    .pax-chevron{
+      position:absolute;
+      right:10px;
+      top:50%;
+      transform:translateY(-50%);
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    /* Пассажиры – панель */
+    .pax-panel{
       position:absolute;
       right:0;
-      top:100%;
       margin-top:6px;
-      padding:14px 16px 12px;
       background:#ffffff;
       border-radius:16px;
       box-shadow:0 18px 45px rgba(15,23,42,0.18);
-      border:1px solid #e2e8f0;
-      width:290px;
-      z-index:20;
+      padding:14px 18px 12px;
+      width:280px;
+      z-index:50;
     }
-    .passenger-row{
+    .pax-panel.hidden{display:none;}
+
+    .pax-row{
       display:flex;
-      justify-content:space-between;
       align-items:center;
-      margin-bottom:6px;
+      justify-content:space-between;
+      margin-bottom:10px;
+    }
+    .pax-label-wrap{
+      max-width:60%;
+    }
+    .pax-title{
       font-size:14px;
+      font-weight:500;
     }
-    .passenger-label{
-      display:flex;
-      flex-direction:column;
-      gap:2px;
-    }
-    .passenger-sub{
+    .pax-note{
       font-size:12px;
       color:var(--muted);
+      margin-top:2px;
     }
-    .passenger-counter{
+    .pax-counter{
       display:flex;
       align-items:center;
-      gap:8px;
+      gap:10px;
     }
-    .passenger-counter button{
-      width:28px;
-      height:28px;
+    .pax-btn{
+      width:32px;
+      height:32px;
       border-radius:999px;
       border:1px solid var(--line);
-      background:#f9fafb;
-      padding:0;
-      font-size:18px;
+      background:#ffffff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:20px;
       line-height:1;
+      color:var(--accent);
+      padding:0;
     }
-    .passenger-counter span{
-      min-width:14px;
+    .pax-count{
+      width:18px;
       text-align:center;
+      font-weight:500;
     }
 
-    .cabin-toggle{
-      display:flex;
+    .pax-cabin{
       margin-top:8px;
       border-radius:999px;
-      overflow:hidden;
       border:1px solid var(--line);
-      font-size:13px;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      overflow:hidden;
     }
-    .cabin-toggle button{
-      flex:1;
+    .pax-cabin-btn{
       border:none;
       border-radius:0;
-      background:#ffffff;
-      padding:7px 10px;
+      padding:8px 4px;
+      font-size:13px;
+      background:#f9fafb;
+      color:var(--muted);
     }
-    .cabin-toggle button.active{
-      background:var(--accent-soft);
-      color:var(--accent);
-      font-weight:500;
+    .pax-cabin-btn.active{
+      background:var(--accent);
+      color:#ffffff;
+    }
+
+    /* подсказка про класс под выпадашкой пассажиров убираем –
+       просто оставляем место пустым */
+    .pax-hint-placeholder{
+      min-height:16px;
+      font-size:12px;
+    }
+
+    /* адаптив */
+    @media (max-width:900px){
+      .two-col{grid-template-columns:1fr}
+      .search-row,
+      .search-hints-row{
+        grid-template-columns:1fr;
+      }
+      .search-actions-row{
+        justify-content:flex-start;
+        flex-wrap:wrap;
+      }
+      .swap-cell{
+        justify-content:flex-start;
+      }
+      .pax-panel{
+        right:auto;
+        left:0;
+      }
     }
 
     /* overlay загрузки */
@@ -467,7 +534,6 @@
       }
     }
 
-    /* версия в углу */
     .version{
       position:fixed;
       bottom:8px;
@@ -496,14 +562,14 @@
 
   <!-- Форма поиска -->
   <div class="card" id="searchForm">
-    <div class="search-grid">
-      <!-- 1-я строка: поля -->
+    <!-- 1 строка: поля -->
+    <div class="search-row">
       <div>
         <div class="label">Откуда</div>
         <input id="origin" placeholder="Москва" autocomplete="off" />
       </div>
 
-      <div class="swap-inline">
+      <div class="swap-cell">
         <button type="button" class="swap-btn" id="swapInline" aria-label="Поменять местами города">⇆</button>
       </div>
 
@@ -514,80 +580,98 @@
 
       <div>
         <div class="label">Дата вылета</div>
-        <input id="depart" type="date" />
+        <div class="date-wrap">
+          <input id="depart" type="date" />
+          <button type="button" class="date-icon-btn" data-for="depart">
+            <div class="date-icon"></div>
+          </button>
+        </div>
       </div>
 
       <div>
         <div class="label">Дата возвращения</div>
-        <input id="ret" type="date" />
-      </div>
-
-      <div>
-        <div class="label">Пассажиры</div>
-        <div class="passengers-wrap">
-          <button type="button" id="passengersBtn" class="input-like">1 пассажир, эконом</button>
-          <div id="passengersPopup" class="passenger-popup hidden">
-            <div class="passenger-row">
-              <div class="passenger-label">
-                <span>Взрослые</span>
-                <span class="passenger-sub">от 12 лет</span>
-              </div>
-              <div class="passenger-counter">
-                <button type="button" id="paxAdultsMinus">−</button>
-                <span id="paxAdultsValue">1</span>
-                <button type="button" id="paxAdultsPlus">+</button>
-              </div>
-            </div>
-            <div class="passenger-row">
-              <div class="passenger-label">
-                <span>Дети</span>
-                <span class="passenger-sub">от 2 до 12 лет</span>
-              </div>
-              <div class="passenger-counter">
-                <button type="button" id="paxChildrenMinus">−</button>
-                <span id="paxChildrenValue">0</span>
-                <button type="button" id="paxChildrenPlus">+</button>
-              </div>
-            </div>
-            <div class="passenger-row">
-              <div class="passenger-label">
-                <span>Младенцы</span>
-                <span class="passenger-sub">до 2 лет (без места)</span>
-              </div>
-              <div class="passenger-counter">
-                <button type="button" id="paxInfantsMinus">−</button>
-                <span id="paxInfantsValue">0</span>
-                <button type="button" id="paxInfantsPlus">+</button>
-              </div>
-            </div>
-
-            <div class="cabin-toggle">
-              <button type="button" id="cabinEco" class="active">Эконом</button>
-              <button type="button" id="cabinBiz">Бизнес</button>
-            </div>
-          </div>
-
-          <!-- скрытые значения для логики -->
-          <input type="hidden" id="adults" value="1">
-          <input type="hidden" id="childrenCount" value="0">
-          <input type="hidden" id="infantsCount" value="0">
-          <input type="hidden" id="cabin" value="eco">
+        <div class="date-wrap">
+          <input id="ret" type="date" />
+          <button type="button" class="date-icon-btn" data-for="ret">
+            <div class="date-icon"></div>
+          </button>
         </div>
       </div>
 
-      <!-- 2-я строка: подсказки -->
+      <div class="pax-field">
+        <div class="label">Пассажиры</div>
+        <button type="button" class="pax-trigger" id="paxTrigger">
+          <div class="pax-main" id="paxMainText">1 пассажир</div>
+          <div class="pax-sub" id="paxSubText">эконом</div>
+          <span class="pax-chevron">▾</span>
+        </button>
+
+        <!-- скрытый селект для API / стейта -->
+        <select id="adults" style="display:none">
+          <option>1</option><option>2</option><option>3</option>
+          <option>4</option><option>5</option><option>6</option>
+        </select>
+
+        <!-- панель пассажиров -->
+        <div class="pax-panel hidden" id="paxPanel">
+          <div class="pax-row">
+            <div class="pax-label-wrap">
+              <div class="pax-title">Взрослые</div>
+              <div class="pax-note">от 12 лет</div>
+            </div>
+            <div class="pax-counter">
+              <button class="pax-btn" type="button" data-kind="adults" data-delta="-1">−</button>
+              <div class="pax-count" data-kind="adults">1</div>
+              <button class="pax-btn" type="button" data-kind="adults" data-delta="1">+</button>
+            </div>
+          </div>
+
+          <div class="pax-row">
+            <div class="pax-label-wrap">
+              <div class="pax-title">Дети</div>
+              <div class="pax-note">от 2 до 12 лет</div>
+            </div>
+            <div class="pax-counter">
+              <button class="pax-btn" type="button" data-kind="children" data-delta="-1">−</button>
+              <div class="pax-count" data-kind="children">0</div>
+              <button class="pax-btn" type="button" data-kind="children" data-delta="1">+</button>
+            </div>
+          </div>
+
+          <div class="pax-row">
+            <div class="pax-label-wrap">
+              <div class="pax-title">Младенцы</div>
+              <div class="pax-note">до 2 лет (без места)</div>
+            </div>
+            <div class="pax-counter">
+              <button class="pax-btn" type="button" data-kind="infants" data-delta="-1">−</button>
+              <div class="pax-count" data-kind="infants">0</div>
+              <button class="pax-btn" type="button" data-kind="infants" data-delta="1">+</button>
+            </div>
+          </div>
+
+          <div class="pax-cabin">
+            <button type="button" class="pax-cabin-btn active" data-cabin="eco">Эконом</button>
+            <button type="button" class="pax-cabin-btn" data-cabin="business">Бизнес</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2 строка: подсказки -->
+    <div class="search-hints-row">
       <div class="hint" id="originIataHint"></div>
       <div></div>
       <div class="hint" id="destIataHint"></div>
       <div class="hint" id="departHint"></div>
       <div class="hint" id="retHint"></div>
-      <div class="hint" id="passengersHint">Взрослые, дети, младенцы</div>
+      <div class="pax-hint-placeholder"></div>
+    </div>
 
-      <!-- 3-я строка: кнопки -->
-      <div class="search-actions-row">
-        <button class="btn-primary" id="doSearch">Искать</button>
-        <button class="btn-ghost" id="toggleAdvanced">Расширенный поиск</button>
-      </div>
+    <!-- 3 строка: кнопки -->
+    <div class="search-actions-row">
+      <button class="btn-primary" id="doSearch">Искать</button>
+      <button class="btn-ghost" id="toggleAdvanced">Расширенный поиск</button>
     </div>
 
     <!-- расширенный блок -->
@@ -620,19 +704,9 @@
         </div>
         <div>
           <div class="label">Класс обслуживания</div>
-          <select id="cabinAdvanced">
+          <select id="cabin">
             <option value="eco">Эконом</option>
-            <option value="premium">Премиум-эконом</option>
             <option value="business">Бизнес</option>
-            <option value="first">Первый</option>
-          </select>
-        </div>
-        <div>
-          <div class="label">Багаж</div>
-          <select id="baggage">
-            <option value="any">Любой</option>
-            <option value="with">Только с багажом</option>
-            <option value="hand">Только ручная кладь</option>
           </select>
         </div>
         <div class="row" style="justify-content:flex-end;gap:6px;align-items:flex-end">
@@ -682,10 +756,10 @@
       <input type="number" id="durMax" min="0" step="1" placeholder="например, 5" style="width:100%">
 
       <div class="label" style="margin-top:10px">Цена</div>
-      <div class="row-price">
-        <input type="number" id="priceMin" placeholder="мин">
+      <div class="row" style="gap:6px;align-items:center">
+        <input type="number" id="priceMin" placeholder="мин" style="flex:1;min-width:0">
         <span>—</span>
-        <input type="number" id="priceMax" placeholder="макс">
+        <input type="number" id="priceMax" placeholder="макс" style="flex:1;min-width:0">
       </div>
 
       <div class="label" style="margin-top:10px">Авиакомпании</div>
@@ -727,7 +801,7 @@
   </div>
 </div>
 
-<div class="version">версия 9.3</div>
+<div class="version">версия 9.4</div>
 
 <script>
 /* ========= helpers ========= */
@@ -799,65 +873,13 @@ function renderRecent(){
     cont.appendChild(chip);
   });
 }
-
-/* ========= пассажиры ========= */
-const pax = {adults:1, children:0, infants:0, cabin:'eco'};
-
-function passengersTotal(){
-  return pax.adults + pax.children + pax.infants;
-}
-function passengersWord(n){
-  if(n%10===1 && n%100!==11) return 'пассажир';
-  if(n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20)) return 'пассажира';
-  return 'пассажиров';
-}
-function updatePassengersSummary(){
-  const total = passengersTotal();
-  const cabinTitle = pax.cabin==='eco' ? 'эконом' : 'бизнес';
-  $('#paxAdultsValue').textContent = pax.adults;
-  $('#paxChildrenValue').textContent = pax.children;
-  $('#paxInfantsValue').textContent = pax.infants;
-  $('#adults').value = String(total || 1);   // для API остаётся одно число
-  $('#childrenCount').value = String(pax.children);
-  $('#infantsCount').value = String(pax.infants);
-  $('#cabin').value = pax.cabin;
-  $('#passengersBtn').textContent = `${total} ${passengersWord(total)}, ${cabinTitle}`;
-}
-
-function changePax(type, delta){
-  if(!(type in pax)) return;
-  pax[type] += delta;
-  if(type==='adults' && pax.adults<1) pax.adults=1;
-  if(type!=='adults' && pax[type]<0) pax[type]=0;
-  // не больше взрослых младенцев
-  if(pax.infants>pax.adults) pax.infants=pax.adults;
-  // максимум 9 человек
-  if(passengersTotal()>9){
-    pax[type]-=delta;
-  }
-  updatePassengersSummary();
-}
-
-function setPassengersTotal(total){
-  total = Math.max(1,Math.min(9,Number(total)||1));
-  pax.adults = total;
-  pax.children = 0;
-  pax.infants = 0;
-  updatePassengersSummary();
-}
-
-/* ========= восстановление из URL / state ========= */
-let originIATA = '', destIATA = '';
-
 function applyState(st){
   $('#origin').value = st.origin_city || '';
   $('#destination').value = st.dest_city || '';
   $('#depart').value = st.depart || '';
   $('#ret').value = st.ret || '';
   $('#currency').value = st.currency || 'RUB';
-  const ad = st.adults || '1';
-  $('#adults').value = ad;
-  setPassengersTotal(ad);
+  $('#adults').value = st.adults || '1';
   $('#oneway').value = st.oneway || 'no';
   $('#flexMode').value = st.flex || 'none';
   originIATA = st.origin_iata || '';
@@ -894,6 +916,8 @@ function restoreFromURL(){
 }
 
 /* ========= подсказки городов ========= */
+let originIATA = '', destIATA = '';
+
 async function suggestCity(q){
   if(!q || q.length<2) return [];
   const url = `https://autocomplete.travelpayouts.com/places2?term=${encodeURIComponent(q)}&locale=ru&types[]=city`;
@@ -1366,14 +1390,14 @@ $('#copyLink').addEventListener('click',()=>{
 $('#reset').addEventListener('click',()=>{
   $('#origin').value=''; $('#destination').value='';
   $('#depart').value=''; $('#ret').value='';
-  $('#currency').value='RUB';
-  setPassengersTotal(1);
+  $('#currency').value='RUB'; $('#adults').value='1';
   $('#oneway').value='no'; $('#flexMode').value='none';
   originIATA=''; destIATA='';
   $('#originIataHint').textContent=''; $('#destIataHint').textContent='';
   $('#results').innerHTML=''; $('#matrix').innerHTML='';
   updateWeekendHint();
   syncURLFromState({oc:null,dc:null,d:null,r:null,cur:null,ad:null,ow:null,fx:null,oi:null,di:null});
+  initPaxFromAdultsSelect();
 });
 $('#clearFilters').addEventListener('click',()=>{
   document.querySelector('input[name="stops"][value="any"]').checked=true;
@@ -1396,7 +1420,7 @@ function initMinDateHints(){
   const iso = toISO(todayLocal);
   $('#depart').min = iso;
   $('#ret').min = iso;
-  $('#departHint').textContent = `Не раньше ${ddmmyyyy(todayLocal)}`;
+  $('#departHint').textContent = `> ${ddmmyyyy(todayLocal)}`;
 }
 
 $('#depart').addEventListener('change',()=>{
@@ -1412,37 +1436,85 @@ $('#depart').addEventListener('change',()=>{
   }
 });
 
-/* ========= попап пассажиров ========= */
-$('#passengersBtn').addEventListener('click',()=>{
-  $('#passengersPopup').classList.toggle('hidden');
+/* открыть календарь по клику на иконку */
+document.querySelectorAll('.date-icon-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const id = btn.dataset.for;
+    const input = document.getElementById(id);
+    if(!input) return;
+    if(typeof input.showPicker === 'function'){
+      input.showPicker();
+    }else{
+      input.focus();
+    }
+  });
 });
 
-document.addEventListener('click',(e)=>{
-  const popup = $('#passengersPopup');
-  const btn = $('#passengersBtn');
-  if(!popup || popup.classList.contains('hidden')) return;
-  if(popup.contains(e.target) || btn.contains(e.target)) return;
-  popup.classList.add('hidden');
+/* ========= блок пассажиров ========= */
+const paxState = {adults:1, children:0, infants:0, cabin:'eco'};
+
+function updatePaxSummary(){
+  const total = paxState.adults + paxState.children + paxState.infants;
+  const main = $('#paxMainText');
+  const sub = $('#paxSubText');
+  main.textContent = `${total} пассажир${total===1?'':'ов'}`;
+  sub.textContent = paxState.cabin==='eco' ? 'эконом' : 'бизнес';
+
+  const sel = $('#adults');
+  if(sel) sel.value = String(total);
+
+  ['adults','children','infants'].forEach(kind=>{
+    const cnt = document.querySelector(`.pax-count[data-kind="${kind}"]`);
+    if(cnt) cnt.textContent = paxState[kind];
+  });
+}
+
+function initPaxFromAdultsSelect(){
+  const sel = $('#adults');
+  if(!sel) return;
+  const n = parseInt(sel.value || '1',10);
+  paxState.adults = isNaN(n)?1:Math.max(1,n);
+  paxState.children = 0;
+  paxState.infants = 0;
+  paxState.cabin = 'eco';
+  updatePaxSummary();
+}
+
+document.querySelectorAll('.pax-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const kind = btn.dataset.kind;
+    const delta = parseInt(btn.dataset.delta,10);
+    const min = kind==='adults'?1:0;
+    const max = 9;
+    let val = paxState[kind] + delta;
+    if(val<min) val=min;
+    if(val>max) val=max;
+    paxState[kind] = val;
+    updatePaxSummary();
+  });
 });
 
-$('#paxAdultsMinus').addEventListener('click',()=>changePax('adults',-1));
-$('#paxAdultsPlus').addEventListener('click',()=>changePax('adults',1));
-$('#paxChildrenMinus').addEventListener('click',()=>changePax('children',-1));
-$('#paxChildrenPlus').addEventListener('click',()=>changePax('children',1));
-$('#paxInfantsMinus').addEventListener('click',()=>changePax('infants',-1));
-$('#paxInfantsPlus').addEventListener('click',()=>changePax('infants',1));
-
-$('#cabinEco').addEventListener('click',()=>{
-  pax.cabin='eco';
-  $('#cabinEco').classList.add('active');
-  $('#cabinBiz').classList.remove('active');
-  updatePassengersSummary();
+document.querySelectorAll('.pax-cabin-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    paxState.cabin = btn.dataset.cabin;
+    document.querySelectorAll('.pax-cabin-btn').forEach(b=>b.classList.toggle('active',b===btn));
+    const cabinSelect = $('#cabin');
+    if(cabinSelect){
+      cabinSelect.value = paxState.cabin;
+    }
+    updatePaxSummary();
+  });
 });
-$('#cabinBiz').addEventListener('click',()=>{
-  pax.cabin='biz';
-  $('#cabinBiz').classList.add('active');
-  $('#cabinEco').classList.remove('active');
-  updatePassengersSummary();
+
+const paxTrigger = $('#paxTrigger');
+const paxPanel = $('#paxPanel');
+paxTrigger.addEventListener('click',()=>{
+  paxPanel.classList.toggle('hidden');
+});
+document.addEventListener('click',e=>{
+  if(!paxPanel.contains(e.target) && !paxTrigger.contains(e.target)){
+    paxPanel.classList.add('hidden');
+  }
 });
 
 /* ========= init ========= */
@@ -1450,8 +1522,9 @@ updateWeekendHint();
 renderRecent();
 toggleOneWay();
 initMinDateHints();
-updatePassengersSummary();
 restoreFromURL();
+initPaxFromAdultsSelect();
 </script>
 </body>
 </html>
+
