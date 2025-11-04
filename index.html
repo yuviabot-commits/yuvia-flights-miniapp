@@ -300,92 +300,57 @@
     }
 
     /* стрелка обмена городов */
-    .swap-cell{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    }
-    .swap-btn{
-      width:44px;
-      height:44px;
-      border-radius:999px;
-      border:1px solid rgba(7,94,84,0.45);
-      background:#ffffff;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:22px;
-      line-height:1;
-      color:var(--accent);
-      box-shadow:0 10px 25px rgba(15,23,42,0.12);
-    }
+   .swap-cell{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.swap-btn{
+  border:none;
+  background:transparent;
+  box-shadow:none;
+  padding:0;
+  font-size:22px;
+  line-height:1;
+  color:var(--accent);
+  cursor:pointer;
+}
+
     .swap-btn:hover{
       background:#ecfdf5;
     }
-
-    /* дата + иконка календаря */
-    .date-wrap{
-      display:grid;
-      grid-template-columns:minmax(0,1fr) 40px;
-      column-gap:6px;
-      align-items:center;
-    }
-    .date-wrap input[type="date"]{
-      width:100%;
-    }
-    .date-icon-btn{
-      width:40px;
-      height:40px;
-      border-radius:12px;
-      border:1px solid var(--line);
-      background:#ffffff;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:0;
-      box-shadow:0 6px 16px rgba(15,23,42,0.1);
-    }
-    .date-icon{
-      width:22px;
-      height:22px;
-      border-radius:6px;
-      background:linear-gradient(145deg,#60a5fa,#2563eb);
-      position:relative;
-    }
-    .date-icon::before{
-      content:'';
-      position:absolute;
-      inset:0;
-      border-radius:6px;
-      border-top:3px solid #1d4ed8;
-      border-left:3px solid #1d4ed8;
-      border-right:3px solid #1d4ed8;
-    }
-
+  
     /* Пассажиры – триггер */
     .pax-field{position:relative;}
-    .pax-trigger{
-      width:100%;
-      border-radius:12px;
-      border:1px solid var(--line);
-      padding:8px 34px 8px 12px;
-      background:#ffffff;
-      display:flex;
-      flex-direction:column;
-      align-items:flex-start;
-      justify-content:center;
-      cursor:pointer;
-      position:relative;
-    }
-    .pax-main{
-      font-size:14px;
-      font-weight:500;
-    }
-    .pax-sub{
-      font-size:12px;
-      color:var(--muted);
-      margin-top:1px;
-    }
+   .pax-trigger{
+  width:100%;
+  border-radius:12px;
+  border:1px solid var(--line);
+  padding:8px 34px 8px 12px;
+  background:#ffffff;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  justify-content:center;
+  cursor:pointer;
+  position:relative;
+  color:var(--ink);              /* общий цвет текста внутри кнопки */
+}
+
+.pax-main{
+  font-size:14px;
+  font-weight:600;
+  color:var(--ink);              /* яркий, основной текст: "2 пассажира" */
+}
+
+.pax-sub{
+  font-size:11px;
+  color:#9ca3af;                 /* более светлый серый для "эконом" */
+  margin-top:1px;
+  text-transform:none;
+  letter-spacing:0.02em;
+}
     .pax-chevron{
       position:absolute;
       right:10px;
@@ -579,24 +544,15 @@
       </div>
 
       <div>
-        <div class="label">Дата вылета</div>
-        <div class="date-wrap">
-          <input id="depart" type="date" />
-          <button type="button" class="date-icon-btn" data-for="depart">
-            <div class="date-icon"></div>
-          </button>
-        </div>
-      </div>
+  <div class="label">Дата вылета</div>
+  <input id="depart" type="date" />
+</div>
 
-      <div>
-        <div class="label">Дата возвращения</div>
-        <div class="date-wrap">
-          <input id="ret" type="date" />
-          <button type="button" class="date-icon-btn" data-for="ret">
-            <div class="date-icon"></div>
-          </button>
-        </div>
-      </div>
+<div>
+  <div class="label">Дата возвращения</div>
+  <input id="ret" type="date" />
+</div>
+   
 
       <div class="pax-field">
         <div class="label">Пассажиры</div>
@@ -801,7 +757,7 @@
   </div>
 </div>
 
-<div class="version">версия 9.4</div>
+<div class="version">версия 9.5</div>
 
 <script>
 /* ========= helpers ========= */
@@ -1423,32 +1379,40 @@ function initMinDateHints(){
   $('#departHint').textContent = `> ${ddmmyyyy(todayLocal)}`;
 }
 
-$('#depart').addEventListener('change',()=>{
+function normalizeDepartDate(){
   let d = parseDateSmart($('#depart').value);
-  d = clampToFuture(d);
+  d = clampToFuture(d);          // не раньше сегодняшнего дня
   if(!d) return;
-  $('#depart').value = toISO(d);
-  $('#ret').min = toISO(d);
+  const iso = toISO(d);
+  $('#depart').value = iso;
+  $('#ret').min = iso;
+
   const r = parseDateSmart($('#ret').value);
   if(r && r<d){
     $('#ret').value='';
     $('#retHint').textContent='';
   }
+}
+
+['change','blur','input'].forEach(ev=>{
+  $('#depart').addEventListener(ev, normalizeDepartDate);
+});
+function normalizeReturnDate(){
+  let r = parseDateSmart($('#ret').value);
+  if(!r) return;
+  // не раньше сегодняшнего
+  r = clampToFuture(r);
+  // и не раньше даты вылета, если она есть
+  const d = parseDateSmart($('#depart').value);
+  if(d && r < d) r = d;
+  $('#ret').value = toISO(r);
+}
+
+['change','blur','input'].forEach(ev=>{
+  $('#ret').addEventListener(ev, normalizeReturnDate);
 });
 
-/* открыть календарь по клику на иконку */
-document.querySelectorAll('.date-icon-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    const id = btn.dataset.for;
-    const input = document.getElementById(id);
-    if(!input) return;
-    if(typeof input.showPicker === 'function'){
-      input.showPicker();
-    }else{
-      input.focus();
-    }
-  });
-});
+
 
 /* ========= блок пассажиров ========= */
 const paxState = {adults:1, children:0, infants:0, cabin:'eco'};
