@@ -340,31 +340,41 @@
     }
 
     /* сетка формы поиска */
-    .search-row{
-      display:grid;
-      grid-template-columns:
-        minmax(0,1.25fr)    /* Откуда */
-        44px                /* стрелка */
-        minmax(0,1.25fr)    /* Куда */
-        minmax(0,1.6fr)     /* Даты */
-        minmax(130px,0.8fr);/* Пассажиры */
-      column-gap:16px;
-      row-gap:10px;
-      align-items:flex-end;
-    }
-    .search-row > *{min-width:0;}
+.search-row{
+  display:grid;
+  grid-template-columns:
+    minmax(0,1.25fr)   /* Откуда */
+    44px               /* стрелка */
+    minmax(0,1.25fr)   /* Куда */
+    minmax(0,1.2fr)    /* Даты */
+    minmax(130px,0.9fr)/* Пассажиры */
+  column-gap:16px;
+  row-gap:10px;
+  align-items:stretch;           /* все колонки одной высоты */
+}
 
-    .search-passengers{
-      min-width:130px;
-      align-self:flex-end;
-    }
+/* каждая ячейка — вертикальная колонка: лейбл, поля, подсказки */
+.search-row > div{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
+}
 
-    .swap-inline{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      align-self:flex-end;
-    }
+
+.search-passengers{
+  min-width:130px;
+  /* без align-self — ячейка растягивается как остальные */
+}
+
+
+ .swap-inline{
+  display:flex;
+  align-items:center;      /* центр по вертикали ячейки */
+  justify-content:center;
+  /* align-self больше не нужен */
+}
+
     .swap-btn{
       width:40px;
       height:40px;
@@ -657,7 +667,7 @@
   </div>
 </div>
 
-<div class="version">версия 9.2</div>
+<div class="version">версия 9.3</div>
 
 <script>
 /* ========= helpers ========= */
