@@ -7,14 +7,14 @@
   <style>
     :root{
       /* Палитра под логотип */
-      --bg:#fbfcfd;                 /* почти белый фон */
+      --bg:#ffffff;                 /* чисто белый фон */
       --surface:#ffffff;
       --ink:#053227;                /* тёмная ель */
       --muted:#6b7280;
 
       --accent:#075e54;             /* тёмный зелёный */
       --accent-soft:#e3f3ee;
-      --accent-soft-2:#fff7e3;      /* мягкий жёлтый */
+      --accent-soft-2:#fff7e3;      /* мягкий жёлтый (почти не используется) */
       --berry:#b1365b;              /* цвет крыла */
       --sun:#f6c453;                /* жёлтый круг */
 
@@ -49,6 +49,12 @@
       padding:16px 18px;
     }
 
+    /* форма поиска чуть темнее */
+    #searchForm{
+      background:#f3faf8;
+      border-color:rgba(7,94,84,0.18);
+    }
+
     .grid{display:grid; gap:12px}
     .grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
     .row{display:flex; gap:10px; align-items:center}
@@ -57,6 +63,9 @@
       .grid-2{grid-template-columns:1fr}
       .row{flex-wrap:wrap}
       .two-col{grid-template-columns:1fr}
+      .search-grid{
+        grid-template-columns:minmax(0,1fr) 40px minmax(0,1fr);
+      }
     }
 
     input, select, button{
@@ -116,9 +125,10 @@
     .chip{
       border-radius:var(--radius-pill);
       padding:7px 11px;
-      background:var(--accent-soft-2);
-      color:#9a3412;
-      border:1px solid rgba(250,204,21,0.45);
+      /* ягодные чипсы под цвет крыла */
+      background:rgba(177,54,91,0.08);
+      color:#7a1238;
+      border:1px solid rgba(177,54,91,0.35);
       font-size:13px;
       cursor:pointer;
     }
@@ -247,20 +257,70 @@
       color:var(--muted);
     }
     .brand-subline{
-      font-size:12px;
-      color:var(--accent);
-      text-transform:uppercase;
-      letter-spacing:.14em;
-      margin-top:2px;
+      font-size:13px;
+      color:var(--berry);
+      text-transform:none;
+      letter-spacing:.06em;
+      margin-top:4px;
+      font-weight:500;
     }
 
     .advanced.hidden{display:none;}
+
+    /* сетка для формы поиска — ровные поля */
+    .search-grid{
+      display:grid;
+      grid-template-columns:minmax(0,1.2fr) 44px minmax(0,1.2fr) minmax(0,1.4fr) 120px auto;
+      gap:12px;
+      align-items:flex-end;
+    }
+
+    .swap-inline{
+      display:flex;
+      align-items:flex-end;
+      justify-content:center;
+    }
+    .swap-btn{
+      width:36px;
+      height:36px;
+      border-radius:999px;
+      border:1px solid rgba(148,163,184,0.7);
+      background:#ffffff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:18px;
+      line-height:1;
+      box-shadow:0 8px 20px rgba(15,23,42,0.12);
+    }
+    .swap-btn:hover{
+      background:linear-gradient(135deg,#ecfdf5,#e0f2fe);
+    }
+
+    /* поле цены в фильтрах */
+    .row-price{
+      display:flex;
+      gap:6px;
+      align-items:center;
+    }
+    .row-price input[type="number"]{
+      flex:1;
+      min-width:0;
+    }
+    .row-price input[type="number"]::-webkit-outer-spin-button,
+    .row-price input[type="number"]::-webkit-inner-spin-button{
+      -webkit-appearance:none;
+      margin:0;
+    }
+    .row-price input[type="number"]{
+      -moz-appearance:textfield;
+    }
 
     /* overlay загрузки */
     .loading-overlay{
       position:fixed;
       inset:0;
-      background:rgba(248,250,252,0.85);
+      background:rgba(248,250,252,0.9);
       backdrop-filter:blur(12px);
       display:flex;
       align-items:center;
@@ -268,10 +328,10 @@
       z-index:999;
     }
     .loading-overlay.hidden{display:none;}
-    .loading-inner{text-align:center;}
+    .loading-inner{text-align:center;overflow:hidden;}
     .loading-bird{
       width:110px;
-      animation:bird-fly 1.6s ease-in-out infinite;
+      animation:bird-fly 2.6s ease-in-out infinite;
     }
     .loading-text{
       margin-top:10px;
@@ -279,9 +339,15 @@
       color:var(--muted);
     }
     @keyframes bird-fly{
-      0%{transform:translateY(0) translateX(0);}
-      50%{transform:translateY(-8px) translateX(4px);}
-      100%{transform:translateY(0) translateX(0);}
+      0%{
+        transform:translateX(-130%) translateY(10px) rotate(-8deg);
+      }
+      50%{
+        transform:translateX(0) translateY(-10px) rotate(4deg);
+      }
+      100%{
+        transform:translateX(130%) translateY(4px) rotate(-6deg);
+      }
     }
 
     /* версия в углу */
@@ -314,19 +380,24 @@
   <!-- Форма поиска -->
   <div class="card" id="searchForm">
     <!-- основная строка -->
-    <div class="row" style="flex-wrap:wrap; gap:10px 12px">
-      <div style="flex:1 1 180px">
+    <div class="search-grid">
+      <div>
         <div class="label">Откуда</div>
         <input id="origin" placeholder="Москва" autocomplete="off" />
         <div class="hint" id="originIataHint"></div>
       </div>
-      <div style="flex:1 1 180px">
+
+      <div class="swap-inline">
+        <button type="button" class="swap-btn" id="swapInline" aria-label="Поменять местами города">⇆</button>
+      </div>
+
+      <div>
         <div class="label">Куда</div>
         <input id="destination" placeholder="Казань" autocomplete="off" />
         <div class="hint" id="destIataHint"></div>
       </div>
 
-      <div style="flex:1 1 220px">
+      <div>
         <div class="label">Даты</div>
         <div class="row" style="gap:6px">
           <input id="depart" type="date" />
@@ -336,7 +407,7 @@
         <div class="hint" id="retHint"></div>
       </div>
 
-      <div style="width:140px">
+      <div>
         <div class="label">Пассажиры</div>
         <select id="adults">
           <option>1</option><option>2</option><option>3</option>
@@ -344,7 +415,7 @@
         </select>
       </div>
 
-      <div class="row" style="gap:8px; align-items:flex-end">
+      <div class="row" style="gap:8px; justify-content:flex-end;">
         <button class="btn-primary" id="doSearch">Искать</button>
         <button class="btn-ghost" id="toggleAdvanced">Расширенный поиск</button>
       </div>
@@ -376,6 +447,23 @@
             <option value="weekend">Ближайшие выходные</option>
             <option value="plus3">± 3 дня</option>
             <option value="plus7">± 7 дней</option>
+          </select>
+        </div>
+        <div>
+          <div class="label">Класс обслуживания</div>
+          <select id="cabin">
+            <option value="eco">Эконом</option>
+            <option value="premium">Премиум-эконом</option>
+            <option value="business">Бизнес</option>
+            <option value="first">Первый</option>
+          </select>
+        </div>
+        <div>
+          <div class="label">Багаж</div>
+          <select id="baggage">
+            <option value="any">Любой</option>
+            <option value="with">Только с багажом</option>
+            <option value="hand">Только ручная кладь</option>
           </select>
         </div>
         <div class="row" style="justify-content:flex-end;gap:6px;align-items:flex-end">
@@ -425,10 +513,10 @@
       <input type="number" id="durMax" min="0" step="1" placeholder="например, 5" style="width:100%">
 
       <div class="label" style="margin-top:10px">Цена</div>
-      <div class="row">
-        <input type="number" id="priceMin" placeholder="мин" style="flex:1">
+      <div class="row-price">
+        <input type="number" id="priceMin" placeholder="мин">
         <span>—</span>
-        <input type="number" id="priceMax" placeholder="макс" style="flex:1">
+        <input type="number" id="priceMax" placeholder="макс">
       </div>
 
       <div class="label" style="margin-top:10px">Авиакомпании</div>
@@ -470,7 +558,7 @@
   </div>
 </div>
 
-<div class="version">версия 5</div>
+<div class="version">версия 6</div>
 
 <script>
 /* ========= helpers ========= */
@@ -777,9 +865,8 @@ function summarize(){
   if(!allResults.length){ $('#summaryChip').textContent='—'; return; }
   const prices = allResults.map(x=>x.price).sort((a,b)=>a-b);
   const min = prices[0];
-  const p50 = prices[Math.floor(prices.length/2)];
-  const p90 = prices[Math.floor(prices.length*0.9)];
-  $('#summaryChip').textContent = `от ${min.toLocaleString('ru-RU')} · мед ${p50.toLocaleString('ru-RU')} · p90 ${p90.toLocaleString('ru-RU')} ${baseCurrency}`;
+  const avg = Math.round(prices.reduce((s,v)=>s+v,0)/prices.length);
+  $('#summaryChip').textContent = `от ${min.toLocaleString('ru-RU')} · средняя ${avg.toLocaleString('ru-RU')} ${baseCurrency}`;
 }
 
 function withinWindow(timeStr, windowsSelected){
@@ -846,6 +933,11 @@ function applyFiltersAndSort(){
   list.forEach(x=>{
     const el=document.createElement('div'); el.className='result';
     const left=document.createElement('div');
+    const transfersText = x.transfers===0
+      ? 'без пересадок'
+      : x.transfers===1
+        ? '1 пересадка'
+        : `${x.transfers} пересадки`;
     left.innerHTML=`
       <div class="result-main-title">
         ${x.origin} ${x.origin_airport?`(${x.origin_airport})`:''}
@@ -854,7 +946,7 @@ function applyFiltersAndSort(){
       <div class="result-meta">
         ${x.depDateStr}${x.retDateStr?(' — '+x.retDateStr):''}
         · ${x.airline || 'авиакомпания неизвестна'}
-        · пересадок: ${x.transfers}
+        · ${transfersText}
         · длительность: ${x.durStr || (x.duration_hours?x.duration_hours+' ч':'—')}
       </div>
       <div class="result-times">
@@ -1029,14 +1121,20 @@ async function doSearch(){
 
 /* ========= кнопки ========= */
 $('#doSearch').addEventListener('click',e=>{ e.preventDefault(); doSearch(); });
-$('#swap').addEventListener('click',()=>{
+
+function swapCities(){
   const a=$('#origin').value, b=$('#destination').value;
   $('#origin').value=b; $('#destination').value=a;
   const ia=originIATA; originIATA=destIATA; destIATA=ia;
   $('#originIataHint').textContent = originIATA?('IATA: '+originIATA):'';
   $('#destIataHint').textContent = destIATA?('IATA: '+destIATA):'';
   syncURLFromState({oc:$('#origin').value.trim(), dc:$('#destination').value.trim(), oi:originIATA, di:destIATA});
+}
+['#swap','#swapInline'].forEach(id=>{
+  const el = document.querySelector(id);
+  if(el) el.addEventListener('click',swapCities);
 });
+
 $('#copyLink').addEventListener('click',()=>{
   const d1=parseDateSmart($('#depart').value), d2=parseDateSmart($('#ret').value);
   const link = buildDeeplink({
@@ -1073,13 +1171,27 @@ $('#toggleAdvanced').addEventListener('click',e=>{
   $('#toggleAdvanced').textContent = isHidden ? 'Скрыть расширенный поиск' : 'Расширенный поиск';
 });
 
-/* ========= init ========= */
+/* ========= даты: ограничения ========= */
 function initMinDateHints(){
   const iso = toISO(todayLocal);
   $('#depart').min = iso;
   $('#ret').min = iso;
   $('#departHint').textContent = `Не раньше ${ddmmyyyy(todayLocal)}`;
 }
+$('#depart').addEventListener('change',()=>{
+  let d = parseDateSmart($('#depart').value);
+  d = clampToFuture(d);
+  if(!d) return;
+  $('#depart').value = toISO(d);
+  $('#ret').min = toISO(d);
+  const r = parseDateSmart($('#ret').value);
+  if(r && r<d){
+    $('#ret').value='';
+    $('#retHint').textContent='';
+  }
+});
+
+/* ========= init ========= */
 updateWeekendHint();
 renderRecent();
 toggleOneWay();
