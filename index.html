@@ -266,6 +266,13 @@
     }
 
     .advanced.hidden{display:none;}
+/* два поля дат в одном ряду, 50/50 */
+.dates-row{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0,1fr));
+  column-gap:6px;
+  align-items:center;
+}
 
     /* сетка для формы поиска — ровные поля */
  .search-grid{
@@ -333,6 +340,41 @@
     .row-price input[type="number"]{
       -moz-appearance:textfield;
     }
+/* Верхняя строка формы поиска: ровная сетка */
+.search-row{
+  display:grid;
+  grid-template-columns:
+    minmax(0,1.25fr)   /* Откуда */
+    56px               /* стрелка между городами */
+    minmax(0,1.25fr)   /* Куда */
+    minmax(0,1.2fr)    /* Даты (2 поля внутри) */
+    minmax(130px,0.9fr)/* Пассажиры */
+    auto;              /* Кнопки */
+  column-gap:16px;
+  row-gap:10px;
+  align-items:end;
+}
+
+/* чтобы колонки не распирали друг друга */
+.search-row > *{
+  min-width:0;
+}
+
+/* блок с кнопками в правом краю */
+.search-actions{
+  justify-content:flex-end;
+}
+
+/* адаптив: на узких экранах всё в одну колонку */
+@media (max-width:900px){
+  .search-row{
+    grid-template-columns:1fr;
+  }
+  .search-actions{
+    justify-content:flex-start;
+    flex-wrap:wrap;
+  }
+}
 
     /* overlay загрузки */
     .loading-overlay{
@@ -398,7 +440,7 @@
   <!-- Форма поиска -->
   <div class="card" id="searchForm">
     <!-- основная строка -->
-    <div class="search-grid">
+     <div class="row search-row">
       <div>
         <div class="label">Откуда</div>
         <input id="origin" placeholder="Москва" autocomplete="off" />
@@ -416,14 +458,18 @@
       </div>
 
       <div>
-        <div class="label">Даты</div>
-        <div class="row" style="gap:6px">
-          <input id="depart" type="date" />
-          <input id="ret" type="date" />
-        </div>
-        <div class="hint" id="departHint"></div>
-        <div class="hint" id="retHint"></div>
-      </div>
+    <div style="flex:1 1 220px">
+  <div class="label">Даты</div>
+  <div class="row dates-row">
+    <input id="depart" type="text"
+           placeholder="ДД.ММ.ГГГГ" inputmode="numeric" />
+    <input id="ret" type="text"
+           placeholder="ДД.ММ.ГГГГ" inputmode="numeric" />
+  </div>
+  <div class="hint" id="departHint"></div>
+  <div class="hint" id="retHint"></div>
+</div>
+
 
    <div class="search-passengers">
   <div class="label">Пассажиры</div>
@@ -434,9 +480,9 @@
 </div>
 
 
-      <div class="row" style="gap:8px; justify-content:flex-end;">
-        <button class="btn-primary" id="doSearch">Искать</button>
-        <button class="btn-ghost" id="toggleAdvanced">Расширенный поиск</button>
+<div class="row search-actions" style="gap:8px; align-items:flex-end">
+  <button class="btn-primary" id="doSearch">Искать</button>
+  <button class="btn-ghost" id="toggleAdvanced">Расширенный поиск</button>
       </div>
     </div>
 
