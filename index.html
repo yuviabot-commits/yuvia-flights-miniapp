@@ -623,7 +623,7 @@
   </div>
 </div>
 
-<div class="version">версия 7</div>
+<div class="version">версия 8</div>
 
 <script>
 /* ========= helpers ========= */
@@ -1238,11 +1238,10 @@ $('#toggleAdvanced').addEventListener('click',e=>{
 
 /* ========= даты: ограничения ========= */
 function initMinDateHints(){
-  const iso = toISO(todayLocal);
-  $('#depart').min = iso;
-  $('#ret').min = iso;
+  // показываем только подсказку — дальше JS уже проверяет даты
   $('#departHint').textContent = `Не раньше ${ddmmyyyy(todayLocal)}`;
 }
+
 $('#depart').addEventListener('change',()=>{
   let d = parseDateSmart($('#depart').value);
   d = clampToFuture(d);
