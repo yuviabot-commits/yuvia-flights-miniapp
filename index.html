@@ -46,7 +46,7 @@
       border-radius:var(--radius-lg);
       border:1px solid rgba(148,163,184,0.28);
       box-shadow:var(--shadow-soft);
-      padding:16px 18px 18px;
+      padding:14px 18px;
     }
 
     /* форма поиска чуть темнее */
@@ -263,15 +263,15 @@
 .search-row{
   display:grid;
   grid-template-columns:
-    minmax(0,1.15fr)    /* Откуда */
-   40px               /* стрелка */
-    minmax(0,1.15fr)    /* Куда */
-    minmax(0,1.15fr)    /* Дата вылета */
-    minmax(0,1.15fr)    /* Дата возвращения */
-    minmax(0,1.15fr);   /* Пассажиры — теперь как остальные */
-  column-gap:10px;     /* поля стали ближе друг к другу */
+    minmax(0,1fr)   /* Откуда */
+    40px            /* стрелка */
+    minmax(0,1fr)   /* Куда */
+    minmax(0,1fr)   /* Дата вылета */
+    minmax(0,1fr)   /* Дата возврата */
+    minmax(0,1fr);  /* Пассажиры */
+  column-gap:14px;   /* расстояние между колонками */
   row-gap:6px;
-  align-items:center;  /* все элементы выровнены по центру по вертикали */
+  align-items:flex-end;
 }
 
     .search-row > *{min-width:0;}
@@ -281,13 +281,13 @@
       margin-top:4px;
       display:grid;
       grid-template-columns:
-        minmax(0,1.15fr)
+        minmax(0,1.1fr)
         40px
-        minmax(0,1.15fr)
-        minmax(0,1.15fr)
-        minmax(0,1.15fr)
-        minmax(0,1.15fr);
-      column-gap:10px;
+        minmax(0,1.1fr)
+        minmax(0,1.1fr)
+        minmax(0,1.1fr)
+        minmax(0,1.1fr);
+      column-gap:14px;
       align-items:start;
     }
     .search-hints-row .hint{margin-top:0;}
@@ -758,7 +758,7 @@
   </div>
 </div>
 
-<div class="version">версия 9.7</div>
+<div class="version">версия 9.8</div>
 
 <script>
 /* ========= helpers ========= */
