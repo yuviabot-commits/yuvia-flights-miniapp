@@ -307,6 +307,7 @@
       align-items:center;
       justify-content:center;
       cursor:pointer;
+      position:relative; /* чтобы псевдоэлементы рисовались внутри */
     }
     .date-btn:hover{
       background:#f1f5f9;
@@ -315,10 +316,9 @@
       content:"";
       display:block;
       width:15px;
-      height:13px;
+      height:11px;
       border-radius:3px;
       border:2px solid var(--accent);
-      position:relative;
       box-sizing:border-box;
     }
     .date-btn::after{
@@ -350,22 +350,24 @@
         minmax(130px,0.8fr);/* Пассажиры */
       column-gap:16px;
       row-gap:10px;
-      align-items:end;
+      align-items:flex-end;
     }
     .search-row > *{min-width:0;}
 
     .search-passengers{
       min-width:130px;
+      align-self:flex-end;
     }
 
     .swap-inline{
       display:flex;
-      align-items:flex-end;
+      align-items:center;
       justify-content:center;
+      align-self:flex-end;
     }
     .swap-btn{
-      width:36px;
-      height:36px;
+      width:40px;
+      height:40px;
       border-radius:999px;
       border:1px solid rgba(148,163,184,0.7);
       background:#ffffff;
@@ -655,7 +657,7 @@
   </div>
 </div>
 
-<div class="version">версия 9.1</div>
+<div class="version">версия 9.2</div>
 
 <script>
 /* ========= helpers ========= */
@@ -1096,6 +1098,39 @@ function applyFiltersAndSort(){
   });
 }
 
+/* ========= нормализация рейса ========= */
+function normalizeFlight(x,{ori,dst,cur,d1,d2,oneway,adults}){
+  const depDateStr = x.depart_date ? x.depart_date.split('T')[0].split('-').reverse().join('.') : '';
+  const retDateStr = x.return_date ? x.return_date.split('T')[0].split('-').reverse().join('.') : '';
+  const depTime = x.depart_time || x.departure_time || '';
+  const arrTime = x.arrival_time || x.arr_time || '';
+  const hh = depTime ? parseInt(depTime.slice(0,2),10) : null;
+  const airlineCode = x.airline_code || x.airline_iata || x.airline || '';
+  const dur = x.duration || x.duration_to || 0;
+  const duration_hours = x.duration_hours ?? Math.round((dur||0)/60);
+  const deeplink = buildDeeplink({ori,dst,d1,d2:(oneway==='yes'?null:d2),currency:cur,adults,oneway});
+
+  return {
+    origin:x.origin,
+    destination:x.destination,
+    origin_airport:x.origin_airport || x.origin_airport_code || x.origin_airport_iata || '',
+    dest_airport:x.destination_airport || x.destination_airport_code || x.destination_airport_iata || '',
+    price:Math.round(x.price ?? x.value ?? 0),
+    currency:x.currency || cur,
+    airline:x.airline || airlineCode || '',
+    airlineCode,
+    transfers:(typeof x.transfers==='number')?x.transfers:(x.number_of_changes ?? 0),
+    duration:dur,
+    duration_to:dur,
+    duration_hours,
+    durStr:duration_hours?`${duration_hours} ч`:'',
+    depTime, arrTime,
+    depSort:(hh===null?0:hh*60 + (parseInt(depTime.slice(3,5),10)||0)),
+    depDateStr, retDateStr,
+    deeplink
+  };
+}
+
 /* ========= matrix helper ========= */
 function showMatrixSafe(ori,dst,cur,d1,flex){
   const params = new URLSearchParams({origin:ori,destination:dst,currency:cur,center:toISO(d1)});
@@ -1118,7 +1153,7 @@ function setLoading(on){
   ov.classList.toggle('hidden',!on);
 }
 
-/* ========= даты: нормализация ========= */
+/* ========= даты ========= */
 function initMinDateHints(){
   const iso = toISO(todayLocal);
   $('#departNative').min = iso;
@@ -1193,86 +1228,90 @@ async function doSearch(){
     const s = await suggestCity(city);
     return s[0]?.code || '';
   }
-  if(!originIATA) originIATA = await ensureIataFor(oriCity, originIATA);
-  if(!destIATA) destIATA = await ensureIataFor(dstCity, destIATA);
-  const ori = originIATA, dst = destIATA;
-  if(!ori || !dst){ alert('Не удалось определить IATA код(ы)'); return; }
 
-  const ow = $('#oneway').value;
-  const cur = $('#currency').value; baseCurrency = cur;
-  const adults = +$('#adults').value || 1;
-
-  let d1 = clampToFuture(parseDateSmart($('#depart').value));
-  let d2 = parseDateSmart($('#ret').value);
-  const flex = $('#flexMode').value;
-
-  if(flex==='weekend'){
-    const {sat,sun}=weekendAround(new Date());
-    d1=sat; if(ow!=='yes') d2=sun;
-    $('#depart').value = ddmmyyyy(d1);
-    $('#departNative').value = toISO(d1);
-    if(ow!=='yes'){
-      $('#ret').value = ddmmyyyy(d2);
-      $('#retNative').value = toISO(d2);
-    } else {
-      $('#ret').value='';
-      $('#retNative').value='';
-    }
-  }
-  if(!d1){ $('#departHint').textContent='Укажи дату вылета'; alert('Укажи дату вылета'); return; }
-  if(d1<todayLocal){
-    d1=todayLocal;
-    $('#depart').value=ddmmyyyy(d1);
-    $('#departNative').value=toISO(d1);
-  }
-  if(ow!=='yes' && d2 && d2<d1){
-    $('#retHint').textContent='Возврат не может быть раньше вылета';
-    alert('Дата возврата раньше вылета');
-    return;
-  }
-  if(ow==='yes'){ $('#retHint').textContent=''; }
-
-  const state = {
-    origin_city:oriCity, dest_city:dstCity,
-    origin_iata:ori, dest_iata:dst,
-    depart:$('#depart').value, ret:$('#ret').value,
-    currency:cur, adults:String(adults), oneway:ow, flex
-  };
-  saveRecent(state);
-  syncURLFromState({
-    oc:oriCity, dc:dstCity, d:state.depart, r:state.ret,
-    cur:cur, ad:adults, ow:ow, fx:flex, oi:ori, di:dst
-  });
-
-  setLoading(true);
-  showLoadingSkeleton();
-  showMatrixSafe(ori,dst,cur,d1,flex);
-
-  const q = new URLSearchParams({
-    origin:ori,destination:dst,currency:cur,
-    oneway:ow==='yes'?'1':'0',
-    depart:toISO(d1),
-    ret:(ow==='yes'||!d2)?'':toISO(d2),
-    adults:String(adults)
-  });
-
-  let json;
   try{
-    json = await callJSON(`/api/search?${q.toString()}`);
-  }catch(e){
-    $('#results').innerHTML = `<div class="card"><div class="bad">Ошибка: ${e.message}</div><div class="hint">Попробуй повторить поиск позже.</div></div>`;
+    setLoading(true);
+    showLoadingSkeleton();
+
+    if(!originIATA) originIATA = await ensureIataFor(oriCity, originIATA);
+    if(!destIATA) destIATA = await ensureIataFor(dstCity, destIATA);
+    const ori = originIATA, dst = destIATA;
+    if(!ori || !dst){ alert('Не удалось определить IATA код(ы)'); return; }
+
+    const ow = $('#oneway').value;
+    const cur = $('#currency').value; baseCurrency = cur;
+    const adults = +$('#adults').value || 1;
+
+    let d1 = clampToFuture(parseDateSmart($('#depart').value));
+    let d2 = parseDateSmart($('#ret').value);
+    const flex = $('#flexMode').value;
+
+    if(flex==='weekend'){
+      const {sat,sun}=weekendAround(new Date());
+      d1=sat; if(ow!=='yes') d2=sun;
+      $('#depart').value = ddmmyyyy(d1);
+      $('#departNative').value = toISO(d1);
+      if(ow!=='yes'){
+        $('#ret').value = ddmmyyyy(d2);
+        $('#retNative').value = toISO(d2);
+      } else {
+        $('#ret').value='';
+        $('#retNative').value='';
+      }
+    }
+    if(!d1){ $('#departHint').textContent='Укажи дату вылета'; alert('Укажи дату вылета'); return; }
+    if(d1<todayLocal){
+      d1=todayLocal;
+      $('#depart').value=ddmmyyyy(d1);
+      $('#departNative').value=toISO(d1);
+    }
+    if(ow!=='yes' && d2 && d2<d1){
+      $('#retHint').textContent='Возврат не может быть раньше вылета';
+      alert('Дата возврата раньше вылета');
+      return;
+    }
+    if(ow==='yes'){ $('#retHint').textContent=''; }
+
+    const state = {
+      origin_city:oriCity, dest_city:dstCity,
+      origin_iata:ori, dest_iata:dst,
+      depart:$('#depart').value, ret:$('#ret').value,
+      currency:cur, adults:String(adults), oneway:ow, flex
+    };
+    saveRecent(state);
+    syncURLFromState({
+      oc:oriCity, dc:dstCity, d:state.depart, r:state.ret,
+      cur:cur, ad:adults, ow:ow, fx:flex, oi:ori, di:dst
+    });
+
+    showMatrixSafe(ori,dst,cur,d1,flex);
+
+    const q = new URLSearchParams({
+      origin:ori,destination:dst,currency:cur,
+      oneway:ow==='yes'?'1':'0',
+      depart:toISO(d1),
+      ret:(ow==='yes'||!d2)?'':toISO(d2),
+      adults:String(adults)
+    });
+
+    let json;
+    try{
+      json = await callJSON(`/api/search?${q.toString()}`);
+    }catch(e){
+      $('#results').innerHTML = `<div class="card"><div class="bad">Ошибка: ${e.message}</div><div class="hint">Попробуй повторить поиск позже.</div></div>`;
+      return;
+    }
+
+    const listRaw = (json.data||[]).filter(x=>x.price>0 && x.origin===ori && x.destination===dst);
+    allResults = listRaw.map(x=>normalizeFlight(x,{ori,dst,cur,d1,d2,oneway:ow,adults}));
+
+    renderAirlinesFilter();
+    renderAirportsFilter();
+    summarize();
+    applyFiltersAndSort();
+  } finally {
     setLoading(false);
-    return;
   }
-
-  const listRaw = (json.data||[]).filter(x=>x.price>0 && x.origin===ori && x.destination===dst);
-  allResults = listRaw.map(x=>normalizeFlight(x,{ori,dst,cur,d1,d2,oneway:ow,adults}));
-
-  renderAirlinesFilter();
-  renderAirportsFilter();
-  summarize();
-  applyFiltersAndSort();
-  setLoading(false);
 }
 
 /* ========= кнопки ========= */
