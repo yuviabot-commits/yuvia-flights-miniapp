@@ -14,7 +14,7 @@
 
       --accent:#075e54;             /* тёмный зелёный */
       --accent-soft:#e3f3ee;
-      --accent-soft-2:#fff7e3;      /* мягкий жёлтый (на чипсах почти не используется) */
+      --accent-soft-2:#fff7e3;      /* мягкий жёлтый (почти не используется) */
       --berry:#b1365b;              /* цвет крыла */
       --sun:#f6c453;                /* жёлтый круг */
 
@@ -59,6 +59,12 @@
     .grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
     .row{display:flex; gap:10px; align-items:center}
 
+    @media (max-width:900px){
+      .grid-2{grid-template-columns:1fr}
+      .row{flex-wrap:wrap}
+      .two-col{grid-template-columns:1fr}
+    }
+
     input, select, button{
       font:inherit;
       border-radius:12px;
@@ -67,7 +73,7 @@
       background:#ffffff;
     }
 
-    input:focus, select:focus{
+    input:focus, select:focus, button:focus{
       outline:none;
       border-color:rgba(34,197,133,0.9);
       box-shadow:0 0 0 1px rgba(34,197,133,0.4);
@@ -103,7 +109,9 @@
       border-color:rgba(148,163,184,0.6);
     }
 
-    .hint{font-size:12px;color:var(--muted);}
+    .hint{font-size:12px;color:var(--muted);margin-top:2px}
+    .label{font-size:12px;color:var(--muted);margin-bottom:4px}
+
     .section-title{
       margin:18px 0 10px;
       font-weight:600;
@@ -151,6 +159,7 @@
       font-size:13px;
       background:#f9fafb;
     }
+
     .filters-block .pill input{
       width:auto;
       padding:0;
@@ -186,6 +195,7 @@
       border:1px solid var(--line);
       background:#ffffff;
     }
+
     .result-main-title{
       font-weight:600;
       margin-bottom:2px;
@@ -253,35 +263,35 @@
     }
 
     .advanced.hidden{display:none;}
+    .hidden{display:none !important;}
 
-    /* ===== компактная трёхрядная форма поиска ===== */
-
-    .search-main{
-      display:flex;
-      flex-direction:column;
-      gap:4px;
-    }
-
-    /* 1-я строка: поля */
-    .search-row-main{
+    /* Сетка формы поиска: 1-я строка поля, 2-я подсказки, 3-я кнопки */
+    .search-grid{
       display:grid;
       grid-template-columns:
-        minmax(0,2.6fr)     /* блок Откуда–Куда со стрелкой */
-        minmax(0,1.3fr)     /* вылет */
-        minmax(0,1.3fr)     /* возврат */
-        minmax(130px,0.9fr) /* пассажиры */
-      ;
+        minmax(0,1.4fr)   /* Откуда */
+        52px              /* стрелка */
+        minmax(0,1.4fr)   /* Куда */
+        minmax(0,1.1fr)   /* вылет */
+        minmax(0,1.1fr)   /* возвращение */
+        minmax(130px,0.8fr); /* пассажиры */
       column-gap:16px;
-      align-items:center;
+      row-gap:4px;
+      align-items:end;
+    }
+    .search-grid > div{min-width:0;}
+
+    @media (max-width:900px){
+      .search-grid{
+        grid-template-columns:1fr;
+      }
     }
 
-    .from-to-group{
-      display:grid;
-      grid-template-columns:minmax(0,1fr) 40px minmax(0,1fr);
-      column-gap:10px;
+    .swap-inline{
+      display:flex;
       align-items:center;
+      justify-content:center;
     }
-
     .swap-btn{
       width:36px;
       height:36px;
@@ -299,67 +309,19 @@
       background:linear-gradient(135deg,#ecfdf5,#e0f2fe);
     }
 
-    .search-row-main input,
-    .search-row-main select{
-      width:100%;
-    }
-
-    .date-field{
-      display:flex;
-      align-items:center;
-      gap:6px;
-    }
-    .date-field input{
-      flex:1;
-    }
-    .date-btn{
-      width:36px;
-      height:36px;
-      border-radius:12px;
-      border:1px solid var(--line);
-      background:#ffffff;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      cursor:pointer;
-      box-shadow:0 4px 10px rgba(15,23,42,0.08);
-      font-size:17px;
-    }
-    .date-btn:hover{
-      background:#ecfdf5;
-    }
-
-    .search-passengers{
-      min-width:130px;
-    }
-
-    /* 2-я строка: подсказки */
-    .search-row-hints{
-      display:grid;
-      grid-template-columns:
-        minmax(0,2.6fr)
-        minmax(0,1.3fr)
-        minmax(0,1.3fr)
-        minmax(130px,0.9fr);
-      column-gap:16px;
-      font-size:12px;
-      color:var(--muted);
-    }
-    .hints-from-to{
-      display:flex;
-      flex-direction:column;
-      gap:2px;
-    }
-    .search-row-hints .hint{
-      margin-top:0;
-    }
-
-    /* 3-я строка: кнопки */
     .search-actions-row{
-      margin-top:6px;
+      grid-column:4 / 7;
       display:flex;
       justify-content:flex-end;
-      gap:10px;
+      gap:12px;
+      margin-top:8px;
+    }
+    @media (max-width:900px){
+      .search-actions-row{
+        grid-column:1 / -1;
+        justify-content:flex-start;
+        flex-wrap:wrap;
+      }
     }
 
     /* поле цены в фильтрах */
@@ -381,20 +343,94 @@
       -moz-appearance:textfield;
     }
 
-    /* адаптив */
-    @media (max-width:900px){
-      .two-col{grid-template-columns:1fr}
-      .search-row-main,
-      .search-row-hints{
-        grid-template-columns:1fr;
-      }
-      .search-actions-row{
-        justify-content:flex-start;
-        flex-wrap:wrap;
-      }
-      .from-to-group{
-        grid-template-columns:minmax(0,1fr) 40px minmax(0,1fr);
-      }
+    /* Пассажиры: кнопка и попап */
+    .input-like{
+      width:100%;
+      text-align:left;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:#ffffff;
+      padding:10px 12px;
+      color:inherit;
+      font:inherit;
+    }
+    .input-like::after{
+      content:"";
+      float:right;
+      margin-top:4px;
+      border:4px solid transparent;
+      border-top-color:#6b7280;
+    }
+    .passengers-wrap{position:relative;}
+
+    .passenger-popup{
+      position:absolute;
+      right:0;
+      top:100%;
+      margin-top:6px;
+      padding:14px 16px 12px;
+      background:#ffffff;
+      border-radius:16px;
+      box-shadow:0 18px 45px rgba(15,23,42,0.18);
+      border:1px solid #e2e8f0;
+      width:290px;
+      z-index:20;
+    }
+    .passenger-row{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:6px;
+      font-size:14px;
+    }
+    .passenger-label{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+    .passenger-sub{
+      font-size:12px;
+      color:var(--muted);
+    }
+    .passenger-counter{
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .passenger-counter button{
+      width:28px;
+      height:28px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:#f9fafb;
+      padding:0;
+      font-size:18px;
+      line-height:1;
+    }
+    .passenger-counter span{
+      min-width:14px;
+      text-align:center;
+    }
+
+    .cabin-toggle{
+      display:flex;
+      margin-top:8px;
+      border-radius:999px;
+      overflow:hidden;
+      border:1px solid var(--line);
+      font-size:13px;
+    }
+    .cabin-toggle button{
+      flex:1;
+      border:none;
+      border-radius:0;
+      background:#ffffff;
+      padding:7px 10px;
+    }
+    .cabin-toggle button.active{
+      background:var(--accent-soft);
+      color:var(--accent);
+      font-weight:500;
     }
 
     /* overlay загрузки */
@@ -460,51 +496,92 @@
 
   <!-- Форма поиска -->
   <div class="card" id="searchForm">
-    <div class="search-main">
+    <div class="search-grid">
       <!-- 1-я строка: поля -->
-      <div class="search-row-main">
-        <div class="from-to-group">
-          <input id="origin" placeholder="Откуда" autocomplete="off" />
-          <button type="button" class="swap-btn" id="swapInline" aria-label="Поменять местами города">⇆</button>
-          <input id="destination" placeholder="Куда" autocomplete="off" />
-        </div>
+      <div>
+        <div class="label">Откуда</div>
+        <input id="origin" placeholder="Москва" autocomplete="off" />
+      </div>
 
-        <div>
-          <div class="date-field">
-            <input id="depart" type="text"
-                   placeholder="Дата вылета"
-                   inputmode="numeric" autocomplete="off" />
-            <button type="button" class="date-btn" id="departCalendar" aria-label="Выбрать дату вылета">📅</button>
+      <div class="swap-inline">
+        <button type="button" class="swap-btn" id="swapInline" aria-label="Поменять местами города">⇆</button>
+      </div>
+
+      <div>
+        <div class="label">Куда</div>
+        <input id="destination" placeholder="Казань" autocomplete="off" />
+      </div>
+
+      <div>
+        <div class="label">Дата вылета</div>
+        <input id="depart" type="date" />
+      </div>
+
+      <div>
+        <div class="label">Дата возвращения</div>
+        <input id="ret" type="date" />
+      </div>
+
+      <div>
+        <div class="label">Пассажиры</div>
+        <div class="passengers-wrap">
+          <button type="button" id="passengersBtn" class="input-like">1 пассажир, эконом</button>
+          <div id="passengersPopup" class="passenger-popup hidden">
+            <div class="passenger-row">
+              <div class="passenger-label">
+                <span>Взрослые</span>
+                <span class="passenger-sub">от 12 лет</span>
+              </div>
+              <div class="passenger-counter">
+                <button type="button" id="paxAdultsMinus">−</button>
+                <span id="paxAdultsValue">1</span>
+                <button type="button" id="paxAdultsPlus">+</button>
+              </div>
+            </div>
+            <div class="passenger-row">
+              <div class="passenger-label">
+                <span>Дети</span>
+                <span class="passenger-sub">от 2 до 12 лет</span>
+              </div>
+              <div class="passenger-counter">
+                <button type="button" id="paxChildrenMinus">−</button>
+                <span id="paxChildrenValue">0</span>
+                <button type="button" id="paxChildrenPlus">+</button>
+              </div>
+            </div>
+            <div class="passenger-row">
+              <div class="passenger-label">
+                <span>Младенцы</span>
+                <span class="passenger-sub">до 2 лет (без места)</span>
+              </div>
+              <div class="passenger-counter">
+                <button type="button" id="paxInfantsMinus">−</button>
+                <span id="paxInfantsValue">0</span>
+                <button type="button" id="paxInfantsPlus">+</button>
+              </div>
+            </div>
+
+            <div class="cabin-toggle">
+              <button type="button" id="cabinEco" class="active">Эконом</button>
+              <button type="button" id="cabinBiz">Бизнес</button>
+            </div>
           </div>
-        </div>
 
-        <div>
-          <div class="date-field">
-            <input id="ret" type="text"
-                   placeholder="Дата возвращения"
-                   inputmode="numeric" autocomplete="off" />
-            <button type="button" class="date-btn" id="retCalendar" aria-label="Выбрать дату возвращения">📅</button>
-          </div>
-        </div>
-
-        <div class="search-passengers">
-          <select id="adults">
-            <option>1</option><option>2</option><option>3</option>
-            <option>4</option><option>5</option><option>6</option>
-          </select>
+          <!-- скрытые значения для логики -->
+          <input type="hidden" id="adults" value="1">
+          <input type="hidden" id="childrenCount" value="0">
+          <input type="hidden" id="infantsCount" value="0">
+          <input type="hidden" id="cabin" value="eco">
         </div>
       </div>
 
       <!-- 2-я строка: подсказки -->
-      <div class="search-row-hints">
-        <div class="hints-from-to">
-          <span class="hint" id="originIataHint"></span>
-          <span class="hint" id="destIataHint"></span>
-        </div>
-        <div class="hint" id="departHint"></div>
-        <div class="hint" id="retHint"></div>
-        <div class="hint">Пассажиры</div>
-      </div>
+      <div class="hint" id="originIataHint"></div>
+      <div></div>
+      <div class="hint" id="destIataHint"></div>
+      <div class="hint" id="departHint"></div>
+      <div class="hint" id="retHint"></div>
+      <div class="hint" id="passengersHint">Взрослые, дети, младенцы</div>
 
       <!-- 3-я строка: кнопки -->
       <div class="search-actions-row">
@@ -543,7 +620,7 @@
         </div>
         <div>
           <div class="label">Класс обслуживания</div>
-          <select id="cabin">
+          <select id="cabinAdvanced">
             <option value="eco">Эконом</option>
             <option value="premium">Премиум-эконом</option>
             <option value="business">Бизнес</option>
@@ -650,7 +727,7 @@
   </div>
 </div>
 
-<div class="version">версия 9.4</div>
+<div class="version">версия 9.3</div>
 
 <script>
 /* ========= helpers ========= */
@@ -722,13 +799,65 @@ function renderRecent(){
     cont.appendChild(chip);
   });
 }
+
+/* ========= пассажиры ========= */
+const pax = {adults:1, children:0, infants:0, cabin:'eco'};
+
+function passengersTotal(){
+  return pax.adults + pax.children + pax.infants;
+}
+function passengersWord(n){
+  if(n%10===1 && n%100!==11) return 'пассажир';
+  if(n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20)) return 'пассажира';
+  return 'пассажиров';
+}
+function updatePassengersSummary(){
+  const total = passengersTotal();
+  const cabinTitle = pax.cabin==='eco' ? 'эконом' : 'бизнес';
+  $('#paxAdultsValue').textContent = pax.adults;
+  $('#paxChildrenValue').textContent = pax.children;
+  $('#paxInfantsValue').textContent = pax.infants;
+  $('#adults').value = String(total || 1);   // для API остаётся одно число
+  $('#childrenCount').value = String(pax.children);
+  $('#infantsCount').value = String(pax.infants);
+  $('#cabin').value = pax.cabin;
+  $('#passengersBtn').textContent = `${total} ${passengersWord(total)}, ${cabinTitle}`;
+}
+
+function changePax(type, delta){
+  if(!(type in pax)) return;
+  pax[type] += delta;
+  if(type==='adults' && pax.adults<1) pax.adults=1;
+  if(type!=='adults' && pax[type]<0) pax[type]=0;
+  // не больше взрослых младенцев
+  if(pax.infants>pax.adults) pax.infants=pax.adults;
+  // максимум 9 человек
+  if(passengersTotal()>9){
+    pax[type]-=delta;
+  }
+  updatePassengersSummary();
+}
+
+function setPassengersTotal(total){
+  total = Math.max(1,Math.min(9,Number(total)||1));
+  pax.adults = total;
+  pax.children = 0;
+  pax.infants = 0;
+  updatePassengersSummary();
+}
+
+/* ========= восстановление из URL / state ========= */
+let originIATA = '', destIATA = '';
+
 function applyState(st){
   $('#origin').value = st.origin_city || '';
   $('#destination').value = st.dest_city || '';
   $('#depart').value = st.depart || '';
   $('#ret').value = st.ret || '';
   $('#currency').value = st.currency || 'RUB';
-  $('#adults').value = st.adults || '1';
+  const ad = st.adults || '1';
+  $('#adults').value = ad;
+  setPassengersTotal(ad);
   $('#oneway').value = st.oneway || 'no';
   $('#flexMode').value = st.flex || 'none';
   originIATA = st.origin_iata || '';
@@ -765,8 +894,6 @@ function restoreFromURL(){
 }
 
 /* ========= подсказки городов ========= */
-let originIATA = '', destIATA = '';
-
 async function suggestCity(q){
   if(!q || q.length<2) return [];
   const url = `https://autocomplete.travelpayouts.com/places2?term=${encodeURIComponent(q)}&locale=ru&types[]=city`;
@@ -820,8 +947,8 @@ function openSuggestFor(input, items, onPick){
   });
   const r = input.getBoundingClientRect();
   box.style.left = (r.left + window.scrollX)+'px';
-  box.style.top  = (r.bottom + window.scrollY)+'px';
-  box.style.width= r.width+'px';
+  box.style.top = (r.bottom + window.scrollY)+'px';
+  box.style.width = r.width+'px';
   suggestInput = input;
   box.hidden = false;
 }
@@ -857,7 +984,7 @@ attachSuggest($('#destination'), (item)=>{ destIATA=item.code; $('#destIataHint'
 function toggleOneWay(){
   const ow = $('#oneway').value==='yes';
   const ret = $('#ret');
-  if(ow){ ret.value=''; $('#retHint').textContent=''; ret.disabled=true; }
+  if(ow){ ret.value=''; ret.disabled=true; $('#retHint').textContent=''; }
   else { ret.disabled=false; }
 }
 $('#oneway').addEventListener('change',()=>{
@@ -926,7 +1053,7 @@ function showMatrix(chips){
     el.textContent = `${c.dstr} · от ${c.price} ${c.currency}`;
     el.onclick=()=>{
       const dt = parseDateSmart(c.dstr);
-      if(dt) $('#depart').value = ddmmyyyy(dt);
+      if(dt) $('#depart').value = toISO(dt);
       syncURLFromState({d:$('#depart').value});
       doSearch();
     };
@@ -1133,79 +1260,6 @@ function setLoading(on){
   ov.classList.toggle('hidden',!on);
 }
 
-/* ========= даты: нормализация и календарь ========= */
-
-function normalizeDateInputField(el){
-  if(!el) return;
-  const v = el.value.trim();
-  if(!v) return;
-  const dRaw = parseDateSmart(v);
-  if(!dRaw) return;
-  const d = clampToFuture(dRaw);
-  el.value = ddmmyyyy(d);
-}
-
-/* нативный календарь поверх скрытого <input type="date"> */
-function makeNativePicker(textId, btnId, minProvider){
-  const textEl = document.getElementById(textId);
-  const btn = document.getElementById(btnId);
-  if(!textEl || !btn) return;
-
-  const hidden = document.createElement('input');
-  hidden.type='date';
-  hidden.style.position='fixed';
-  hidden.style.opacity='0';
-  hidden.style.pointerEvents='none';
-  hidden.style.width='0';
-  hidden.style.height='0';
-  document.body.appendChild(hidden);
-
-  btn.addEventListener('click',()=>{
-    let minDate = todayLocal;
-    if(typeof minProvider==='function'){
-      const d = minProvider();
-      if(d) minDate = d;
-    }
-    hidden.min = toISO(minDate);
-    const current = clampToFuture(parseDateSmart(textEl.value)) || minDate;
-    hidden.value = toISO(current);
-    if(hidden.showPicker){
-      hidden.showPicker();
-    }else{
-      hidden.focus();
-      hidden.click();
-    }
-  });
-
-  hidden.addEventListener('change',()=>{
-    if(!hidden.value) return;
-    const d = parseDateSmart(hidden.value);
-    if(!d) return;
-    textEl.value = ddmmyyyy(clampToFuture(d));
-    normalizeDateInputField(textEl);
-    if(textId==='depart'){
-      const depDate = clampToFuture(parseDateSmart(textEl.value));
-      const r = parseDateSmart($('#ret').value);
-      if(r && depDate && r<depDate){
-        $('#ret').value='';
-        $('#retHint').textContent='';
-      }
-    }
-  });
-}
-
-/* при изменении вручную даты вылета следим за возвратом */
-$('#depart').addEventListener('change',()=>{
-  let d = clampToFuture(parseDateSmart($('#depart').value));
-  if(!d) return;
-  $('#depart').value = ddmmyyyy(d);
-  const r = parseDateSmart($('#ret').value);
-  if(r && r<d){
-    $('#ret').value='';
-    $('#retHint').textContent='';
-  }
-});
-
 /* ========= основной поиск ========= */
 async function doSearch(){
   const oriCity = $('#origin').value.trim();
@@ -1233,11 +1287,11 @@ async function doSearch(){
   if(flex==='weekend'){
     const {sat,sun}=weekendAround(new Date());
     d1=sat; if(ow!=='yes') d2=sun;
-    $('#depart').value = ddmmyyyy(d1);
-    if(ow!=='yes') $('#ret').value = ddmmyyyy(d2);
+    $('#depart').value = toISO(d1);
+    if(ow!=='yes') $('#ret').value = toISO(d2);
   }
   if(!d1){ $('#departHint').textContent='Укажи дату вылета'; alert('Укажи дату вылета'); return; }
-  if(d1<todayLocal){ d1=todayLocal; $('#depart').value=ddmmyyyy(d1); }
+  if(d1<todayLocal){ d1=todayLocal; $('#depart').value=toISO(d1); }
   if(ow!=='yes' && d2 && d2<d1){ $('#retHint').textContent='Возврат не может быть раньше вылета'; alert('Дата возврата раньше вылета'); return; }
   if(ow==='yes'){ $('#retHint').textContent=''; }
 
@@ -1292,7 +1346,7 @@ function swapCities(){
   $('#origin').value=b; $('#destination').value=a;
   const ia=originIATA; originIATA=destIATA; destIATA=ia;
   $('#originIataHint').textContent = originIATA?('IATA: '+originIATA):'';
-  $('#destIataHint').textContent   = destIATA?('IATA: '+destIATA):'';
+  $('#destIataHint').textContent = destIATA?('IATA: '+destIATA):'';
   syncURLFromState({oc:$('#origin').value.trim(), dc:$('#destination').value.trim(), oi:originIATA, di:destIATA});
 }
 ['#swap','#swapInline'].forEach(id=>{
@@ -1312,7 +1366,8 @@ $('#copyLink').addEventListener('click',()=>{
 $('#reset').addEventListener('click',()=>{
   $('#origin').value=''; $('#destination').value='';
   $('#depart').value=''; $('#ret').value='';
-  $('#currency').value='RUB'; $('#adults').value='1';
+  $('#currency').value='RUB';
+  setPassengersTotal(1);
   $('#oneway').value='no'; $('#flexMode').value='none';
   originIATA=''; destIATA='';
   $('#originIataHint').textContent=''; $('#destIataHint').textContent='';
@@ -1336,28 +1391,66 @@ $('#toggleAdvanced').addEventListener('click',e=>{
   $('#toggleAdvanced').textContent = isHidden ? 'Скрыть расширенный поиск' : 'Расширенный поиск';
 });
 
-/* ========= init ========= */
+/* ========= даты: ограничения ========= */
 function initMinDateHints(){
+  const iso = toISO(todayLocal);
+  $('#depart').min = iso;
+  $('#ret').min = iso;
   $('#departHint').textContent = `Не раньше ${ddmmyyyy(todayLocal)}`;
 }
 
-['depart','ret'].forEach(id=>{
-  const el = document.getElementById(id);
-  if(!el) return;
-  el.addEventListener('blur', ()=>normalizeDateInputField(el));
-  el.addEventListener('change', ()=>normalizeDateInputField(el));
+$('#depart').addEventListener('change',()=>{
+  let d = parseDateSmart($('#depart').value);
+  d = clampToFuture(d);
+  if(!d) return;
+  $('#depart').value = toISO(d);
+  $('#ret').min = toISO(d);
+  const r = parseDateSmart($('#ret').value);
+  if(r && r<d){
+    $('#ret').value='';
+    $('#retHint').textContent='';
+  }
 });
 
-makeNativePicker('depart','departCalendar', ()=>todayLocal);
-makeNativePicker('ret','retCalendar', ()=>{
-  const d1 = clampToFuture(parseDateSmart($('#depart').value));
-  return d1 || todayLocal;
+/* ========= попап пассажиров ========= */
+$('#passengersBtn').addEventListener('click',()=>{
+  $('#passengersPopup').classList.toggle('hidden');
 });
 
+document.addEventListener('click',(e)=>{
+  const popup = $('#passengersPopup');
+  const btn = $('#passengersBtn');
+  if(!popup || popup.classList.contains('hidden')) return;
+  if(popup.contains(e.target) || btn.contains(e.target)) return;
+  popup.classList.add('hidden');
+});
+
+$('#paxAdultsMinus').addEventListener('click',()=>changePax('adults',-1));
+$('#paxAdultsPlus').addEventListener('click',()=>changePax('adults',1));
+$('#paxChildrenMinus').addEventListener('click',()=>changePax('children',-1));
+$('#paxChildrenPlus').addEventListener('click',()=>changePax('children',1));
+$('#paxInfantsMinus').addEventListener('click',()=>changePax('infants',-1));
+$('#paxInfantsPlus').addEventListener('click',()=>changePax('infants',1));
+
+$('#cabinEco').addEventListener('click',()=>{
+  pax.cabin='eco';
+  $('#cabinEco').classList.add('active');
+  $('#cabinBiz').classList.remove('active');
+  updatePassengersSummary();
+});
+$('#cabinBiz').addEventListener('click',()=>{
+  pax.cabin='biz';
+  $('#cabinBiz').classList.add('active');
+  $('#cabinEco').classList.remove('active');
+  updatePassengersSummary();
+});
+
+/* ========= init ========= */
 updateWeekendHint();
 renderRecent();
 toggleOneWay();
 initMinDateHints();
+updatePassengersSummary();
 restoreFromURL();
 </script>
 </body>
