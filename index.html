@@ -476,7 +476,60 @@
 
 .loading-inner{
   text-align:center;
+  /* overflow убрали, чтобы не резало видео */
 }
+
+/* маленькая птица по центру */
+.loading-logo-wrap{
+  position:relative;
+  display:inline-block;
+  max-width:220px;   /* можно 180–240 по вкусу */
+  width:100%;
+  margin:0 auto;
+  animation:logo-float 3s ease-in-out infinite;
+}
+
+/* само видео */
+.loading-logo-video{
+  display:block;
+  max-width:220px;
+  max-height:40vh;   /* не больше 40% высоты экрана */
+  width:100%;
+  height:auto;
+  border-radius:24px;
+}
+
+/* мягкое свечение под птицей */
+.loading-logo-wrap::before{
+  content:"";
+  position:absolute;
+  left:15%;
+  right:15%;
+  bottom:-8px;
+  height:16px;
+  border-radius:999px;
+  background:radial-gradient(ellipse at center, rgba(7,94,84,0.45), transparent 60%);
+  filter:blur(6px);
+  opacity:0.7;
+  animation:glow-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes logo-float{
+  0%,100%{ transform:translateY(0); }
+  50%{ transform:translateY(-8px); }
+}
+
+@keyframes glow-pulse{
+  0%,100%{
+    transform:scaleX(1);
+    opacity:0.6;
+  }
+  50%{
+    transform:scaleX(1.12);
+    opacity:0.9;
+  }
+}
+
 
 .loading-text{
   margin-top:10px;
@@ -877,20 +930,23 @@
   <div class="loading-inner">
     <div class="loading-logo-wrap">
       <video
-        src="Yuvia_.mov"          <!-- или .mov / .webm / .gif -->
         class="loading-logo-video"
         autoplay
         muted
         loop
         playsinline
-      ></video>
+        preload="auto"
+      >
+        <!-- сначала webm, как более “родной” для браузеров -->
+        <source src="yuvia-bird.webm" type="video/webm">
+      </video>
     </div>
     <div class="loading-text">Ищем лучшие варианты...</div>
   </div>
 </div>
 
 
-<div class="version">версия 10.4</div>
+<div class="version">версия 10.5</div>
 
 <script>
 /* ========= helpers ========= */
