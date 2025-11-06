@@ -566,6 +566,59 @@
     transform:translateY(-3px);
   }
 }
+/* контейнер с логотипом */
+.loading-logo-wrap{
+  position:relative;
+  width:220px;         /* подгони под размер ролика */
+  height:auto;
+  margin:0 auto;
+  animation:logo-float 3s ease-in-out infinite;
+}
+
+/* само видео */
+.loading-logo-video{
+  display:block;
+  width:100%;
+  height:auto;
+  border-radius:24px;   /* чуть скруглим, чтобы было мягче, можно убрать */
+}
+
+/* мягкое свечение под птицей */
+.loading-logo-wrap::before{
+  content:"";
+  position:absolute;
+  left:15%;
+  right:15%;
+  bottom:-8px;
+  height:16px;
+  border-radius:999px;
+  background:radial-gradient(ellipse at center, rgba(7,94,84,0.45), transparent 60%);
+  filter:blur(6px);
+  opacity:0.7;
+  animation:glow-pulse 2.2s ease-in-out infinite;
+}
+
+/* покачивание логотипа вверх-вниз */
+@keyframes logo-float{
+  0%,100%{
+    transform:translateY(0);
+  }
+  50%{
+    transform:translateY(-8px);
+  }
+}
+
+/* пульсирующее свечение */
+@keyframes glow-pulse{
+  0%,100%{
+    transform:scaleX(1);
+    opacity:0.6;
+  }
+  50%{
+    transform:scaleX(1.12);
+    opacity:0.9;
+  }
+}
 
     .version{
       position:fixed;
@@ -819,19 +872,22 @@
 
 <div id="loadingOverlay" class="loading-overlay hidden">
   <div class="loading-inner">
-    <div class="loading-logo-anim">
-      <!-- тело птицы -->
-      <img src="Logo-bird.png"  alt="" class="logo-layer logo-bird">
-      <!-- крыло (анимация) -->
-      <img src="Logo-wing.png"  alt="" class="logo-layer logo-wing">
-      <!-- солнце (легкая «подпрыгивающая» анимация) -->
-      <img src="Logo-sun.png"   alt="" class="logo-layer logo-sun">
+    <div class="loading-logo-wrap">
+      <video
+        src="Yuvia_.mov"          <!-- или .mov / .webm / .gif -->
+        class="loading-logo-video"
+        autoplay
+        muted
+        loop
+        playsinline
+      ></video>
     </div>
     <div class="loading-text">Ищем лучшие варианты...</div>
   </div>
 </div>
 
-<div class="version">версия 10.2</div>
+
+<div class="version">версия 10.3</div>
 
 <script>
 /* ========= helpers ========= */
