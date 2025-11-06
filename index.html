@@ -462,64 +462,110 @@
     }
 
     /* overlay загрузки */
-    .loading-overlay{
-      position:fixed;
-      inset:0;
-      background:rgba(248,250,252,0.9);
-      backdrop-filter:blur(12px);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      z-index:999;
-    }
-    .loading-overlay.hidden{display:none;}
-    .loading-inner{text-align:center;overflow:hidden;}
+.loading-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(248,250,252,0.9);
+  backdrop-filter:blur(12px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:999;
+}
+.loading-overlay.hidden{display:none;}
 
-    /* Обёртка двигает птицу по экрану (полёт) */
-    .loading-bird-wrap{
-      display:inline-block;
-      animation:bird-fly 2.6s ease-in-out infinite;
-    }
+.loading-inner{
+  text-align:center;
+  overflow:hidden;
+}
 
-    /* Картинка качается и «дышит» — ощущение махания крылом */
-    .loading-bird{
-      width:120px;
-      display:block;
-      animation:bird-flap 0.6s ease-in-out infinite;
-      transform-origin:35% 45%;
-    }
+.loading-text{
+  margin-top:10px;
+  font-size:14px;
+  color:var(--muted);
+}
 
-    .loading-text{
-      margin-top:10px;
-      font-size:14px;
-      color:var(--muted);
-    }
+/* ---------- Анимированный логотип в оверлее ---------- */
 
-    /* траектория полёта */
-    @keyframes bird-fly{
-      0%{
-        transform:translateX(-60px) translateY(10px);
-      }
-      50%{
-        transform:translateX(0) translateY(-10px);
-      }
-      100%{
-        transform:translateX(60px) translateY(4px);
-      }
-    }
+/* контейнер под слои логотипа */
+.loading-logo-anim{
+  position:relative;
+  width:210px;   /* можно 180–220, подбери на глаз */
+  height:300px;
+  margin:0 auto;
+}
 
-    /* «махание крылом» — лёгкое покачивание и масштаб */
-    @keyframes bird-flap{
-      0%{
-        transform:rotate(-6deg) scale(1);
-      }
-      50%{
-        transform:rotate(4deg) scale(1.04);
-      }
-      100%{
-        transform:rotate(-4deg) scale(1);
-      }
-    }
+/* каждый слой растянут на весь холст */
+.loading-logo-anim .logo-layer{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  pointer-events:none;
+}
+
+/* тело слегка «дышит» */
+.loading-logo-anim .logo-bird{
+  animation:bird-bob 1.2s ease-in-out infinite;
+}
+
+/* крыло – основная анимация */
+.loading-logo-anim .logo-wing{
+  transform-origin:28% 52%;  /* точка крепления крыла */
+  animation:wing-flap 0.6s ease-in-out infinite;
+}
+
+/* солнце чуть подпрыгивает */
+.loading-logo-anim .logo-sun{
+  animation:sun-bob 2.4s ease-in-out infinite;
+}
+
+/* если позже добавишь дугу / надпись */
+.loading-logo-anim .logo-arca{
+  animation:arc-sway 2.4s ease-in-out infinite;
+}
+.loading-logo-anim .logo-wordmark{
+  animation:none;
+}
+
+/* ---------- keyframes ---------- */
+
+@keyframes wing-flap{
+  0%,100%{
+    transform:rotate(0deg);
+  }
+  50%{
+    transform:rotate(-18deg) translateY(-6px);
+  }
+}
+
+@keyframes bird-bob{
+  0%,100%{
+    transform:translateY(0);
+  }
+  50%{
+    transform:translateY(-4px);
+  }
+}
+
+@keyframes arc-sway{
+  0%,100%{
+    transform:rotate(0deg);
+  }
+  50%{
+    transform:rotate(3deg);
+  }
+}
+
+@keyframes sun-bob{
+  0%,100%{
+    transform:translateY(0);
+  }
+  50%{
+    transform:translateY(-3px);
+  }
+}
 
     .version{
       position:fixed;
@@ -784,97 +830,8 @@
     <div class="loading-text">Ищем лучшие варианты...</div>
   </div>
 </div>
-/* ---------- Анимированный логотип в оверлее ---------- */
 
-.loading-inner{
-  text-align:center;
-}
-
-/* контейнер под слои логотипа */
-.loading-logo-anim{
-  position:relative;
-  width:180px;      /* можно менять размер */
-  height:260px;     /* под твой формат PNG; подкорректируй по вкусу */
-  margin:0 auto;
-}
-
-/* каждый слой растянут на весь холст */
-.loading-logo-anim .logo-layer{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  object-fit:contain;
-  pointer-events:none;
-}
-
-/* тело слегка «дышит» вместе с крылом */
-.loading-logo-anim .logo-bird{
-  animation:bird-bob 1.2s ease-in-out infinite;
-}
-
-/* КРЫЛО – основная анимация.
-   transform-origin подбирала «на глаз», ты можешь потом чуть подкрутить проценты */
-.loading-logo-anim .logo-wing{
-  transform-origin:28% 52%;  /* точка крепления крыла к корпусу */
-  animation:wing-flap 0.6s ease-in-out infinite;
-}
-
-/* дуга – лёгкое покачивание, чтобы картинка жила */
-.loading-logo-anim .logo-arca{
-  animation:arc-sway 2.4s ease-in-out infinite;
-}
-
-/* солнце чуть подпрыгивает */
-.loading-logo-anim .logo-sun{
-  animation:sun-bob 2.4s ease-in-out infinite;
-}
-
-/* надпись без анимации */
-.loading-logo-anim .logo-wordmark{
-  animation:none;
-}
-
-/* ---------- keyframes ---------- */
-
-@keyframes wing-flap{
-  0%,100%{
-    transform:rotate(0deg);
-  }
-  50%{
-    transform:rotate(-18deg) translateY(-6px);
-  }
-}
-
-@keyframes bird-bob{
-  0%,100%{
-    transform:translateY(0);
-  }
-  50%{
-    transform:translateY(-4px);
-  }
-}
-
-@keyframes arc-sway{
-  0%,100%{
-    transform:rotate(0deg);
-  }
-  50%{
-    transform:rotate(3deg);
-  }
-}
-
-@keyframes sun-bob{
-  0%,100%{
-    transform:translateY(0);
-  }
-  50%{
-    transform:translateY(-3px);
-  }
-}
-
-
-<div class="version">версия 10.1</div>
+<div class="version">версия 10.2</div>
 
 <script>
 /* ========= helpers ========= */
