@@ -476,7 +476,6 @@
 
 .loading-inner{
   text-align:center;
-  overflow:hidden;
 }
 
 .loading-text{
@@ -566,11 +565,12 @@
     transform:translateY(-3px);
   }
 }
-/* контейнер с логотипом */
+/* контейнер с логотипом — маленькая птичка по центру */
 .loading-logo-wrap{
   position:relative;
-  width:220px;         /* подгони под размер ролика */
-  height:auto;
+  display:inline-block;
+  max-width:220px;     /* максимум ширины */
+  width:100%;          /* на маленьких экранах сжимается */
   margin:0 auto;
   animation:logo-float 3s ease-in-out infinite;
 }
@@ -578,10 +578,13 @@
 /* само видео */
 .loading-logo-video{
   display:block;
+  max-width:220px;     /* чтобы точно не разъезжалось */
+  max-height:40vh;     /* не больше 40% высоты экрана */
   width:100%;
   height:auto;
-  border-radius:24px;   /* чуть скруглим, чтобы было мягче, можно убрать */
+  border-radius:24px;
 }
+
 
 /* мягкое свечение под птицей */
 .loading-logo-wrap::before{
@@ -887,7 +890,7 @@
 </div>
 
 
-<div class="version">версия 10.3</div>
+<div class="version">версия 10.4</div>
 
 <script>
 /* ========= helpers ========= */
@@ -1371,11 +1374,23 @@ function showMatrixSafe(ori,dst,cur,d1,flex){
 }
 
 /* ========= loading overlay ========= */
-function setLoading(on){
+function setLoading(on, delay = 0){
   const ov = $('#loadingOverlay');
   if(!ov) return;
-  ov.classList.toggle('hidden',!on);
+
+  if(on){
+    // Показать оверлей сразу
+    ov.classList.remove('hidden');
+  } else {
+    // Скрыть с задержкой
+    if(delay > 0){
+      setTimeout(()=>ov.classList.add('hidden'), delay);
+    } else {
+      ov.classList.add('hidden');
+    }
+  }
 }
+
 
 /* ========= основной поиск ========= */
 async function doSearch(){
@@ -1441,7 +1456,7 @@ async function doSearch(){
     json = await callJSON(`/api/search?${q.toString()}`);
   }catch(e){
     $('#results').innerHTML = `<div class="card"><div class="bad">Ошибка: ${e.message}</div><div class="hint">Попробуй повторить поиск позже.</div></div>`;
-    setLoading(false);
+   setLoading(false, 4000);
     return;
   }
 
@@ -1452,7 +1467,7 @@ async function doSearch(){
   renderAirportsFilter();
   summarize();
   applyFiltersAndSort();
-  setLoading(false);
+ setLoading(false, 4000);
 }
 
 /* ========= кнопки ========= */
