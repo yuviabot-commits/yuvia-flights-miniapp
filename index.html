@@ -234,7 +234,7 @@
       margin-bottom:12px;
     }
     .brand-logo{
-      width:56px;
+      width:72px;
       height:auto;
     }
     .brand-name{
@@ -540,7 +540,7 @@
   <!-- Бренд -->
   <header class="brand">
     <!-- НОВЫЙ ЛОГОТИП -->
-    <img src="yuvia-logo-new.png" alt="Yuvia" class="brand-logo">
+    <img src="Logo-Full.png" alt="Yuvia" class="brand-logo">
     <div class="brand-text">
       <div class="brand-name">Yuvia</div>
       <div class="brand-tagline">персональный тревел-консьерж</div>
@@ -771,18 +771,110 @@
   </div>
 </div>
 
-<!-- Оверлей загрузки -->
 <div id="loadingOverlay" class="loading-overlay hidden">
   <div class="loading-inner">
-    <div class="loading-bird-wrap">
-      <!-- НОВЫЙ ЛОГОТИП В АНИМАЦИИ -->
-      <img src="yuvia-logo-new.png" class="loading-bird" alt="Yuvia">
+    <div class="loading-logo-anim">
+      <!-- тело птицы -->
+      <img src="Logo-bird.png"  alt="" class="logo-layer logo-bird">
+      <!-- крыло (анимация) -->
+      <img src="Logo-wing.png"  alt="" class="logo-layer logo-wing">
+      <!-- солнце (легкая «подпрыгивающая» анимация) -->
+      <img src="Logo-sun.png"   alt="" class="logo-layer logo-sun">
     </div>
     <div class="loading-text">Ищем лучшие варианты...</div>
   </div>
 </div>
+/* ---------- Анимированный логотип в оверлее ---------- */
 
-<div class="version">версия 10.0</div>
+.loading-inner{
+  text-align:center;
+}
+
+/* контейнер под слои логотипа */
+.loading-logo-anim{
+  position:relative;
+  width:180px;      /* можно менять размер */
+  height:260px;     /* под твой формат PNG; подкорректируй по вкусу */
+  margin:0 auto;
+}
+
+/* каждый слой растянут на весь холст */
+.loading-logo-anim .logo-layer{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  pointer-events:none;
+}
+
+/* тело слегка «дышит» вместе с крылом */
+.loading-logo-anim .logo-bird{
+  animation:bird-bob 1.2s ease-in-out infinite;
+}
+
+/* КРЫЛО – основная анимация.
+   transform-origin подбирала «на глаз», ты можешь потом чуть подкрутить проценты */
+.loading-logo-anim .logo-wing{
+  transform-origin:28% 52%;  /* точка крепления крыла к корпусу */
+  animation:wing-flap 0.6s ease-in-out infinite;
+}
+
+/* дуга – лёгкое покачивание, чтобы картинка жила */
+.loading-logo-anim .logo-arca{
+  animation:arc-sway 2.4s ease-in-out infinite;
+}
+
+/* солнце чуть подпрыгивает */
+.loading-logo-anim .logo-sun{
+  animation:sun-bob 2.4s ease-in-out infinite;
+}
+
+/* надпись без анимации */
+.loading-logo-anim .logo-wordmark{
+  animation:none;
+}
+
+/* ---------- keyframes ---------- */
+
+@keyframes wing-flap{
+  0%,100%{
+    transform:rotate(0deg);
+  }
+  50%{
+    transform:rotate(-18deg) translateY(-6px);
+  }
+}
+
+@keyframes bird-bob{
+  0%,100%{
+    transform:translateY(0);
+  }
+  50%{
+    transform:translateY(-4px);
+  }
+}
+
+@keyframes arc-sway{
+  0%,100%{
+    transform:rotate(0deg);
+  }
+  50%{
+    transform:rotate(3deg);
+  }
+}
+
+@keyframes sun-bob{
+  0%,100%{
+    transform:translateY(0);
+  }
+  50%{
+    transform:translateY(-3px);
+  }
+}
+
+
+<div class="version">версия 10.1</div>
 
 <script>
 /* ========= helpers ========= */
