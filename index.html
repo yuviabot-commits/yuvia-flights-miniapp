@@ -371,6 +371,88 @@
   font-size:13px;
   color:var(--muted);
 }
+    /* панель с выбором пассажиров — выпадающее окошко */
+.pax-panel{
+  position:absolute;
+  right:0;
+  margin-top:6px;
+  background:#ffffff;
+  border-radius:16px;
+  box-shadow:0 18px 45px rgba(15,23,42,0.18);
+  padding:14px 18px 12px;
+  width:280px;
+  z-index:50;
+}
+
+/* скрыта по умолчанию */
+.pax-panel.hidden{
+  display:none;
+}
+
+.pax-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:10px;
+}
+.pax-label-wrap{
+  max-width:60%;
+}
+.pax-title{
+  font-size:14px;
+  font-weight:500;
+}
+.pax-note{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:2px;
+}
+.pax-counter{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.pax-btn{
+  width:32px;
+  height:32px;
+  border-radius:999px;
+  border:1px solid var(--line);
+  background:#ffffff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:20px;
+  line-height:1;
+  color:var(--accent);
+  padding:0;
+}
+.pax-count{
+  width:18px;
+  text-align:center;
+  font-weight:500;
+}
+
+.pax-cabin{
+  margin-top:8px;
+  border-radius:999px;
+  border:1px solid var(--line);
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  overflow:hidden;
+}
+.pax-cabin-btn{
+  border:none;
+  border-radius:0;
+  padding:8px 4px;
+  font-size:13px;
+  background:#f9fafb;
+  color:var(--muted);
+}
+.pax-cabin-btn.active{
+  background:var(--accent);
+  color:#ffffff;
+}
+
 
 .pax-hint-placeholder{
   min-height:16px;
@@ -378,24 +460,30 @@
 }
 
     /* адаптив */
-    @media (max-width:900px){
-      .two-col{grid-template-columns:1fr}
-      .search-row,
-      .search-hints-row{
-        grid-template-columns:1fr;
-      }
-      .search-actions-row{
-        justify-content:flex-start;
-        flex-wrap:wrap;
-      }
-      .swap-cell{
-        justify-content:flex-start;
-      }
-      .pax-panel{
-        right:auto;
-        left:0;
-      }
-    }
+@media (max-width:900px){
+  .two-col{grid-template-columns:1fr}
+
+  .search-grid{
+    grid-template-columns:1fr;
+  }
+
+  .swap-cell--full{
+    grid-row:auto;
+    justify-content:flex-start;
+    margin-top:4px;
+  }
+
+  .search-actions-row{
+    justify-content:flex-start;
+    flex-wrap:wrap;
+  }
+
+  .pax-panel{
+    right:auto;
+    left:0;
+  }
+}
+
 
     /* overlay загрузки */
 .loading-overlay{
