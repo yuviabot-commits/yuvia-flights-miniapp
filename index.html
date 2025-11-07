@@ -315,11 +315,14 @@
     }
 
     /* клетка со стрелкой */
-    .swap-cell{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    }
+  .swap-cell{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  /* небольшой оптический сдвиг влево, чтобы казалось строго по центру */
+  transform:translateX(-4px);   /* если хочется ещё чуть левее, попробуй -5 или -6 */
+}
+
 
     /* класс оставляем, но без растягивания по строкам */
     .swap-cell--full{}
@@ -942,7 +945,7 @@
   </div>
 </div>
 
-<div class="version">версия 12.1</div>
+<div class="version">версия 12.2</div>
 
 <script>
 /* ========= helpers ========= */
