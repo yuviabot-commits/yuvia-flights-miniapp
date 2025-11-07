@@ -262,40 +262,27 @@
 
     .advanced.hidden{display:none;}
 
-    /* ------- Форма поиска: 3 строки ------- */
+    /* ------- Форма поиска: 4 строки ------- */
 
-    /* 1-я строка – поля (города + стрелка + даты + пассажиры) */
-    .search-row{
-      display:grid;
-      grid-template-columns:
-        1.15fr   /* Откуда */
-        32px     /* стрелка */
-        1.15fr   /* Куда */
-        0.9fr    /* Дата вылета */
-        0.9fr    /* Дата возврата */
-        0.9fr;   /* Пассажиры */
-      column-gap:10px;
-      row-gap:8px;
-      align-items:start;
-    }
+   /* Общая сетка для 1–3 строк формы поиска */
+.search-grid{
+  display:grid;
+  grid-template-columns:
+    1.15fr  /* Откуда */
+    36px    /* стрелка */
+    1.15fr  /* Куда */
+    16px    /* отступ */
+    0.9fr   /* Дата вылета */
+    8px     /* МАЛЕНЬКИЙ отступ — даты ближе */
+    0.9fr   /* Дата возвращения */
+    16px    /* отступ */
+    0.95fr; /* Пассажиры */
+  row-gap:4px;          /* расстояние между 1-й, 2-й и 3-й строкой */
+  align-items:center;   /* чтобы стрелка вставала по центру своего столбца */
+}
 
-    /* 2-я строка – подсказки (такая же сетка) */
-    .search-hints-row{
-      margin-top:4px;
-      display:grid;
-      grid-template-columns:
-        1.15fr
-        32px
-        1.15fr
-        0.9fr
-        0.9fr
-        0.9fr;
-      column-gap:10px;
-      align-items:start;
-    }
-    .search-hints-row .hint{margin-top:0;}
 
-    /* 3-я строка – кнопки */
+    /* 4-я строка – кнопки */
     .search-actions-row{
       margin-top:14px;
       display:flex;
@@ -306,10 +293,11 @@
     /* стрелка обмена городов – колонка в сетке */
 .swap-cell{
   display:flex;
-  align-items:center;
-  justify-content:center;
-  align-self:center;   /* ↓ теперь сама ячейка по центру по вертикали */
+  align-items:center;      /* по высоте по центру */
+  justify-content:center;  /* по ширине по центру */
+  height:100%;
 }
+
     .swap-cell .swap-btn{
       padding:0;
       border:none;
@@ -330,17 +318,17 @@
   width:100%;
   border-radius:12px;
   border:1px solid var(--line);
-  height:42px;              /* фиксируем высоту как у input */
-  padding:0 34px 0 12px;    /* убрали вертикальные отступы */
+  padding:10px 34px 10px 12px; /* те же 10px сверху/снизу, что и у input */
   background:#ffffff;
   display:flex;
   flex-direction:column;
-  justify-content:center;   /* центр по вертикали */
   align-items:flex-start;
+  justify-content:center;
   cursor:pointer;
   position:relative;
   color:var(--ink);
 }
+
 
     .pax-main{
       font-size:14px;
@@ -711,103 +699,77 @@
 
   <!-- Форма поиска -->
   <div class="card" id="searchForm">
-    <!-- 1 строка: поля -->
-    <div class="search-row">
-      <div>
-        <div class="label">Откуда</div>
-        <input id="origin" placeholder="Москва" autocomplete="off" />
-      </div>
+<div class="search-grid">
+  <!-- 1-я строка: текст над полями -->
+  <div class="label">Откуда</div>
+  <div></div> <!-- колонка стрелки, тут пока пусто -->
+  <div class="label">Куда</div>
+  <div></div> <!-- отступ -->
+  <div class="label">Дата вылета</div>
+  <div></div> <!-- маленький отступ -->
+  <div class="label">Дата возвращения</div>
+  <div></div> <!-- отступ -->
+  <div class="label">Пассажиры</div>
 
-      <div class="swap-cell">
-        <button type="button" class="swap-btn" id="swapInline" aria-label="Поменять местами города">⇆</button>
-      </div>
+  <!-- 2-я строка: сами блоки -->
+  <div>
+    <input id="origin" placeholder="Москва" autocomplete="off" />
+  </div>
 
-      <div>
-        <div class="label">Куда</div>
-        <input id="destination" placeholder="Казань" autocomplete="off" />
-      </div>
+  <div class="swap-cell">
+    <button type="button" class="swap-btn" id="swapInline" aria-label="Поменять местами города">⇆</button>
+  </div>
 
-      <div>
-        <div class="label">Дата вылета</div>
-        <input id="depart" type="date" />
-      </div>
+  <div>
+    <input id="destination" placeholder="Казань" autocomplete="off" />
+  </div>
 
-      <div>
-        <div class="label">Дата возвращения</div>
-        <input id="ret" type="date" />
-      </div>
+  <div></div>
 
-      <div class="pax-field">
-        <div class="label">Пассажиры</div>
-        <button type="button" class="pax-trigger" id="paxTrigger">
-          <div class="pax-main" id="paxMainText">1 пассажир</div>
-          <div class="pax-sub" id="paxSubText">эконом</div>
-          <span class="pax-chevron">▾</span>
-        </button>
+  <div>
+    <input id="depart" type="date" />
+  </div>
 
-        <!-- скрытый селект для API / стейта -->
-        <select id="adults" style="display:none">
-          <option>1</option><option>2</option><option>3</option>
-          <option>4</option><option>5</option><option>6</option>
-        </select>
+  <div></div>
 
-        <!-- панель пассажиров -->
-        <div class="pax-panel hidden" id="paxPanel">
-          <div class="pax-row">
-            <div class="pax-label-wrap">
-              <div class="pax-title">Взрослые</div>
-              <div class="pax-note">от 12 лет</div>
-            </div>
-            <div class="pax-counter">
-              <button class="pax-btn" type="button" data-kind="adults" data-delta="-1">−</button>
-              <div class="pax-count" data-kind="adults">1</div>
-              <button class="pax-btn" type="button" data-kind="adults" data-delta="1">+</button>
-            </div>
-          </div>
+  <div>
+    <input id="ret" type="date" />
+  </div>
 
-          <div class="pax-row">
-            <div class="pax-label-wrap">
-              <div class="pax-title">Дети</div>
-              <div class="pax-note">от 2 до 12 лет</div>
-            </div>
-            <div class="pax-counter">
-              <button class="pax-btn" type="button" data-kind="children" data-delta="-1">−</button>
-              <div class="pax-count" data-kind="children">0</div>
-              <button class="pax-btn" type="button" data-kind="children" data-delta="1">+</button>
-            </div>
-          </div>
+  <div></div>
 
-          <div class="pax-row">
-            <div class="pax-label-wrap">
-              <div class="pax-title">Младенцы</div>
-              <div class="pax-note">до 2 лет (без места)</div>
-            </div>
-            <div class="pax-counter">
-              <button class="pax-btn" type="button" data-kind="infants" data-delta="-1">−</button>
-              <div class="pax-count" data-kind="infants">0</div>
-              <button class="pax-btn" type="button" data-kind="infants" data-delta="1">+</button>
-            </div>
-          </div>
+  <div class="pax-field">
+    <button type="button" class="pax-trigger" id="paxTrigger">
+      <div class="pax-main" id="paxMainText">1 пассажир</div>
+      <div class="pax-sub" id="paxSubText">эконом</div>
+      <span class="pax-chevron">▾</span>
+    </button>
 
-          <div class="pax-cabin">
-            <button type="button" class="pax-cabin-btn active" data-cabin="eco">Эконом</button>
-            <button type="button" class="pax-cabin-btn" data-cabin="business">Бизнес</button>
-          </div>
-        </div>
-      </div>
+    <!-- скрытый селект для API / стейта -->
+    <select id="adults" style="display:none">
+      <option>1</option><option>2</option><option>3</option>
+      <option>4</option><option>5</option><option>6</option>
+    </select>
+
+    <!-- панель пассажиров -->
+    <div class="pax-panel hidden" id="paxPanel">
+      ... (оставь как было)
     </div>
+  </div>
 
-    <!-- 2 строка: подсказки -->
-    <div class="search-hints-row">
-      <div class="hint" id="originIataHint"></div>
-      <div></div>
-      <div class="hint" id="destIataHint"></div>
-      <div class="hint" id="departHint"></div>
-      <div class="hint" id="retHint"></div>
-      <div class="pax-hint-placeholder"></div>
-    </div>
+  <!-- 3-я строка: подсказки -->
+  <div class="hint" id="originIataHint"></div>
+  <div></div>
+  <div class="hint" id="destIataHint"></div>
+  <div></div>
+  <div class="hint" id="departHint"></div>
+  <div></div>
+  <div class="hint" id="retHint"></div>
+  <div></div>
+  <div class="pax-hint-placeholder"></div>
+</div>
 
-    <!-- 3 строка: кнопки -->
+    <!-- 4 строка: кнопки -->
     <div class="search-actions-row">
       <button class="btn-primary" id="doSearch">Искать</button>
       <button class="btn-ghost" id="toggleAdvanced">Расширенный поиск</button>
@@ -952,7 +914,7 @@
 </div>
 
 
-<div class="version">версия 11.5</div>
+<div class="version">версия 11.6</div>
 
 <script>
 /* ========= helpers ========= */
