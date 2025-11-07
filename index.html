@@ -274,7 +274,7 @@
         0.9fr    /* Дата вылета */
         0.9fr    /* Дата возврата */
         0.9fr;   /* Пассажиры */
-      column-gap:12px;
+      column-gap:10px;
       row-gap:8px;
       align-items:start;
     }
@@ -290,7 +290,7 @@
         0.9fr
         0.9fr
         0.9fr;
-      column-gap:12px;
+      column-gap:10px;
       align-items:start;
     }
     .search-hints-row .hint{margin-top:0;}
@@ -304,11 +304,12 @@
     }
 
     /* стрелка обмена городов – колонка в сетке */
-    .swap-cell{
-      display:flex;
-      align-items:center;      /* по высоте по центру */
-      justify-content:center;  /* по ширине по центру */
-    }
+.swap-cell{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  align-self:center;   /* ↓ теперь сама ячейка по центру по вертикали */
+}
     .swap-cell .swap-btn{
       padding:0;
       border:none;
@@ -325,20 +326,21 @@
 
     /* Пассажиры – триггер */
     .pax-field{position:relative;}
-    .pax-trigger{
-      width:100%;
-      border-radius:12px;
-      border:1px solid var(--line);
-      padding:8px 34px 8px 12px;
-      background:#ffffff;
-      display:flex;
-      flex-direction:column;
-      align-items:flex-start;
-      justify-content:center;
-      cursor:pointer;
-      position:relative;
-      color:var(--ink);
-    }
+.pax-trigger{
+  width:100%;
+  border-radius:12px;
+  border:1px solid var(--line);
+  height:42px;              /* фиксируем высоту как у input */
+  padding:0 34px 0 12px;    /* убрали вертикальные отступы */
+  background:#ffffff;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;   /* центр по вертикали */
+  align-items:flex-start;
+  cursor:pointer;
+  position:relative;
+  color:var(--ink);
+}
 
     .pax-main{
       font-size:14px;
@@ -346,14 +348,13 @@
       color:var(--ink);              /* основной текст: "2 пассажира" */
     }
 
-    .pax-sub{
-      font-size:11px;
-      color:#9ca3af;                 /* более светлый серый для "эконом" */
-      margin-top:1px;
-      text-transform:none;
-      letter-spacing:0.02em;
-    }
-
+.pax-sub{
+  font-size:11px;
+  color:#9ca3af;
+  margin-top:0;             /* чтобы текст не разъезжался по высоте */
+  text-transform:none;
+  letter-spacing:0.02em;
+}
     .pax-chevron{
       position:absolute;
       right:10px;
@@ -951,7 +952,7 @@
 </div>
 
 
-<div class="version">версия 11.4</div>
+<div class="version">версия 11.5</div>
 
 <script>
 /* ========= helpers ========= */
