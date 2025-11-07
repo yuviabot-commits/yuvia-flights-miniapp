@@ -5,19 +5,17 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Yuvia · Поиск авиабилетов</title>
 
-   <!-- Иконка вкладки -->
   <link rel="icon" type="image/png" href="favicon.png" sizes="256x256">
-<link rel="shortcut icon" type="image/png" href="favicon.png">
+  <link rel="shortcut icon" type="image/png" href="favicon.png">
 
   <style>
     :root{
-      /* Палитра под логотип */
-      --bg:#ffffff;                 /* чисто белый фон */
+      --bg:#ffffff;
       --surface:#ffffff;
-      --ink:#053227;                /* тёмная ель */
+      --ink:#053227;
       --muted:#6b7280;
 
-      --accent:#075e54;             /* тёмный зелёный */
+      --accent:#075e54;
       --accent-soft:#e3f3ee;
       --accent-soft-2:#fff7e3;
       --berry:#b1365b;
@@ -29,6 +27,12 @@
       --shadow-soft:0 18px 45px rgba(7,94,84,0.10);
       --radius-lg:18px;
       --radius-pill:999px;
+
+      /* размеры полей формы */
+      --field-h:56px;         /* общая высота инпутов */
+      --gap-large:24px;       /* отступы между большими блоками */
+      --gap-small:12px;       /* узкий отступ между датами */
+      --swap-w:44px;          /* ширина колонки со стрелкой */
     }
 
     *{box-sizing:border-box}
@@ -40,12 +44,7 @@
       background:var(--bg);
     }
 
-    .wrap{
-      max-width:1140px;
-      margin:0 auto;
-      padding:18px 16px 32px;
-    }
-
+    .wrap{max-width:1140px;margin:0 auto;padding:18px 16px 32px;}
     .card{
       background:var(--surface);
       border-radius:var(--radius-lg);
@@ -53,12 +52,7 @@
       box-shadow:var(--shadow-soft);
       padding:14px 18px;
     }
-
-    /* форма поиска чуть темнее */
-    #searchForm{
-      background:#f3faf8;
-      border-color:rgba(7,94,84,0.18);
-    }
+    #searchForm{background:#f3faf8;border-color:rgba(7,94,84,0.18);}
 
     .grid{display:grid; gap:12px}
     .grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -71,13 +65,11 @@
       padding:10px 12px;
       background:#ffffff;
     }
-
     input:focus, select:focus{
       outline:none;
       border-color:rgba(34,197,133,0.9);
       box-shadow:0 0 0 1px rgba(34,197,133,0.4);
     }
-
     button{
       cursor:pointer;
       border-radius:var(--radius-pill);
@@ -88,34 +80,19 @@
       font-weight:500;
       white-space:nowrap;
     }
-
     .btn-primary{
       background:linear-gradient(135deg,#075e54,#0f766e);
       color:#f9fafb;
       box-shadow:0 10px 25px rgba(7,94,84,0.35);
     }
-    .btn-primary:hover{
-      background:linear-gradient(135deg,#064e3b,#0d6b60);
-    }
-    .btn-secondary{
-      background:var(--accent-soft);
-      color:var(--accent);
-      border-color:rgba(45,212,191,0.6);
-    }
-    .btn-ghost{
-      background:transparent;
-      color:var(--accent);
-      border-color:rgba(148,163,184,0.6);
-    }
+    .btn-primary:hover{background:linear-gradient(135deg,#064e3b,#0d6b60);}
+    .btn-secondary{background:var(--accent-soft);color:var(--accent);border-color:rgba(45,212,191,0.6);}
+    .btn-ghost{background:transparent;color:var(--accent);border-color:rgba(148,163,184,0.6);}
 
     .hint{font-size:12px;color:var(--muted);margin-top:3px}
     .label{font-size:12px;color:var(--muted);margin-bottom:4px}
 
-    .section-title{
-      margin:18px 0 10px;
-      font-weight:600;
-      font-size:16px;
-    }
+    .section-title{margin:18px 0 10px;font-weight:600;font-size:16px;}
 
     .chips{display:flex;flex-wrap:wrap;gap:8px}
     .chip{
@@ -127,61 +104,17 @@
       font-size:13px;
       cursor:pointer;
     }
-    .chip#summaryChip{
-      background:var(--accent-soft);
-      color:var(--accent);
-      border-color:rgba(45,212,191,0.45);
-      cursor:default;
-    }
+    .chip#summaryChip{background:var(--accent-soft);color:var(--accent);border-color:rgba(45,212,191,0.45);cursor:default;}
 
-    .divider{
-      height:1px;
-      margin:14px 0 10px;
-      background:linear-gradient(90deg,rgba(148,163,184,0.3),rgba(148,163,184,0));
-    }
+    .divider{height:1px;margin:14px 0 10px;background:linear-gradient(90deg,rgba(148,163,184,0.3),rgba(148,163,184,0));}
 
-    .two-col{
-      display:grid;
-      grid-template-columns:280px minmax(0,1fr);
-      gap:16px;
-      margin-top:12px;
-    }
+    .two-col{display:grid;grid-template-columns:280px minmax(0,1fr);gap:16px;margin-top:12px;}
 
-    .filters-block .pill{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      padding:6px 10px;
-      border-radius:var(--radius-pill);
-      border:1px solid var(--line);
-      font-size:13px;
-      background:#f9fafb;
-    }
+    .filters-block .pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:var(--radius-pill);border:1px solid var(--line);font-size:13px;background:#f9fafb;}
+    .filters-block .pill input{width:auto;padding:0;border:none;box-shadow:none;}
 
-    .filters-block .pill input{
-      width:auto;
-      padding:0;
-      border:none;
-      box-shadow:none;
-    }
-
-    .toolbar{
-      position:sticky;
-      top:0;
-      z-index:2;
-      background:var(--surface);
-      border:1px solid rgba(148,163,184,0.25);
-      border-radius:var(--radius-pill);
-      padding:8px 11px;
-      display:flex;
-      align-items:center;
-      gap:10px;
-      margin-bottom:8px;
-    }
-    .toolbar select{
-      border-radius:999px;
-      padding:7px 14px;
-    }
+    .toolbar{position:sticky;top:0;z-index:2;background:var(--surface);border:1px solid rgba(148,163,184,0.25);border-radius:var(--radius-pill);padding:8px 11px;display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+    .toolbar select{border-radius:999px;padding:7px 14px;}
 
     .result{
       display:grid;
@@ -193,532 +126,148 @@
       border:1px solid var(--line);
       background:#ffffff;
     }
-
-    .result-main-title{
-      font-weight:600;
-      margin-bottom:2px;
-    }
-    .result-meta,
-    .result-times{
-      font-size:13px;
-      color:var(--muted);
-    }
-    .price{
-      font-weight:700;
-      font-size:18px;
-      white-space:nowrap;
-    }
-    .airline-logo{
-      display:inline-block;
-      height:24px;
-      width:auto;
-      border-radius:6px;
-      margin-top:4px;
-    }
+    .result-main-title{font-weight:600;margin-bottom:2px;}
+    .result-meta,.result-times{font-size:13px;color:var(--muted);}
+    .price{font-weight:700;font-size:18px;white-space:nowrap;}
+    .airline-logo{display:inline-block;height:24px;width:auto;border-radius:6px;margin-top:4px;}
 
     .bad{color:var(--danger)}
     .ok{color:var(--ok)}
+    .skeleton{height:62px;border-radius:12px;background:linear-gradient(90deg,#f4f7fb 25%,#edf2f7 37%,#f4f7fb 63%);background-size:200% 100%;animation:sh 1.1s ease-in-out infinite;}
+    @keyframes sh{0%{background-position:-200% 0}100%{background-position:200% 0}}
 
-    .skeleton{
-      height:62px;
-      border-radius:12px;
-      background:linear-gradient(90deg,#f4f7fb 25%,#edf2f7 37%,#f4f7fb 63%);
-      background-size:200% 100%;
-      animation:sh 1.1s ease-in-out infinite;
-    }
-    @keyframes sh{
-      0%{background-position:-200% 0}
-      100%{background-position:200% 0}
-    }
-
-    /* Бренд в шапке */
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:14px;
-      margin-bottom:12px;
-    }
-    .brand-logo{
-      width:72px;
-      height:auto;
-    }
-    .brand-name{
-      font-size:26px;
-      font-weight:650;
-      letter-spacing:0.03em;
-    }
-    .brand-tagline{
-      font-size:13px;
-      color:var(--muted);
-    }
-    .brand-subline{
-      font-size:13px;
-      color:var(--berry);
-      text-transform:none;
-      letter-spacing:.06em;
-      margin-top:4px;
-      font-weight:500;
-    }
-
+    .brand{display:flex;align-items:center;gap:14px;margin-bottom:12px;}
+    .brand-logo{width:72px;height:auto;}
+    .brand-name{font-size:26px;font-weight:650;letter-spacing:0.03em;}
+    .brand-tagline{font-size:13px;color:var(--muted);}
+    .brand-subline{font-size:13px;color:var(--berry);text-transform:none;letter-spacing:.06em;margin-top:4px;font-weight:500;}
     .advanced.hidden{display:none;}
 
-    /* ------- Форма поиска: 4 строки ------- */
+    /* ====== НОВАЯ СЕТКА ФОРМЫ (ровно 9 колонок, 4 линии) ====== */
 
-/* ------- Форма поиска: 4 линии ------- */
+    /* одинаковая высота полей */
+    .search-grid input[type="text"],
+    .search-grid input[type="date"],
+    .pax-trigger{height:var(--field-h);}
 
-/* одинаковая высота всех полей */
-.search-grid input[type="text"],
-.search-grid input[type="date"],
-.pax-trigger{
-  height:48px;
-}
-
-/* 3 строки внутри сетки: 
-   1 — текст, 2 — поля, 3 — подсказки */
-.search-grid{
-  display:grid;
-  grid-template-columns:
-    1.15fr  /* Откуда */
-    36px    /* стрелка */
-    1.15fr  /* Куда */
-    16px    /* отступ */
-    0.9fr   /* Дата вылета */
-    8px     /* маленький отступ между датами */
-    0.9fr   /* Дата возвращения */
-    16px    /* отступ */
-    0.95fr; /* Пассажиры */
-  grid-template-rows:auto auto auto;
-  row-gap:4px;
-}
-
-
-    /* 4-я строка – кнопки */
-    .search-actions-row{
-      margin-top:14px;
-      display:flex;
-      justify-content:flex-end;
-      gap:10px;
+    .search-grid{
+      display:grid;
+      grid-template-columns:
+        1.2fr          /* Откуда */
+        var(--swap-w)  /* стрелка */
+        1.2fr          /* Куда */
+        var(--gap-large) /* отступ */
+        1fr            /* Дата вылета */
+        var(--gap-small) /* узкий отступ */
+        1fr            /* Дата возвращения */
+        var(--gap-large) /* отступ */
+        1.05fr;        /* Пассажиры */
+      grid-template-rows:
+        20px           /* 1. заголовки (низ) */
+        var(--field-h) /* 2. поля */
+        20px;          /* 3. подсказки (верх) */
+      row-gap:6px;
+      align-items:stretch;
     }
-/* строка 1 — текст, прижат к НИЗУ клетки */
-.search-grid .label{
-  margin:0;
-  align-self:flex-end;
-}
 
-/* строка 3 — подсказки, прижаты к ВЕРХУ клетки */
-.search-grid .hint{
-  margin:0;
-  align-self:flex-start;
-  font-size:12px;
-}
-/* стрелка — один блок на три строки, по центру */
-.swap-cell{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-.swap-cell--full{
-  grid-row:1 / 4;   /* занимает строки 1–3 */
-}
+    /* 4-я строка — кнопки */
+    .search-actions-row{margin-top:14px;display:flex;justify-content:flex-end;gap:10px;}
 
-.swap-btn{
-  padding:0;
-  border:none;
-  background:transparent;
-  font-size:20px;
-  line-height:1;
-  color:#075e54;
-  cursor:pointer;
-}
-.swap-btn:hover{
-  background:#ecfdf5;
-  border-radius:999px;
-}
+    /* линия 1 — лейблы прижаты к низу клетки */
+    .search-grid .label{margin:0;align-self:end;}
 
-/* Пассажиры */
-.pax-field{position:relative;}
+    /* линия 3 — подсказки прижаты к верху клетки */
+    .search-grid .hint{margin:0;align-self:start;font-size:12px;}
 
-.pax-trigger{
-  width:100%;
-  border-radius:12px;
-  border:1px solid var(--line);
-  padding:6px 34px 6px 12px;  /* чуть меньше отступы */
-  background:#ffffff;
-  display:flex;
-  flex-direction:column;
-  align-items:flex-start;
-  justify-content:center;
-  cursor:pointer;
-  position:relative;
-  color:var(--ink);
-}
+    /* стрелка — стоит ТОЛЬКО во 2-й линии и центрируется по ней */
+    .swap-cell{display:flex;align-items:center;justify-content:center;}
+    .swap-cell--full{grid-row:2 / 3;}              /* <<< ключ */
+    .swap-btn{
+      width:40px;height:40px;border-radius:999px;
+      padding:0;border:1px solid #dbe7e3;background:#ffffff;
+      font-size:20px;line-height:1;color:#075e54;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .swap-btn:hover{background:#ecfdf5;}
 
-.pax-main{
-  font-size:13px;
-  font-weight:600;
-}
-.pax-sub{
-  font-size:10px;
-  color:#9ca3af;
-  margin-top:1px;
-}
+    /* Пассажиры — триггер той же высоты */
+    .pax-field{position:relative;}
+    .pax-trigger{
+      width:100%;
+      border-radius:12px;border:1px solid var(--line);
+      padding:8px 34px 8px 12px;
+      background:#ffffff;display:flex;flex-direction:column;
+      align-items:flex-start;justify-content:center;
+      cursor:pointer;position:relative;color:var(--ink);
+    }
+    .pax-main{font-size:13px;font-weight:600;}
+    .pax-sub{font-size:10px;color:#9ca3af;margin-top:1px;}
+    .pax-chevron{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--muted);}
 
-.pax-chevron{
-  position:absolute;
-  right:10px;
-  top:50%;
-  transform:translateY(-50%);
-  font-size:13px;
-  color:var(--muted);
-}
-    /* панель с выбором пассажиров — выпадающее окошко */
-.pax-panel{
-  position:absolute;
-  right:0;
-  margin-top:6px;
-  background:#ffffff;
-  border-radius:16px;
-  box-shadow:0 18px 45px rgba(15,23,42,0.18);
-  padding:14px 18px 12px;
-  width:280px;
-  z-index:50;
-}
-
-/* скрыта по умолчанию */
-.pax-panel.hidden{
-  display:none;
-}
-
-.pax-row{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  margin-bottom:10px;
-}
-.pax-label-wrap{
-  max-width:60%;
-}
-.pax-title{
-  font-size:14px;
-  font-weight:500;
-}
-.pax-note{
-  font-size:12px;
-  color:var(--muted);
-  margin-top:2px;
-}
-.pax-counter{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-.pax-btn{
-  width:32px;
-  height:32px;
-  border-radius:999px;
-  border:1px solid var(--line);
-  background:#ffffff;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:20px;
-  line-height:1;
-  color:var(--accent);
-  padding:0;
-}
-.pax-count{
-  width:18px;
-  text-align:center;
-  font-weight:500;
-}
-
-.pax-cabin{
-  margin-top:8px;
-  border-radius:999px;
-  border:1px solid var(--line);
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  overflow:hidden;
-}
-.pax-cabin-btn{
-  border:none;
-  border-radius:0;
-  padding:8px 4px;
-  font-size:13px;
-  background:#f9fafb;
-  color:var(--muted);
-}
-.pax-cabin-btn.active{
-  background:var(--accent);
-  color:#ffffff;
-}
-
-
-.pax-hint-placeholder{
-  min-height:16px;
-  font-size:12px;
-}
+    /* Выпадающая панель — поверх, не ломает сетку */
+    .pax-panel{
+      position:absolute;right:0;margin-top:6px;background:#ffffff;
+      border-radius:16px;box-shadow:0 18px 45px rgba(15,23,42,0.18);
+      padding:14px 18px 12px;width:280px;z-index:50;
+    }
+    .pax-panel.hidden{display:none;}
+    .pax-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+    .pax-label-wrap{max-width:60%;}
+    .pax-title{font-size:14px;font-weight:500;}
+    .pax-note{font-size:12px;color:var(--muted);margin-top:2px;}
+    .pax-counter{display:flex;align-items:center;gap:10px;}
+    .pax-btn{width:32px;height:32px;border-radius:999px;border:1px solid var(--line);background:#ffffff;display:flex;align-items:center;justify-content:center;font-size:20px;line-height:1;color:var(--accent);padding:0;}
+    .pax-count{width:18px;text-align:center;font-weight:500;}
+    .pax-cabin{margin-top:8px;border-radius:999px;border:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr;overflow:hidden;}
+    .pax-cabin-btn{border:none;border-radius:0;padding:8px 4px;font-size:13px;background:#f9fafb;color:var(--muted);}
+    .pax-cabin-btn.active{background:var(--accent);color:#ffffff;}
+    .pax-hint-placeholder{min-height:16px;font-size:12px;}
 
     /* адаптив */
-@media (max-width:900px){
-  .two-col{grid-template-columns:1fr}
-
-  .search-grid{
-    grid-template-columns:1fr;
-  }
-
-  .swap-cell--full{
-    grid-row:auto;
-    justify-content:flex-start;
-    margin-top:4px;
-  }
-
-  .search-actions-row{
-    justify-content:flex-start;
-    flex-wrap:wrap;
-  }
-
-  .pax-panel{
-    right:auto;
-    left:0;
-  }
-}
-
+    @media (max-width:900px){
+      .two-col{grid-template-columns:1fr}
+      .search-grid{grid-template-columns:1fr;}
+      .swap-cell--full{grid-row:auto;justify-content:flex-start;margin-top:4px;}
+      .search-actions-row{justify-content:flex-start;flex-wrap:wrap;}
+      .pax-panel{right:auto;left:0;}
+    }
 
     /* overlay загрузки */
-.loading-overlay{
-  position:fixed;
-  inset:0;
-  background:#ffffff;  /* ← ключевая строка */
-  backdrop-filter:blur(12px);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:999;
-}
-.loading-overlay.hidden{display:none;}
+    .loading-overlay{position:fixed;inset:0;background:#ffffff;backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;z-index:999;}
+    .loading-overlay.hidden{display:none;}
+    .loading-inner{text-align:center;}
+    .loading-logo-wrap{position:relative;display:inline-block;max-width:260px;width:100%;margin:0 auto;animation:logo-float 3s ease-in-out infinite;}
+    .loading-logo-video{display:block;max-width:260px;max-height:40vh;width:100%;height:auto;border-radius:24px;}
+    .loading-logo-wrap::before{content:"";position:absolute;left:10%;right:10%;bottom:-10px;height:18px;border-radius:999px;background:radial-gradient(ellipse at center, rgba(7,94,84,0.45), transparent 60%);filter:blur(8px);opacity:0.75;animation:glow-pulse 2.2s ease-in-out infinite;}
+    @keyframes logo-float{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+    @keyframes glow-pulse{0%,100%{transform:scaleX(1);opacity:0.6;}50%{transform:scaleX(1.12);opacity:0.9;}}
+    .loading-text{margin-top:14px;font-size:16px;color:var(--muted);}
 
-.loading-inner{
-  text-align:center;
-  /* overflow убрали, чтобы не резало видео */
-}
+    .loading-logo-anim{position:relative;width:210px;height:300px;margin:0 auto;}
+    .loading-logo-anim .logo-layer{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;}
+    .loading-logo-anim .logo-bird{animation:bird-bob 1.2s ease-in-out infinite;}
+    .loading-logo-anim .logo-wing{transform-origin:28% 52%;animation:wing-flap 0.6s ease-in-out infinite;}
+    .loading-logo-anim .logo-sun{animation:sun-bob 2.4s ease-in-out infinite;}
+    .loading-logo-anim .logo-arca{animation:arc-sway 2.4s ease-in-out infinite;}
+    .loading-logo-anim .logo-wordmark{animation:none;}
+    @keyframes wing-flap{0%,100%{transform:rotate(0deg);}50%{transform:rotate(-18deg) translateY(-6px);}}
+    @keyframes bird-bob{0%,100%{transform:translateY(0);}50%{transform:translateY(-4px);}}
+    @keyframes arc-sway{0%,100%{transform:rotate(0deg);}50%{transform:rotate(3deg);}}
+    @keyframes sun-bob{0%,100%{transform:translateY(0);}50%{transform:translateY(-3px);}}
 
-/* маленькая птица по центру */
-.loading-logo-wrap{
-  position:relative;
-  display:inline-block;
-  max-width:260px;   /* можно 180–240 по вкусу */
-  width:100%;
-  margin:0 auto;
-  animation:logo-float 3s ease-in-out infinite;
-}
+    .loading-logo-wrap{position:relative;display:inline-block;max-width:180px;width:100%;margin:0 auto;animation:logo-float 3s ease-in-out infinite;}
+    .loading-logo-video{display:block;max-width:180px;max-height:30vh;width:100%;height:auto;border-radius:24px;}
+    .loading-logo-wrap::before{content:"";position:absolute;left:15%;right:15%;bottom:-8px;height:16px;border-radius:999px;background:radial-gradient(ellipse at center, rgba(7,94,84,0.45), transparent 60%);filter:blur(6px);opacity:0.7;animation:glow-pulse 2.2s ease-in-out infinite;}
+    @keyframes logo-float{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+    @keyframes glow-pulse{0%,100%{transform:scaleX(1);opacity:0.6;}50%{transform:scaleX(1.12);opacity:0.9;}}
 
-/* само видео */
-.loading-logo-video{
-  display:block;
-  max-width:260px;
-  max-height:40vh;   /* не больше 40% высоты экрана */
-  width:100%;
-  height:auto;
-  border-radius:24px;
-}
-
-/* мягкое свечение под птицей */
-.loading-logo-wrap::before{
-  content:"";
-  position:absolute;
-  left:10%;
-  right:10%;
-  bottom:-10px;
-  height:18px;
-  border-radius:999px;
-  background:radial-gradient(ellipse at center, rgba(7,94,84,0.45), transparent 60%);
-  filter:blur(8px);
-  opacity:0.75;
-  animation:glow-pulse 2.2s ease-in-out infinite;
-}
-
-@keyframes logo-float{
-  0%,100%{ transform:translateY(0); }
-  50%{ transform:translateY(-8px); }
-}
-
-@keyframes glow-pulse{
-  0%,100%{
-    transform:scaleX(1);
-    opacity:0.6;
-  }
-  50%{
-    transform:scaleX(1.12);
-    opacity:0.9;
-  }
-}
-
-
-.loading-text{
-  margin-top:14px;
-  font-size:16px;
-  color:var(--muted);
-}
-
-/* ---------- Анимированный логотип в оверлее ---------- */
-
-/* контейнер под слои логотипа */
-.loading-logo-anim{
-  position:relative;
-  width:210px;   /* можно 180–220, подбери на глаз */
-  height:300px;
-  margin:0 auto;
-}
-
-/* каждый слой растянут на весь холст */
-.loading-logo-anim .logo-layer{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  object-fit:contain;
-  pointer-events:none;
-}
-
-/* тело слегка «дышит» */
-.loading-logo-anim .logo-bird{
-  animation:bird-bob 1.2s ease-in-out infinite;
-}
-
-/* крыло – основная анимация */
-.loading-logo-anim .logo-wing{
-  transform-origin:28% 52%;  /* точка крепления крыла */
-  animation:wing-flap 0.6s ease-in-out infinite;
-}
-
-/* солнце чуть подпрыгивает */
-.loading-logo-anim .logo-sun{
-  animation:sun-bob 2.4s ease-in-out infinite;
-}
-
-/* если позже добавишь дугу / надпись */
-.loading-logo-anim .logo-arca{
-  animation:arc-sway 2.4s ease-in-out infinite;
-}
-.loading-logo-anim .logo-wordmark{
-  animation:none;
-}
-
-/* ---------- keyframes ---------- */
-
-@keyframes wing-flap{
-  0%,100%{
-    transform:rotate(0deg);
-  }
-  50%{
-    transform:rotate(-18deg) translateY(-6px);
-  }
-}
-
-@keyframes bird-bob{
-  0%,100%{
-    transform:translateY(0);
-  }
-  50%{
-    transform:translateY(-4px);
-  }
-}
-
-@keyframes arc-sway{
-  0%,100%{
-    transform:rotate(0deg);
-  }
-  50%{
-    transform:rotate(3deg);
-  }
-}
-
-@keyframes sun-bob{
-  0%,100%{
-    transform:translateY(0);
-  }
-  50%{
-    transform:translateY(-3px);
-  }
-}
-/* контейнер с логотипом — маленькая птичка по центру */
-.loading-logo-wrap{
-  position:relative;
-  display:inline-block;
-  max-width:180px;     /* максимум ширины */
-  width:100%;          /* на маленьких экранах сжимается */
-  margin:0 auto;
-  animation:logo-float 3s ease-in-out infinite;
-}
-
-/* само видео */
-.loading-logo-video{
-  display:block;
-  max-width:180px;     /* чтобы точно не разъезжалось */
-  max-height:30vh;     /* не больше 40% высоты экрана */
-  width:100%;
-  height:auto;
-  border-radius:24px;
-}
-
-
-/* мягкое свечение под птицей */
-.loading-logo-wrap::before{
-  content:"";
-  position:absolute;
-  left:15%;
-  right:15%;
-  bottom:-8px;
-  height:16px;
-  border-radius:999px;
-  background:radial-gradient(ellipse at center, rgba(7,94,84,0.45), transparent 60%);
-  filter:blur(6px);
-  opacity:0.7;
-  animation:glow-pulse 2.2s ease-in-out infinite;
-}
-
-/* покачивание логотипа вверх-вниз */
-@keyframes logo-float{
-  0%,100%{
-    transform:translateY(0);
-  }
-  50%{
-    transform:translateY(-8px);
-  }
-}
-
-/* пульсирующее свечение */
-@keyframes glow-pulse{
-  0%,100%{
-    transform:scaleX(1);
-    opacity:0.6;
-  }
-  50%{
-    transform:scaleX(1.12);
-    opacity:0.9;
-  }
-}
-
-    .version{
-      position:fixed;
-      bottom:8px;
-      right:10px;
-      font-size:12px;
-      color:#64748b;
-      background:#f1f5f9;
-      border:1px solid #e2e8f0;
-      border-radius:8px;
-      padding:4px 7px;
-      z-index:990;
-    }
+    .version{position:fixed;bottom:8px;right:10px;font-size:12px;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:8px;padding:4px 7px;z-index:990;}
   </style>
 </head>
 <body>
 <div class="wrap">
   <!-- Бренд -->
   <header class="brand">
-    <!-- НОВЫЙ ЛОГОТИП -->
     <img src="Logo-Full.png" alt="Yuvia" class="brand-logo">
     <div class="brand-text">
       <div class="brand-name">Yuvia</div>
@@ -727,7 +276,6 @@
     </div>
   </header>
 
-  <!-- Форма поиска -->
   <!-- Форма поиска -->
   <div class="card" id="searchForm">
     <div class="search-grid">
@@ -742,31 +290,18 @@
       <div></div>
       <div class="label">Пассажиры</div>
 
-      <!-- Линия 2: блоки -->
-      <div>
-        <input id="origin" placeholder="Москва" autocomplete="off" />
-      </div>
+      <!-- Линия 2: поля -->
+      <div><input id="origin" placeholder="Москва" autocomplete="off" /></div>
 
       <div class="swap-cell swap-cell--full">
         <button type="button" class="swap-btn" id="swapInline" aria-label="Поменять местами города">⇆</button>
       </div>
 
-      <div>
-        <input id="destination" placeholder="Казань" autocomplete="off" />
-      </div>
-
+      <div><input id="destination" placeholder="Казань" autocomplete="off" /></div>
       <div></div>
-
-      <div>
-        <input id="depart" type="date" />
-      </div>
-
+      <div><input id="depart" type="date" /></div>
       <div></div>
-
-      <div>
-        <input id="ret" type="date" />
-      </div>
-
+      <div><input id="ret" type="date" /></div>
       <div></div>
 
       <div class="pax-field">
@@ -776,13 +311,11 @@
           <span class="pax-chevron">▾</span>
         </button>
 
-        <!-- скрытый селект для скриптов -->
         <select id="adults" style="display:none">
           <option>1</option><option>2</option><option>3</option>
           <option>4</option><option>5</option><option>6</option>
         </select>
 
-        <!-- панель пассажиров — как у тебя была -->
         <div class="pax-panel hidden" id="paxPanel">
           <div class="pax-row">
             <div class="pax-label-wrap">
@@ -839,13 +372,13 @@
       <div class="pax-hint-placeholder"></div>
     </div>
 
-    <!-- 4 строка: кнопки -->
+    <!-- Линия 4: кнопки -->
     <div class="search-actions-row">
       <button class="btn-primary" id="doSearch">Искать</button>
       <button class="btn-ghost" id="toggleAdvanced">Расширенный поиск</button>
     </div>
 
-    <!-- расширенный блок -->
+    <!-- расширенный блок (без изменений) -->
     <div id="advancedBlock" class="advanced hidden">
       <div class="divider"></div>
       <div class="grid grid-2">
@@ -896,7 +429,6 @@
 
   <!-- Фильтры + результаты -->
   <div class="two-col">
-    <!-- Фильтры -->
     <div class="card filters-block">
       <div class="section-title" style="margin-top:0">Фильтры</div>
 
@@ -942,7 +474,6 @@
       <button class="btn-ghost" id="clearFilters" style="margin-top:12px;width:100%">Сбросить фильтры</button>
     </div>
 
-    <!-- Результаты -->
     <div>
       <div class="toolbar">
         <div class="label" style="margin:0">Сортировка</div>
@@ -967,15 +498,7 @@
 <div id="loadingOverlay" class="loading-overlay hidden">
   <div class="loading-inner">
     <div class="loading-logo-wrap">
-      <video
-        class="loading-logo-video"
-        autoplay
-        muted
-        loop
-        playsinline
-        preload="auto"
-      >
-        <!-- сначала webm, как более “родной” для браузеров -->
+      <video class="loading-logo-video" autoplay muted loop playsinline preload="auto">
         <source src="Yuvia_Anim.webm" type="video/webm">
       </video>
     </div>
@@ -983,8 +506,7 @@
   </div>
 </div>
 
-
-<div class="version">версия 11.8</div>
+<div class="version">версия 11.9</div>
 
 <script>
 /* ========= helpers ========= */
@@ -994,13 +516,11 @@ const todayLocal = (()=>{ const t=new Date(); return new Date(t.getFullYear(),t.
 
 function parseDateSmart(s){
   if(!s) return null;
-  // ISO: YYYY-MM-DD
   if(/^\d{4}-\d{2}-\d{2}$/.test(s)){
     const [y,m,d] = s.split('-').map(Number);
     const dt = new Date(y, m-1, d);
     return isNaN(dt)?null:dt;
   }
-  // DD.MM.YYYY
   if(/^\d{1,2}\.\d{1,2}\.\d{4}$/.test(s)){
     const [dd,mm,yy] = s.split('.').map(Number);
     const dt = new Date(yy, mm-1, dd);
@@ -1015,23 +535,17 @@ function toISO(d){
   const day = fmt2(d.getDate());
   return `${y}-${m}-${day}`;
 }
-
 function ddmmyyyy(d){return `${fmt2(d.getDate())}.${fmt2(d.getMonth()+1)}.${d.getFullYear()}`;}
-
 function weekendAround(today=new Date()){
   const t = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  const wd = t.getDay(); // 0=Вс ... 6=Сб
+  const wd = t.getDay();
   let sat = new Date(t);
   sat.setDate(t.getDate() + ((6 - (wd||7)) % 7) || 7);
   if (wd === 6 || wd === 0) { sat.setDate(sat.getDate() + 7); }
   const sun = new Date(sat); sun.setDate(sat.getDate()+1);
   return {sat, sun};
 }
-function clampToFuture(d){
-  if(!d) return null;
-  return d < todayLocal ? todayLocal : d;
-}
-
+function clampToFuture(d){ if(!d) return null; return d < todayLocal ? todayLocal : d; }
 function timeWindowStrToRange(v){
   if(v==='night') return [0,6];
   if(v==='morning') return [6,12];
@@ -1107,30 +621,21 @@ function restoreFromURL(){
 
 /* ========= подсказки городов ========= */
 let originIATA = '', destIATA = '';
-
 async function suggestCity(q){
   if(!q || q.length<2) return [];
   const url = `https://autocomplete.travelpayouts.com/places2?term=${encodeURIComponent(q)}&locale=ru&types[]=city`;
   const r = await fetch(url); if(!r.ok) return [];
   return await r.json();
 }
-
 let suggestBox = null;
 let suggestInput = null;
 function ensureSuggestBox(){
   if(suggestBox) return suggestBox;
   suggestBox = document.createElement('div');
   Object.assign(suggestBox.style,{
-    position:'absolute',
-    background:'#ffffff',
-    border:'1px solid #e2e8f0',
-    borderRadius:'8px',
-    boxShadow:'0 12px 30px rgba(15,23,42,0.15)',
-    zIndex:9999,
-    minWidth:'220px',
-    maxHeight:'260px',
-    overflowY:'auto',
-    fontSize:'14px'
+    position:'absolute',background:'#ffffff',border:'1px solid #e2e8f0',borderRadius:'8px',
+    boxShadow:'0 12px 30px rgba(15,23,42,0.15)',zIndex:9999,minWidth:'220px',maxHeight:'260px',
+    overflowY:'auto',fontSize:'14px'
   });
   document.body.appendChild(suggestBox);
   suggestBox.hidden = true;
@@ -1161,8 +666,8 @@ function openSuggestFor(input, items, onPick){
   });
   const r = input.getBoundingClientRect();
   box.style.left = (r.left + window.scrollX)+'px';
-  box.style.top = (r.bottom + window.scrollY)+'px';
-  box.style.width = r.width+'px';
+  box.style.top  = (r.bottom + window.scrollY)+'px';
+  box.style.width= r.width+'px';
   suggestInput = input;
   box.hidden = false;
 }
@@ -1190,7 +695,6 @@ function attachSuggest(inputEl, onPick){
     if(list.length) openSuggestFor(inputEl,list,onPick);
   });
 }
-
 attachSuggest($('#origin'), (item)=>{ originIATA=item.code; $('#originIataHint').textContent='IATA: '+originIATA; });
 attachSuggest($('#destination'), (item)=>{ destIATA=item.code; $('#destIataHint').textContent='IATA: '+destIATA; });
 
@@ -1219,30 +723,23 @@ $('#flexMode').addEventListener('change',()=>{
   syncURLFromState({fx:$('#flexMode').value});
 });
 
-/* ========= диплинк на Aviasales ========= */
+/* ========= диплинк ========= */
 const MARKER = 672309;
 function buildDeeplink({ori, dst, d1, d2, currency, adults, oneway}){
   const DD1 = d1 ? (fmt2(d1.getDate()) + fmt2(d1.getMonth()+1)) : '';
   const DD2 = d2 ? (fmt2(d2.getDate()) + fmt2(d2.getMonth()+1)) : '';
   let slug = '';
-  if(oneway==='yes'){
-    slug = `/${ori}${DD1}${dst}1`;
-  } else {
-    slug = `/${ori}${DD1}${dst}${DD2}1`;
-  }
+  if(oneway==='yes'){ slug = `/${ori}${DD1}${dst}1`; }
+  else { slug = `/${ori}${DD1}${dst}${DD2}1`; }
   const params = new URLSearchParams({
-    marker: MARKER,
-    with_request: 'true',
-    adults: String(adults||1),
-    currency: (currency||'RUB').toLowerCase(),
-    utm_source: 'yuvia_miniapp'
+    marker: MARKER, with_request: 'true', adults: String(adults||1),
+    currency: (currency||'RUB').toLowerCase(), utm_source: 'yuvia_miniapp'
   });
   return `https://www.aviasales.ru/search${slug}?${params.toString()}`;
 }
 
 /* ========= API ========= */
 const API_BASE = 'https://yuvia-flights-api.yuviabot.workers.dev';
-
 async function callJSON(path){
   const url = path.startsWith('http') ? path : API_BASE + path;
   const r = await fetch(url);
@@ -1301,7 +798,6 @@ function summarize(){
   const avg = Math.round(prices.reduce((s,v)=>s+v,0)/prices.length);
   $('#summaryChip').textContent = `от ${min.toLocaleString('ru-RU')} · средняя ${avg.toLocaleString('ru-RU')} ${baseCurrency}`;
 }
-
 function withinWindow(timeStr, windowsSelected){
   if(!windowsSelected.length || !timeStr) return true;
   const m = timeStr.match(/^(\d{2}):(\d{2})/);
@@ -1311,16 +807,13 @@ function withinWindow(timeStr, windowsSelected){
     const [a,b]=timeWindowStrToRange(w); return (hh>=a && hh<b);
   });
 }
-
 function applyFiltersAndSort(){
   const r = $('#results'); r.innerHTML='';
   if(!allResults.length){
     const empty=document.createElement('div'); empty.className='card';
     empty.innerHTML=`<div class="bad">Ничего не нашли.</div><div class="hint">Попробуй поменять даты, валюту или снять фильтры. Ниже — цены на соседние дни.</div>`;
-    r.appendChild(empty);
-    return;
+    r.appendChild(empty); return;
   }
-
   const stops = (document.querySelector('input[name="stops"]:checked')||{}).value || 'any';
   const depWins = Array.from(document.querySelectorAll('.depwin:checked')).map(x=>x.value);
   const arrWins = Array.from(document.querySelectorAll('.arrwin:checked')).map(x=>x.value);
@@ -1359,18 +852,13 @@ function applyFiltersAndSort(){
   if(!list.length){
     const empty=document.createElement('div'); empty.className='card';
     empty.innerHTML=`<div class="bad">После применения фильтров ничего не осталось.</div><div class="hint">Сними часть фильтров или расширь диапазоны.</div>`;
-    r.appendChild(empty);
-    return;
+    r.appendChild(empty); return;
   }
 
   list.forEach(x=>{
     const el=document.createElement('div'); el.className='result';
     const left=document.createElement('div');
-    const transfersText = x.transfers===0
-      ? 'без пересадок'
-      : x.transfers===1
-        ? '1 пересадка'
-        : `${x.transfers} пересадки`;
+    const transfersText = x.transfers===0 ? 'без пересадок' : x.transfers===1 ? '1 пересадка' : `${x.transfers} пересадки`;
     left.innerHTML=`
       <div class="result-main-title">
         ${x.origin} ${x.origin_airport?`(${x.origin_airport})`:''}
@@ -1471,20 +959,12 @@ function showMatrixSafe(ori,dst,cur,d1,flex){
 function setLoading(on, delay = 0){
   const ov = $('#loadingOverlay');
   if(!ov) return;
-
-  if(on){
-    // Показать оверлей сразу
-    ov.classList.remove('hidden');
-  } else {
-    // Скрыть с задержкой
-    if(delay > 0){
-      setTimeout(()=>ov.classList.add('hidden'), delay);
-    } else {
-      ov.classList.add('hidden');
-    }
+  if(on){ ov.classList.remove('hidden'); }
+  else{
+    if(delay > 0){ setTimeout(()=>ov.classList.add('hidden'), delay); }
+    else{ ov.classList.add('hidden'); }
   }
 }
-
 
 /* ========= основной поиск ========= */
 async function doSearch(){
@@ -1550,7 +1030,7 @@ async function doSearch(){
     json = await callJSON(`/api/search?${q.toString()}`);
   }catch(e){
     $('#results').innerHTML = `<div class="card"><div class="bad">Ошибка: ${e.message}</div><div class="hint">Попробуй повторить поиск позже.</div></div>`;
-   setLoading(false, 4000);
+    setLoading(false, 4000);
     return;
   }
 
@@ -1561,7 +1041,7 @@ async function doSearch(){
   renderAirportsFilter();
   summarize();
   applyFiltersAndSort();
- setLoading(false, 4000);
+  setLoading(false, 4000);
 }
 
 /* ========= кнопки ========= */
@@ -1617,14 +1097,13 @@ $('#toggleAdvanced').addEventListener('click',e=>{
   $('#toggleAdvanced').textContent = isHidden ? 'Скрыть расширенный поиск' : 'Расширенный поиск';
 });
 
-/* ========= даты: ограничения ========= */
+/* ========= даты ========= */
 function initMinDateHints(){
   const iso = toISO(todayLocal);
   $('#depart').min = iso;
   $('#ret').min = iso;
   $('#departHint').textContent = `> ${ddmmyyyy(todayLocal)}`;
 }
-
 function normalizeDepartDate(){
   let d = parseDateSmart($('#depart').value);
   d = clampToFuture(d);
@@ -1632,14 +1111,12 @@ function normalizeDepartDate(){
   const iso = toISO(d);
   $('#depart').value = iso;
   $('#ret').min = iso;
-
   const r = parseDateSmart($('#ret').value);
   if(r && r<d){
     $('#ret').value='';
     $('#retHint').textContent='';
   }
 }
-
 ['change','blur','input'].forEach(ev=>{
   $('#depart').addEventListener(ev, normalizeDepartDate);
 });
@@ -1651,30 +1128,25 @@ function normalizeReturnDate(){
   if(d && r < d) r = d;
   $('#ret').value = toISO(r);
 }
-
 ['change','blur','input'].forEach(ev=>{
   $('#ret').addEventListener(ev, normalizeReturnDate);
 });
 
 /* ========= блок пассажиров ========= */
 const paxState = {adults:1, children:0, infants:0, cabin:'eco'};
-
 function updatePaxSummary(){
   const total = paxState.adults + paxState.children + paxState.infants;
   const main = $('#paxMainText');
   const sub = $('#paxSubText');
   main.textContent = `${total} пассажир${total===1?'':'ов'}`;
   sub.textContent = paxState.cabin==='eco' ? 'эконом' : 'бизнес';
-
   const sel = $('#adults');
   if(sel) sel.value = String(total);
-
   ['adults','children','infants'].forEach(kind=>{
     const cnt = document.querySelector(`.pax-count[data-kind="${kind}"]`);
     if(cnt) cnt.textContent = paxState[kind];
   });
 }
-
 function initPaxFromAdultsSelect(){
   const sel = $('#adults');
   if(!sel) return;
@@ -1685,7 +1157,6 @@ function initPaxFromAdultsSelect(){
   paxState.cabin = 'eco';
   updatePaxSummary();
 }
-
 document.querySelectorAll('.pax-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
     const kind = btn.dataset.kind;
@@ -1699,24 +1170,18 @@ document.querySelectorAll('.pax-btn').forEach(btn=>{
     updatePaxSummary();
   });
 });
-
 document.querySelectorAll('.pax-cabin-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
     paxState.cabin = btn.dataset.cabin;
     document.querySelectorAll('.pax-cabin-btn').forEach(b=>b.classList.toggle('active',b===btn));
     const cabinSelect = $('#cabin');
-    if(cabinSelect){
-      cabinSelect.value = paxState.cabin;
-    }
+    if(cabinSelect){ cabinSelect.value = paxState.cabin; }
     updatePaxSummary();
   });
 });
-
 const paxTrigger = $('#paxTrigger');
 const paxPanel = $('#paxPanel');
-paxTrigger.addEventListener('click',()=>{
-  paxPanel.classList.toggle('hidden');
-});
+paxTrigger.addEventListener('click',()=>{ paxPanel.classList.toggle('hidden'); });
 document.addEventListener('click',e=>{
   if(!paxPanel.contains(e.target) && !paxTrigger.contains(e.target)){
     paxPanel.classList.add('hidden');
