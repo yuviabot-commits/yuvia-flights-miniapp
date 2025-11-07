@@ -488,7 +488,7 @@
 .loading-logo-wrap{
   position:relative;
   display:inline-block;
-  max-width:220px;   /* можно 180–240 по вкусу */
+  max-width:260px;   /* можно 180–240 по вкусу */
   width:100%;
   margin:0 auto;
   animation:logo-float 3s ease-in-out infinite;
@@ -497,7 +497,7 @@
 /* само видео */
 .loading-logo-video{
   display:block;
-  max-width:220px;
+  max-width:260px;
   max-height:40vh;   /* не больше 40% высоты экрана */
   width:100%;
   height:auto;
@@ -508,14 +508,14 @@
 .loading-logo-wrap::before{
   content:"";
   position:absolute;
-  left:15%;
-  right:15%;
-  bottom:-8px;
-  height:16px;
+  left:10%;
+  right:10%;
+  bottom:-10px;
+  height:18px;
   border-radius:999px;
   background:radial-gradient(ellipse at center, rgba(7,94,84,0.45), transparent 60%);
-  filter:blur(6px);
-  opacity:0.7;
+  filter:blur(8px);
+  opacity:0.75;
   animation:glow-pulse 2.2s ease-in-out infinite;
 }
 
@@ -537,8 +537,8 @@
 
 
 .loading-text{
-  margin-top:10px;
-  font-size:14px;
+  margin-top:14px;
+  font-size:16px;
   color:var(--muted);
 }
 
@@ -951,7 +951,7 @@
 </div>
 
 
-<div class="version">версия 11.3</div>
+<div class="version">версия 11.4</div>
 
 <script>
 /* ========= helpers ========= */
