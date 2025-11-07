@@ -264,12 +264,15 @@
 
     /* ------- Форма поиска: 4 линии ------- */
 
-    /* одинаковая высота всех полей */
-    .search-grid input[type="text"],
-    .search-grid input[type="date"],
-    .pax-trigger{
-      height:48px;
-    }
+    /* одинаковая высота всех полей в шапке: города, даты, пассажиры */
+.search-grid input,
+.pax-trigger{
+  height:48px;
+  padding-top:9px;
+  padding-bottom:9px;
+  /* остальное (border-radius, шрифт) наследуется из общих стилей input */
+}
+
 
     /* 3 строки внутри сетки:
        1 — текст, 2 — поля, 3 — подсказки
@@ -280,14 +283,14 @@
     .search-grid{
       display:grid;
       grid-template-columns:
-        1.2fr   /* Откуда */
-        56px    /* Стрелка */
-        1.2fr   /* Куда */
+        1.25fr   /* Откуда */
+        52px    /* Стрелка */
+        1.25fr   /* Куда */
         0.9fr   /* Дата вылета */
         0.9fr   /* Дата возвращения */
         1.05fr; /* Пассажиры */
       grid-auto-rows:auto;
-      column-gap:18px;
+      column-gap:14px;
       row-gap:4px;
       align-items:start;
     }
@@ -323,8 +326,8 @@
 
     /* круглая кнопка-стрелка */
     .swap-btn{
-      width:44px;
-      height:44px;
+      width:40px;
+      height:40px;
       border-radius:999px;
       border:1px solid rgba(7,94,84,0.18);
       background:#ffffff;
@@ -939,7 +942,7 @@
   </div>
 </div>
 
-<div class="version">версия 12</div>
+<div class="version">версия 12.1</div>
 
 <script>
 /* ========= helpers ========= */
