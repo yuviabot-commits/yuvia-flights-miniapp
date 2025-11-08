@@ -188,22 +188,39 @@
     }
 
     /* -------- Карточка результата -------- */
-    .result{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      padding:14px 16px;
-      margin-bottom:10px;
-      border-radius:16px;
-      border:1px solid var(--line);
-      background:#ffffff;
-      transition:box-shadow .18s ease, transform .18s ease, border-color .18s ease;
-    }
-    .result:hover{
-      box-shadow:0 18px 40px rgba(15,23,42,0.12);
-      transform:translateY(-1px);
-      border-color:rgba(7,94,84,0.25);
-    }
+.result{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding:14px 16px;
+  margin-bottom:10px;
+  border-radius:14px;
+  border:1px solid #e5e7eb;
+  background:#fcfdfd;
+  transition:box-shadow .16s ease, transform .16s ease, border-color .16s ease;
+  box-shadow:0 4px 14px rgba(15,23,42,0.06);
+}
+.result:hover{
+  box-shadow:0 10px 24px rgba(15,23,42,0.10);
+  transform:translateY(-1px);
+  border-color:rgba(7,94,84,0.20);
+}
+
+/* карточки плеч более «плоские» */
+.result-leg-card{
+  border-radius:10px;
+  border:1px solid #e5e7eb;
+  background:#f9fafb;
+  padding:8px 10px;
+}
+
+.result-leg-details{
+  margin-top:6px;
+  font-size:12px;
+  color:var(--muted);
+  line-height:1.4;
+}
+
     .result.highlighted{
       box-shadow:0 0 0 2px rgba(56,189,248,0.85),0 20px 45px rgba(15,23,42,0.25);
       transform:translateY(-1px);
@@ -802,7 +819,7 @@
   </div>
 </div>
 
-<div class="version">версия 13.6</div>
+<div class="version">версия 13.7</div>
 
 <script>
 /* ========= helpers ========= */
@@ -874,6 +891,18 @@ function extractDateStr(val){
   }
   if(!iso) return '';
   return iso.split('-').reverse().join('.');
+}
+// форматируем длительность в минутах: 185 → "3 ч 5 мин"
+function formatDurationMinutes(mins){
+  if(!mins || !Number.isFinite(mins)) return '';
+  const m = Math.max(0, Math.round(mins));
+  const h = Math.floor(m / 60);
+  const mm = m % 60;
+  const parts = [];
+  if(h > 0) parts.push(`${h} ч`);
+  if(mm > 0) parts.push(`${mm} мин`);
+  if(!parts.length) return '0 мин';
+  return parts.join(' ');
 }
 
 /* ========= state: недавние запросы ========= */
@@ -1334,50 +1363,108 @@ function normalizeFlight(x,{ori,dst,cur,d1,d2,oneway,adults}){
   const rawDepDate = x.depart_date || x.departure_at || '';
   const rawRetDate = x.return_date || x.return_at || '';
 
+  // даты
   let depDateStr = extractDateStr(rawDepDate);
   let retDateStr = extractDateStr(rawRetDate);
   if(!retDateStr && d2){ retDateStr = ddmmyyyy(d2); }
 
-  const depTime = extractTime(x.depart_time || x.departure_time || x.departure_at || '');
-  const arrTime = extractTime(x.arrival_time || x.arr_time || x.return_at || '');
+  // времена туда
+  const rawDepAt  = x.depart_time   || x.departure_time   || x.departure_at   || rawDepDate;
+  const rawArrAt  = x.arrival_time  || x.arr_time         || x.arrival_at     || '';
+  const rawRetDep = x.return_departure_time || x.return_time || x.return_at || rawRetDate;
+  const rawRetArr = x.return_arrival_time   || x.return_arrival_at || '';
 
+  const depTime   = extractTime(rawDepAt);
+  const arrTime   = extractTime(rawArrAt);
   const depTimeTo = depTime;
-  const retDepTime = extractTime(x.return_time || x.return_at || rawRetDate || '');
+  const retDepTime = extractTime(rawRetDep);
+  const retArrTime = extractTime(rawRetArr);
 
-  const durTo  = x.duration_to  ?? x.duration ?? 0;
-  const durBack = x.duration_back ?? 0;
-  const duration_to_hours   = durTo    ? Math.round(durTo/60)    : 0;
-  const duration_back_hours = durBack  ? Math.round(durBack/60)  : 0;
-  const duration_hours = duration_to_hours || (x.duration_hours ?? Math.round(((x.duration ?? durTo) || 0)/60));
+  // длительность (минуты → часы/минуты)
+  const durTo    = x.duration_to   ?? x.duration ?? 0;
+  const durBack  = x.duration_back ?? 0;
+
+  const duration_to_hours   = durTo   ? Math.round(durTo/60)   : 0;
+  const duration_back_hours = durBack ? Math.round(durBack/60) : 0;
+
+  const duration_hours = duration_to_hours; // для фильтра "максимум часов" считаем по плечу "туда"
+
+  const durToStr   = formatDurationMinutes(durTo);
+  const durBackStr = formatDurationMinutes(durBack);
 
   const hh = depTime ? parseInt(depTime.slice(0,2),10) : null;
   const airlineCode = x.airline_code || x.airline_iata || x.airline || '';
 
-  const deeplink = buildDeeplink({ori,dst,d1,d2:(oneway==='yes'?null:d2),currency:cur,adults,oneway});
+  // инфа по багажу (пытаемся аккуратно вытянуть что есть)
+  let baggageText = 'по тарифу авиакомпании';
+  if (typeof x.baggage === 'string') baggageText = x.baggage;
+  else if (typeof x.luggage === 'string') baggageText = x.luggage;
+  else if (x.baggage === 0 || x.luggage === 0 || x.baggage_included === false) baggageText = 'багаж не включён';
+  else if (x.baggage > 0 || x.luggage > 0 || x.baggage_included === true) baggageText = 'багаж включён';
+
+  let handLuggageText = 'включена стандартная ручная кладь';
+  if (typeof x.hand_luggage === 'string') handLuggageText = x.hand_luggage;
+  else if (x.hand_luggage === 0 || x.hand_luggage_included === false) handLuggageText = 'ручная кладь не включена';
+
+  const flightNumberTo   = x.flight_number_to   || x.flight_number || x.flight_to || '';
+  const flightNumberBack = x.flight_number_back || x.return_flight_number || '';
+
+  const deeplink = buildDeeplink({
+    ori,dst,
+    d1,
+    d2:(oneway==='yes'?null:d2),
+    currency:cur,
+    adults,
+    oneway
+  });
 
   const base = {
-    origin:x.origin,
-    destination:x.destination,
-    origin_airport:x.origin_airport || x.origin_airport_code || x.origin_airport_iata || '',
-    dest_airport:x.destination_airport || x.destination_airport_code || x.destination_airport_iata || '',
-    price:Math.round(x.price ?? x.value ?? 0),
-    currency:x.currency || cur,
-    airline:x.airline || airlineCode || '',
-    airlineCode,
-    transfers:(typeof x.transfers==='number')?x.transfers:(x.number_of_changes ?? 0),
+    origin: x.origin,
+    destination: x.destination,
+    origin_airport: x.origin_airport || x.origin_airport_code || x.origin_airport_iata || '',
+    dest_airport: x.destination_airport || x.destination_airport_code || x.destination_airport_iata || '',
 
-    duration:durTo,
-    duration_to:durTo,
-    duration_back:durBack,
+    price: Math.round(x.price ?? x.value ?? 0),
+    currency: x.currency || cur,
+
+    airline: x.airline || airlineCode || '',
+    airlineCode,
+
+    transfers: (typeof x.transfers === 'number')
+      ? x.transfers
+      : (x.number_of_changes ?? 0),
+
+    // длительности
+    duration: durTo,
+    duration_to: durTo,
+    duration_back: durBack,
     duration_hours,
     duration_to_hours,
     duration_back_hours,
-    durStr:duration_hours?`${duration_hours} ч`:'',
+    durStr: durToStr || (duration_hours ? `${duration_hours} ч` : ''),
 
-    depTime, arrTime,
-    depTimeTo, retDepTime,
-    depSort:(hh===null?0:hh*60 + (parseInt(depTime.slice(3,5),10)||0)),
-    depDateStr, retDateStr,
+    durToStr,
+    durBackStr,
+
+    // времена / даты
+    depTime,
+    arrTime,
+    depTimeTo,
+    retDepTime,
+    retArrTime,
+
+    depSort: (hh===null ? 0 : hh*60 + (parseInt(depTime.slice(3,5),10) || 0)),
+    depDateStr,
+    retDateStr,
+
+    // багаж / ручная кладь
+    baggageText,
+    handLuggageText,
+
+    // рейсы
+    flightNumberTo,
+    flightNumberBack,
+
     deeplink
   };
 
@@ -1448,6 +1535,7 @@ function withinListAfterFilters(){
 
 function applyFiltersAndSort(){
   const r = $('#results'); r.innerHTML='';
+
   if(!allResults.length){
     const empty=document.createElement('div'); empty.className='card';
     empty.innerHTML=`<div class="bad">Ничего не нашли.</div><div class="hint">Попробуй поменять даты, валюту или снять фильтры. Ниже — цены на соседние дни.</div>`;
@@ -1455,13 +1543,40 @@ function applyFiltersAndSort(){
     return;
   }
 
-  let list = withinListAfterFilters();
+  // фильтры
+  const stops = (document.querySelector('input[name="stops"]:checked')||{}).value || 'any';
+  const depWins = Array.from(document.querySelectorAll('.depwin:checked')).map(x=>x.value);
+  const arrWins = Array.from(document.querySelectorAll('.arrwin:checked')).map(x=>x.value);
+  const durMax = parseInt($('#durMax').value,10);
+  const pmin = parseInt($('#priceMin').value,10);
+  const pmax = parseInt($('#priceMax').value,10);
+  const airlineSel = new Set(Array.from($('#airlineFilter').selectedOptions||[]).map(o=>o.value));
+  const airportSel = new Set(Array.from($('#airportFilter').selectedOptions||[]).map(o=>o.value));
+
+  let list = allResults.filter(x=>{
+    if(stops==='0' && x.transfers>0) return false;
+    if(stops==='1' && x.transfers>1) return false;
+    if(Number.isFinite(durMax) && x.duration_hours>durMax) return false;
+    if(Number.isFinite(pmin) && x.price<pmin) return false;
+    if(Number.isFinite(pmax) && x.price>pmax) return false;
+    if(airlineSel.size && !airlineSel.has(x.airline)) return false;
+    if(airportSel.size){
+      const from = `FROM:${x.origin_airport||''}`;
+      const to   = `TO:${x.dest_airport||''}`;
+      if(!airportSel.has(from) && !airportSel.has(to)) return false;
+    }
+    if(!withinWindow(x.depTime, depWins)) return false;
+    if(!withinWindow(x.arrTime, arrWins)) return false;
+    return true;
+  });
+
+  // сортировка
   const s = $('#sortBy').value;
   list.sort((a,b)=>{
     if(s==='yuvia_score') return (b.rating||0)-(a.rating||0);
     if(s==='price_asc') return a.price-b.price;
     if(s==='price_desc') return b.price-a.price;
-    if(s==='duration_asc') return a.duration-b.duration;
+    if(s==='duration_asc') return a.duration-a.duration;
     if(s==='depart_asc') return (a.depSort||0)-(b.depSort||0);
     return 0;
   });
@@ -1485,8 +1600,8 @@ function applyFiltersAndSort(){
         ? '1 пересадка'
         : `${x.transfers} пересадки`;
 
-    const mainDurationHours = x.duration_to_hours || x.duration_hours;
-    const durationLabel = mainDurationHours ? `${mainDurationHours} ч` : (x.durStr || '—');
+    const mainDurationLabel = x.durToStr || (x.duration_to_hours ? `${x.duration_to_hours} ч` : '');
+    const backDurationLabel = x.durBackStr || (x.duration_back_hours ? `${x.duration_back_hours} ч` : '');
 
     const ratingStr = x.rating ? x.rating.toFixed(1).replace('.',',') : '';
     const stressMap = {low:'низкий',medium:'средний',high:'высокий'};
@@ -1503,29 +1618,20 @@ function applyFiltersAndSort(){
       <div class="airline-logo">${(x.airlineCode||x.airline||'').slice(0,2) || '—'}</div>
     `;
 
-    const isRecommended = x.rating && (x.rating >= maxRating - 0.3);
-
-    const legToPieces = [];
-    if(x.depDateStr) legToPieces.push(x.depDateStr);
-    if(x.depTimeTo)  legToPieces.push(`вылет ${x.depTimeTo}`);
-    if(mainDurationHours) legToPieces.push(`в пути ~${mainDurationHours} ч`);
-    legToPieces.push(transfersText);
-
-    const legBackPieces = [];
-    if(x.retDateStr) legBackPieces.push(x.retDateStr);
-    if(x.retDepTime) legBackPieces.push(`вылет ${x.retDepTime}`);
-    if(x.duration_back_hours) legBackPieces.push(`в пути ~${x.duration_back_hours} ч`);
-    const hasReturnInfo = legBackPieces.length > 0;
+    const hasReturnInfo = !!(x.retDateStr || x.retDepTime || x.retArrTime || x.duration_back_hours);
 
     const titleArrow = hasReturnInfo ? '⇄' : '→';
 
-    const detailsExtras = [];
-    detailsExtras.push('Ручная кладь обычно включена, багаж — по тарифу авиакомпании.');
-    if(x.transfers>0) detailsExtras.push('При пересадках возможна смена терминала — проверь детали на Aviasales.');
-    if(mainDurationHours>5) detailsExtras.push('Длительный перелёт, заложи время на отдых и питание.');
-    const extrasText = detailsExtras.join(' ');
+    const isRecommended = x.rating && (x.rating >= maxRating - 0.3);
 
-el.innerHTML = `
+    const baggageLine = x.baggageText
+      ? `<div><strong>Багаж:</strong> ${x.baggageText}</div>`
+      : '';
+    const handLine = x.handLuggageText
+      ? `<div><strong>Ручная кладь:</strong> ${x.handLuggageText}</div>`
+      : '';
+
+    el.innerHTML = `
       <div class="result-main">
         <div>
           <div class="result-main-left-top">
@@ -1533,10 +1639,9 @@ el.innerHTML = `
             ${x.destination} ${x.dest_airport?`(${x.dest_airport})`:''}
           </div>
           <div class="result-main-left-sub">
-            ${x.depDateStr || ''}${x.retDateStr ? (' — ' + x.retDateStr) : ''}
+            ${x.depDateStr || ''}${x.retDateStr ? ` — ${x.retDateStr}` : ''}${x.airline ? ` · ${x.airline}` : ''}
           </div>
 
-          <!-- две карточки: туда и обратно -->
           <div class="result-legs">
             <!-- ТУДА -->
             <div class="result-leg-card">
@@ -1548,23 +1653,19 @@ el.innerHTML = `
                 </div>
                 <div class="result-leg-center">
                   <div class="result-leg-line"></div>
-                  <div class="result-leg-duration">в пути ~${mainDurationHours || '—'} ч · ${transfersText}</div>
+                  <div class="result-leg-duration">
+                    в пути ${mainDurationLabel || '—'} · ${transfersText}
+                  </div>
                 </div>
                 <div class="result-leg-block">
-                  <div class="result-leg-time">${x.arrTime || ''}</div>
+                  <div class="result-leg-time">${x.arrTime || '—'}</div>
                   <div class="result-leg-city">${x.destination}</div>
                   <div class="result-leg-airport">${x.dest_airport || ''}</div>
                 </div>
               </div>
-
-              <button type="button" class="result-leg-toggle" data-leg="to">
-                <span class="result-leg-chevron">▾</span>
-                <span>Детали рейса</span>
-              </button>
-              <div class="result-leg-extra">
-                <strong>Туда:</strong> ${legToPieces.join(' · ')}<br>
-                <strong>Пересадки:</strong> ${transfersText}<br>
-                <strong>Дополнительно:</strong> ${extrasText}
+              <div class="result-leg-details">
+                <div><strong>Туда:</strong> ${x.depDateStr || '—'}</div>
+                ${x.flightNumberTo ? `<div><strong>Рейс:</strong> ${x.flightNumberTo}</div>` : ''}
               </div>
             </div>
 
@@ -1580,24 +1681,18 @@ el.innerHTML = `
                 <div class="result-leg-center">
                   <div class="result-leg-line"></div>
                   <div class="result-leg-duration">
-                    в пути ~${x.duration_back_hours || '—'} ч · ${transfersText}
+                    в пути ${backDurationLabel || '—'} · ${transfersText}
                   </div>
                 </div>
                 <div class="result-leg-block">
-                  <div class="result-leg-time"> </div>
+                  <div class="result-leg-time">${x.retArrTime || '—'}</div>
                   <div class="result-leg-city">${x.origin}</div>
                   <div class="result-leg-airport">${x.origin_airport || ''}</div>
                 </div>
               </div>
-
-              <button type="button" class="result-leg-toggle" data-leg="back">
-                <span class="result-leg-chevron">▾</span>
-                <span>Детали рейса</span>
-              </button>
-              <div class="result-leg-extra">
-                <strong>Обратно:</strong> ${legBackPieces.join(' · ')}<br>
-                <strong>Пересадки:</strong> ${transfersText}<br>
-                <strong>Дополнительно:</strong> ${extrasText}
+              <div class="result-leg-details">
+                <div><strong>Обратно:</strong> ${x.retDateStr || '—'}</div>
+                ${x.flightNumberBack ? `<div><strong>Рейс:</strong> ${x.flightNumberBack}</div>` : ''}
               </div>
             </div>
             ` : ''}
@@ -1617,15 +1712,19 @@ el.innerHTML = `
       </div>
 
       <div class="result-tags">
-        ${ratingStr ? `<span class="badge badge-rating" title="Оценка Yuvia: учитываем длительность, пересадки, ночные перелёты и ещё несколько факторов.">Оценка маршрута ${ratingStr}</span>` : ''}
+        ${ratingStr ? `<span class="badge badge-rating" title="Оценка Yuvia: длительность, пересадки, ночные вылеты и ещё несколько факторов.">Оценка маршрута ${ratingStr}</span>` : ''}
         ${stressLabel ? `<span class="badge ${stressClass}" title="Стресс Yuvia: ночные вылеты, короткие стыковки, смена аэропортов и т.п.">стресс: ${stressLabel}</span>` : ''}
         <span class="badge badge-chip">${transfersText}</span>
-        ${mainDurationHours ? `<span class="badge badge-chip">в пути ~${mainDurationHours} ч</span>` : ''}
+        ${mainDurationLabel ? `<span class="badge badge-chip">туда: ${mainDurationLabel}</span>` : ''}
+        ${backDurationLabel ? `<span class="badge badge-chip">обратно: ${backDurationLabel}</span>` : ''}
         ${isRecommended ? `<span class="badge badge-yuvia">Рекомендация Yuvia</span>` : ''}
       </div>
 
       <div class="result-footer">
-        <div></div>
+        <div>
+          ${baggageLine}
+          ${handLine}
+        </div>
         <div class="result-footer-actions">
           <button type="button" class="btn-ghost btn-sm btn-fav" data-id="${x.id}">
             ${isFav ? '★ В избранном' : '☆ В избранное'}
@@ -1643,39 +1742,18 @@ el.innerHTML = `
     r.appendChild(el);
   });
 
-    document.querySelectorAll('.btn-fav').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      const id = btn.getAttribute('data-id');
-      toggleFavoriteById(id);
-    });
+  // обработчики для кнопок
+  document.querySelectorAll('.btn-fav').forEach(btn=>{
+    btn.addEventListener('click',()=>{ const id = btn.getAttribute('data-id'); toggleFavoriteById(id); });
   });
-
   document.querySelectorAll('.btn-compare').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      const id = btn.getAttribute('data-id');
-      toggleCompareById(id);
-    });
+    btn.addEventListener('click',()=>{ const id = btn.getAttribute('data-id'); toggleCompareById(id); });
   });
-
   document.querySelectorAll('.btn-help').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      alert('Скоро здесь появится AI-разбор маршрута от Yuvia ✨');
-    });
-  });
-
-  // раскрытие подробностей под каждым рейсом
-  document.querySelectorAll('.result-leg-toggle').forEach(btnToggle=>{
-    btnToggle.addEventListener('click', ()=>{
-      const extra = btnToggle.nextElementSibling;
-      if(!extra) return;
-      extra.classList.toggle('visible');
-      const chev = btnToggle.querySelector('.result-leg-chevron');
-      if(chev){
-        chev.textContent = extra.classList.contains('visible') ? '▴' : '▾';
-      }
-    });
+    btn.addEventListener('click',()=>{ alert('Скоро здесь появится AI-разбор маршрута от Yuvia ✨'); });
   });
 }
+
 
 
 ['change','input'].forEach(ev=>{
