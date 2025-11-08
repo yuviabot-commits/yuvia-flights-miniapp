@@ -209,12 +209,13 @@
       transform:translateY(-1px);
     }
 
-    .result-main{
-      display:grid;
-      grid-template-columns:minmax(0,260px) minmax(0,1fr) auto;
-      gap:12px;
-      align-items:center;
-    }
+.result-main{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto; /* левая колонка = оба рейса, справа — цена */
+  gap:12px;
+  align-items:flex-start;
+}
+
 
     .result-main-left-top{
       font-size:18px;
@@ -235,6 +236,94 @@
     .result-leg-row{ display:flex; gap:6px; align-items:flex-start; }
     .result-leg-label{ font-weight:600; color:var(--ink); min-width:74px; }
     .result-leg-body{ flex:1; }
+/* Карточки сегментов (туда / обратно, как у Aviasales) */
+.result-legs{
+  margin-top:10px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.result-leg-card{
+  border-radius:12px;
+  border:1px solid var(--line);
+  background:#f9fafb;
+  padding:8px 10px;
+}
+
+.result-leg-header{
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr) auto;
+  gap:8px;
+  align-items:center;
+}
+
+.result-leg-block{
+  min-width:80px;
+}
+
+.result-leg-time{
+  font-size:18px;
+  font-weight:600;
+}
+
+.result-leg-city{
+  font-size:13px;
+  color:var(--muted);
+}
+
+.result-leg-airport{
+  font-size:11px;
+  color:var(--muted);
+}
+
+.result-leg-center{
+  text-align:center;
+  font-size:12px;
+  color:var(--muted);
+}
+
+.result-leg-line{
+  position:relative;
+  height:4px;
+  border-radius:999px;
+  background:linear-gradient(90deg,rgba(7,94,84,0.18),rgba(7,94,84,0.06));
+  margin-bottom:4px;
+}
+
+.result-leg-duration{
+  font-size:12px;
+  color:var(--muted);
+}
+
+/* раскрывающиеся детали под каждым рейсом */
+.result-leg-toggle{
+  margin-top:4px;
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  font-size:12px;
+  color:var(--accent);
+  background:transparent;
+  border:none;
+  padding:0;
+  cursor:pointer;
+}
+
+.result-leg-chevron{
+  font-size:11px;
+}
+
+.result-leg-extra{
+  margin-top:6px;
+  font-size:13px;
+  color:var(--muted);
+  display:none;
+}
+
+.result-leg-extra.visible{
+  display:block;
+}
 
     .result-main-right{
       text-align:right;
@@ -713,7 +802,7 @@
   </div>
 </div>
 
-<div class="version">версия 13.4</div>
+<div class="version">версия 13.5</div>
 
 <script>
 /* ========= helpers ========= */
@@ -1436,7 +1525,7 @@ function applyFiltersAndSort(){
     if(mainDurationHours>5) detailsExtras.push('Длительный перелёт, заложи время на отдых и питание.');
     const extrasText = detailsExtras.join(' ');
 
-    el.innerHTML = `
+el.innerHTML = `
       <div class="result-main">
         <div>
           <div class="result-main-left-top">
@@ -1446,28 +1535,75 @@ function applyFiltersAndSort(){
           <div class="result-main-left-sub">
             ${x.depDateStr || ''}${x.retDateStr ? (' — ' + x.retDateStr) : ''}
           </div>
-          <div class="result-main-directions">
-            <div class="result-leg-row">
-              <div class="result-leg-label">Туда</div>
-              <div class="result-leg-body">${legToPieces.join(' · ')}</div>
+
+          <!-- две карточки: туда и обратно -->
+          <div class="result-legs">
+            <!-- ТУДА -->
+            <div class="result-leg-card">
+              <div class="result-leg-header">
+                <div class="result-leg-block">
+                  <div class="result-leg-time">${x.depTimeTo || '—'}</div>
+                  <div class="result-leg-city">${x.origin}</div>
+                  <div class="result-leg-airport">${x.origin_airport || ''}</div>
+                </div>
+                <div class="result-leg-center">
+                  <div class="result-leg-line"></div>
+                  <div class="result-leg-duration">в пути ~${mainDurationHours || '—'} ч · ${transfersText}</div>
+                </div>
+                <div class="result-leg-block">
+                  <div class="result-leg-time">${x.arrTime || ''}</div>
+                  <div class="result-leg-city">${x.destination}</div>
+                  <div class="result-leg-airport">${x.dest_airport || ''}</div>
+                </div>
+              </div>
+
+              <button type="button" class="result-leg-toggle" data-leg="to">
+                <span class="result-leg-chevron">▾</span>
+                <span>Детали рейса</span>
+              </button>
+              <div class="result-leg-extra">
+                <strong>Туда:</strong> ${legToPieces.join(' · ')}<br>
+                <strong>Пересадки:</strong> ${transfersText}<br>
+                <strong>Дополнительно:</strong> ${extrasText}
+              </div>
             </div>
+
             ${hasReturnInfo ? `
-            <div class="result-leg-row">
-              <div class="result-leg-label">Обратно</div>
-              <div class="result-leg-body">${legBackPieces.join(' · ')}</div>
-            </div>` : ''}
+            <!-- ОБРАТНО -->
+            <div class="result-leg-card">
+              <div class="result-leg-header">
+                <div class="result-leg-block">
+                  <div class="result-leg-time">${x.retDepTime || '—'}</div>
+                  <div class="result-leg-city">${x.destination}</div>
+                  <div class="result-leg-airport">${x.dest_airport || ''}</div>
+                </div>
+                <div class="result-leg-center">
+                  <div class="result-leg-line"></div>
+                  <div class="result-leg-duration">
+                    в пути ~${x.duration_back_hours || '—'} ч · ${transfersText}
+                  </div>
+                </div>
+                <div class="result-leg-block">
+                  <div class="result-leg-time"> </div>
+                  <div class="result-leg-city">${x.origin}</div>
+                  <div class="result-leg-airport">${x.origin_airport || ''}</div>
+                </div>
+              </div>
+
+              <button type="button" class="result-leg-toggle" data-leg="back">
+                <span class="result-leg-chevron">▾</span>
+                <span>Детали рейса</span>
+              </button>
+              <div class="result-leg-extra">
+                <strong>Обратно:</strong> ${legBackPieces.join(' · ')}<br>
+                <strong>Пересадки:</strong> ${transfersText}<br>
+                <strong>Дополнительно:</strong> ${extrasText}
+              </div>
+            </div>
+            ` : ''}
           </div>
         </div>
-        <div class="route-timeline">
-          <div class="route-timeline-top">
-            <span>${durationLabel}</span>
-            <span>${transfersText}</span>
-          </div>
-          <div class="route-line">
-            <div class="route-line-fill"></div>
-            <div class="route-bird-plane" aria-hidden="true">🕊️✈️</div>
-          </div>
-        </div>
+
         <div class="result-main-right">
           <div class="price">${x.price.toLocaleString('ru-RU')} ${x.currency}</div>
           <div class="airline-logo-wrap">
@@ -1489,14 +1625,7 @@ function applyFiltersAndSort(){
       </div>
 
       <div class="result-footer">
-        <div>
-          <strong>Туда:</strong> ${legToPieces.join(' · ')}
-          ${hasReturnInfo ? `<br><strong>Обратно:</strong> ${legBackPieces.join(' · ')}` : ''}
-          <br>
-          <strong>Пересадки:</strong> ${transfersText}
-          <br>
-          <strong>Дополнительно:</strong> ${extrasText}
-        </div>
+        <div></div>
         <div class="result-footer-actions">
           <button type="button" class="btn-ghost btn-sm btn-fav" data-id="${x.id}">
             ${isFav ? '★ В избранном' : '☆ В избранное'}
@@ -1510,6 +1639,7 @@ function applyFiltersAndSort(){
         </div>
       </div>
     `;
+
     r.appendChild(el);
   });
 
@@ -1521,6 +1651,18 @@ function applyFiltersAndSort(){
   });
   document.querySelectorAll('.btn-help').forEach(btn=>{
     btn.addEventListener('click',()=>{ alert('Скоро здесь появится AI-разбор маршрута от Yuvia ✨'); });
+  });
+    // раскрытие подробностей под каждым рейсом
+  el.querySelectorAll('.result-leg-toggle').forEach(btnToggle=>{
+    btnToggle.addEventListener('click', ()=>{
+      const extra = btnToggle.nextElementSibling;
+      if(!extra) return;
+      extra.classList.toggle('visible');
+      const chev = btnToggle.querySelector('.result-leg-chevron');
+      if(chev){
+        chev.textContent = extra.classList.contains('visible') ? '▴' : '▾';
+      }
+    });
   });
 }
 
