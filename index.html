@@ -11,7 +11,6 @@
 
   <style>
     :root{
-      /* Палитра под логотип */
       --bg:#ffffff;
       --surface:#ffffff;
       --ink:#053227;
@@ -54,7 +53,6 @@
       padding:14px 18px;
     }
 
-    /* форма поиска чуть темнее */
     #searchForm{
       background:#f3faf8;
       border-color:rgba(7,94,84,0.18);
@@ -189,7 +187,7 @@
       padding:7px 14px;
     }
 
-    /* -------- Карточка результата: новый вид -------- */
+    /* -------- Карточка результата -------- */
     .result{
       display:flex;
       flex-direction:column;
@@ -205,6 +203,10 @@
       box-shadow:0 18px 40px rgba(15,23,42,0.12);
       transform:translateY(-1px);
       border-color:rgba(7,94,84,0.25);
+    }
+    .result.highlighted{
+      box-shadow:0 0 0 2px rgba(56,189,248,0.85),0 20px 45px rgba(15,23,42,0.25);
+      transform:translateY(-1px);
     }
 
     .result-main{
@@ -251,8 +253,8 @@
     }
 
     .airline-logo{
-      width:34px;
-      height:34px;
+      width:32px;
+      height:32px;
       border-radius:999px;
       overflow:hidden;
       border:1px solid #e5e7eb;
@@ -265,8 +267,8 @@
       color:var(--accent);
     }
     .airline-logo img{
-      width:100%;
-      height:100%;
+      width:70%;
+      height:70%;
       object-fit:contain;
       display:block;
     }
@@ -275,7 +277,7 @@
       margin-top:6px;
     }
 
-    /* Линия маршрута + анимация птички */
+    /* Линия маршрута + птичка */
     .route-timeline{
       display:flex;
       flex-direction:column;
@@ -302,31 +304,31 @@
     }
     .route-bird-plane{
       position:absolute;
-      top:50%;
+      top:0;
       left:0;
-      transform:translate(-10%, -50%);
+      transform:translate(-10%, -130%);
       width:22px;
       height:22px;
       border-radius:999px;
       background:#ffffff;
-      border:1px solid rgba(34,197,133,0.5);
+      border:1px solid rgba(34,197,133,0.6);
       display:flex;
       align-items:center;
       justify-content:center;
       font-size:11px;
-      box-shadow:0 4px 12px rgba(7,94,84,0.35);
+      box-shadow:0 4px 14px rgba(7,94,84,0.4);
       animation:fly-route 6s ease-in-out infinite;
     }
 
     @keyframes fly-route{
       0%{
-        transform:translate(-10%, -50%);
+        transform:translate(-10%, -130%);
       }
       50%{
-        transform:translate(110%, -60%);
+        transform:translate(110%, -145%);
       }
       100%{
-        transform:translate(-10%, -50%);
+        transform:translate(-10%, -130%);
       }
     }
 
@@ -386,10 +388,11 @@
     }
 
     .badge-yuvia{
-      background:var(--accent);
-      border-color:var(--accent);
-      color:#ecfeff;
-      box-shadow:0 8px 22px rgba(7,94,84,0.45);
+      background:linear-gradient(135deg,rgba(7,94,84,0.1),rgba(13,148,136,0.25));
+      border-color:rgba(13,148,136,0.7);
+      color:#064e3b;
+      box-shadow:0 6px 18px rgba(13,148,136,0.35);
+      font-weight:600;
     }
 
     .result-footer{
@@ -461,9 +464,8 @@
 
     .advanced.hidden{display:none;}
 
-    /* ------- Форма поиска: 4 линии ------- */
+    /* ------- Форма поиска ------- */
 
-    /* одинаковая высота всех полей в шапке */
     .search-grid input,
     .pax-trigger{
       height:48px;
@@ -471,16 +473,15 @@
       padding-bottom:9px;
     }
 
-    /* сетка полей поиска */
     .search-grid{
       display:grid;
       grid-template-columns:
-        1.25fr   /* Откуда */
-        52px     /* Стрелка */
-        1.25fr   /* Куда */
-        0.9fr    /* Дата вылета */
-        0.9fr    /* Дата возвращения */
-        1.05fr;  /* Пассажиры */
+        1.25fr
+        52px
+        1.25fr
+        0.9fr
+        0.9fr
+        1.05fr;
       grid-auto-rows:auto;
       column-gap:14px;
       row-gap:4px;
@@ -504,7 +505,6 @@
       align-self:start;
     }
 
-    /* клетка со стрелкой */
     .swap-cell{
       display:flex;
       align-items:center;
@@ -533,7 +533,6 @@
       background:#ecfdf5;
     }
 
-    /* 4-я строка – кнопки */
     .search-actions-row{
       margin-top:14px;
       display:flex;
@@ -698,6 +697,50 @@
 
     .hidden{display:none !important;}
 
+    /* Модалка сравнения */
+    .compare-modal-backdrop{
+      position:fixed;
+      inset:0;
+      background:rgba(15,23,42,0.35);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:998;
+    }
+    .compare-modal{
+      background:#ffffff;
+      border-radius:18px;
+      padding:16px 20px;
+      max-width:760px;
+      width:100%;
+      box-shadow:0 28px 70px rgba(15,23,42,0.55);
+    }
+    .compare-modal h3{
+      margin:0 0 10px;
+      font-size:18px;
+    }
+    .compare-table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:13px;
+    }
+    .compare-table th,
+    .compare-table td{
+      padding:6px 8px;
+      border-bottom:1px solid #e5e7eb;
+      text-align:left;
+      white-space:nowrap;
+    }
+    .compare-table th{
+      font-weight:600;
+      color:#4b5563;
+    }
+    .compare-close{
+      margin-top:10px;
+      display:flex;
+      justify-content:flex-end;
+    }
+
     @media (max-width:900px){
       .two-col{grid-template-columns:1fr}
 
@@ -735,6 +778,13 @@
       }
       .result-footer-actions{
         justify-content:flex-start;
+      }
+
+      .compare-modal{
+        margin:0 10px;
+      }
+      .compare-table{
+        font-size:12px;
       }
     }
 
@@ -838,7 +888,6 @@
   <!-- Форма поиска -->
   <div class="card" id="searchForm">
     <div class="search-grid">
-      <!-- Линия 1: текст -->
       <div class="label">Откуда</div>
       <div></div>
       <div class="label">Куда</div>
@@ -846,7 +895,6 @@
       <div class="label">Дата возвращения</div>
       <div class="label">Пассажиры</div>
 
-      <!-- Линия 2: блоки -->
       <div>
         <input id="origin" placeholder="Москва" autocomplete="off" />
       </div>
@@ -874,13 +922,11 @@
           <span class="pax-chevron">▾</span>
         </button>
 
-        <!-- скрытый селект для скриптов -->
         <select id="adults" style="display:none">
           <option>1</option><option>2</option><option>3</option>
           <option>4</option><option>5</option><option>6</option>
         </select>
 
-        <!-- панель пассажиров -->
         <div class="pax-panel hidden" id="paxPanel">
           <div class="pax-row">
             <div class="pax-label-wrap">
@@ -925,7 +971,6 @@
         </div>
       </div>
 
-      <!-- Линия 3: подсказки -->
       <div class="hint" id="originIataHint"></div>
       <div></div>
       <div class="hint" id="destIataHint"></div>
@@ -934,13 +979,11 @@
       <div class="pax-hint-placeholder"></div>
     </div>
 
-    <!-- 4 строка: кнопки -->
     <div class="search-actions-row">
       <button class="btn-primary" id="doSearch">Искать</button>
       <button class="btn-ghost" id="toggleAdvanced">Расширенный поиск</button>
     </div>
 
-    <!-- расширенный блок -->
     <div id="advancedBlock" class="advanced hidden">
       <div class="divider"></div>
       <div class="grid grid-2">
@@ -1084,7 +1127,7 @@
   </div>
 </div>
 
-<div class="version">версия 13.1</div>
+<div class="version">версия 13.2</div>
 
 <script>
 /* ========= helpers ========= */
@@ -1136,6 +1179,26 @@ function timeWindowStrToRange(v){
   if(v==='day') return [12,18];
   if(v==='evening') return [18,24];
   return null;
+}
+
+/* извлечение времени из разных форматов */
+function extractTime(val){
+  if(!val) return '';
+  if(/^\d{2}:\d{2}/.test(val)) return val.slice(0,5);
+  const m = String(val).match(/T(\d{2}:\d{2})/);
+  if(m) return m[1];
+  return '';
+}
+function extractDateStr(val){
+  if(!val) return '';
+  let iso = '';
+  if(/^\d{4}-\d{2}-\d{2}$/.test(val)) iso = val;
+  else{
+    const m = String(val).match(/(\d{4}-\d{2}-\d{2})/);
+    if(m) iso = m[1];
+  }
+  if(!iso) return '';
+  return iso.split('-').reverse().join('.');
 }
 
 /* ========= state: недавние запросы ========= */
@@ -1378,7 +1441,7 @@ function toggleFavoriteById(id){
   }
   saveFavorites();
   renderFavoritesBlock();
-  applyFiltersAndSort(); // чтобы подписи на кнопках обновились
+  applyFiltersAndSort();
 }
 
 function clearFavorites(){
@@ -1512,8 +1575,73 @@ function renderCompareBlock(){
   block.innerHTML = `
     <div class="section-title" style="margin-top:0">Сравнение рейсов (${compareList.length})</div>
     <div class="compare-list">${listHtml}</div>
-    <button class="btn-ghost btn-sm" style="margin-top:8px" onclick="clearCompare()">Очистить список</button>
+    <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn-secondary btn-sm" onclick="openCompareModal()">Сравнить подробно</button>
+      <button class="btn-ghost btn-sm" onclick="clearCompare()">Очистить список</button>
+    </div>
   `;
+}
+
+/* модалка сравнения */
+function openCompareModal(){
+  if(!compareList.length) return;
+  const backdrop = document.createElement('div');
+  backdrop.className = 'compare-modal-backdrop';
+  const rows = compareList.map(f=>{
+    const stressMap = {low:'низкий',medium:'средний',high:'высокий'};
+    const stressLabel = f.stressLevel ? stressMap[f.stressLevel] : '';
+    const ratingStr = f.rating ? f.rating.toFixed(1).replace('.',',') : '';
+    const transfersText = f.transfers===0
+      ? 'без пересадок'
+      : f.transfers===1 ? '1 пересадка' : `${f.transfers} пересадки`;
+    const durLabel = f.durStr || (f.duration_hours?`${f.duration_hours} ч`:'—');
+    return `
+      <tr>
+        <td>${f.origin} → ${f.destination}</td>
+        <td>${f.depDateStr || ''}</td>
+        <td>${f.depTime || ''}</td>
+        <td>${transfersText}</td>
+        <td>${durLabel}</td>
+        <td>${ratingStr}</td>
+        <td>${stressLabel}</td>
+        <td>${f.price.toLocaleString('ru-RU')} ${f.currency}</td>
+        <td>${f.airline || f.airlineCode || ''}</td>
+      </tr>`;
+  }).join('');
+  backdrop.innerHTML = `
+    <div class="compare-modal">
+      <h3>Сравнение рейсов от Yuvia</h3>
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>Маршрут</th>
+            <th>Дата</th>
+            <th>Вылет</th>
+            <th>Пересадки</th>
+            <th>В пути</th>
+            <th>Оценка</th>
+            <th>Стресс</th>
+            <th>Цена</th>
+            <th>Авиакомпания</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div class="compare-close">
+        <button class="btn-ghost btn-sm" type="button" id="closeCompareModalBtn">Закрыть</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(backdrop);
+  const close = ()=>{ if(backdrop.parentNode) backdrop.parentNode.removeChild(backdrop); };
+  backdrop.addEventListener('click',e=>{ if(e.target===backdrop) close(); });
+  backdrop.querySelector('#closeCompareModalBtn').addEventListener('click',close);
+  document.addEventListener('keydown',function escHandler(e){
+    if(e.key==='Escape'){
+      close();
+      document.removeEventListener('keydown',escHandler);
+    }
+  });
 }
 
 /* ========= фильтры ========= */
@@ -1580,7 +1708,6 @@ function applyFiltersAndSort(){
     return;
   }
 
-  // определяем максимальный рейтинг для бейджа "Рекомендация Yuvia"
   const maxRating = Math.max(...list.map(f=>f.rating||0), 0);
 
   list.forEach(x=>{
@@ -1605,21 +1732,33 @@ function applyFiltersAndSort(){
 
     const logoHtml = x.airlineCode ? `
       <div class="airline-logo">
-        <img src="https://pics.avs.io/48/48/${x.airlineCode}.png" alt="${x.airlineCode}" onerror="this.parentNode.textContent='${(x.airlineCode||'').slice(0,2)}'">
+        <img src="https://pics.avs.io/120/120/${x.airlineCode}.png" alt="${x.airlineCode}" onerror="this.parentNode.textContent='${(x.airlineCode||'').slice(0,2)}'">
       </div>` : `
       <div class="airline-logo">${(x.airlineCode||x.airline||'').slice(0,2) || '—'}</div>
     `;
 
     const isRecommended = x.rating && (x.rating >= maxRating - 0.3);
 
+    const timesText = x.depTime && x.arrTime
+      ? `${x.depTime} · прилёт ${x.arrTime}`
+      : x.depTime
+        ? `вылет ${x.depTime}`
+        : x.arrTime
+          ? `прилёт ${x.arrTime}`
+          : '';
+
+    const detailsExtras = [];
+    detailsExtras.push('Ручная кладь обычно включена, багаж — по тарифу авиакомпании.');
+    if(x.transfers>0) detailsExtras.push('При пересадках возможна смена терминала — проверь детали на Aviasales.');
+    if(x.duration_hours>5) detailsExtras.push('Длительный перелёт, заложи время на отдых и питание.');
+    const extrasText = detailsExtras.join(' ');
+
     el.innerHTML = `
       <div class="result-main">
         <div>
           <div class="result-main-left-top">${x.origin} ${x.origin_airport?`(${x.origin_airport})`:''} → ${x.destination} ${x.dest_airport?`(${x.dest_airport})`:''}</div>
           <div class="result-main-left-sub">${x.depDateStr}${x.retDateStr?(' — '+x.retDateStr):''}</div>
-          <div class="result-main-left-times">
-            ${x.depTime || '--:--'} · прилёт ${x.arrTime || '--:--'}
-          </div>
+          ${timesText ? `<div class="result-main-left-times">${timesText}</div>` : ''}
         </div>
         <div class="route-timeline">
           <div class="route-timeline-top">
@@ -1657,6 +1796,8 @@ function applyFiltersAndSort(){
           ${x.arrTime?(' · прилёт '+x.arrTime):''}
           <br>
           <strong>Пересадки:</strong> ${transfersText}
+          <br>
+          <strong>Дополнительно:</strong> ${extrasText}
         </div>
         <div class="result-footer-actions">
           <button type="button" class="btn-ghost btn-sm btn-fav" data-id="${x.id}">
@@ -1674,7 +1815,6 @@ function applyFiltersAndSort(){
     r.appendChild(el);
   });
 
-  // навешиваем события на кнопки избранного/сравнения/помощи
   document.querySelectorAll('.btn-fav').forEach(btn=>{
     btn.addEventListener('click',()=>{
       const id = btn.getAttribute('data-id');
@@ -1716,7 +1856,7 @@ function computeRatingAndStress(x){
   const depTime = x.depTime || '';
   if(/^(\d{2}):/.test(depTime)){
     const hh = parseInt(depTime.slice(0,2),10);
-    if(hh<6 || hh>=23) rating -= 0.8; // ночной вылет
+    if(hh<6 || hh>=23) rating -= 0.8;
   }
 
   rating = Math.max(4, Math.min(10, rating));
@@ -1731,10 +1871,15 @@ function computeRatingAndStress(x){
 
 /* ========= нормализация рейса ========= */
 function normalizeFlight(x,{ori,dst,cur,d1,d2,oneway,adults}){
-  const depDateStr = x.depart_date ? x.depart_date.split('T')[0].split('-').reverse().join('.') : '';
-  const retDateStr = x.return_date ? x.return_date.split('T')[0].split('-').reverse().join('.') : '';
-  const depTime = x.depart_time || x.departure_time || '';
-  const arrTime = x.arrival_time || x.arr_time || '';
+  const rawDepDate = x.depart_date || x.departure_at || '';
+  const rawRetDate = x.return_date || x.return_at || '';
+
+  const depDateStr = extractDateStr(rawDepDate);
+  const retDateStr = extractDateStr(rawRetDate);
+
+  const depTime = extractTime(x.depart_time || x.departure_time || x.departure_at || '');
+  const arrTime = extractTime(x.arrival_time || x.arr_time || x.return_at || '');
+
   const hh = depTime ? parseInt(depTime.slice(0,2),10) : null;
   const airlineCode = x.airline_code || x.airline_iata || x.airline || '';
   const dur = x.duration || x.duration_to || 0;
