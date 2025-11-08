@@ -215,16 +215,39 @@
       gap:12px;
       align-items:center;
     }
+.result-main-left-top{
+  font-size:18px;
+  font-weight:600;
+  margin-bottom:2px;
+}
+.result-main-left-sub{
+  font-size:13px;
+  color:var(--muted);
+}
 
-    .result-main-left-top{
-      font-size:18px;
-      font-weight:600;
-      margin-bottom:2px;
-    }
-    .result-main-left-sub{
-      font-size:13px;
-      color:var(--muted);
-    }
+    /* Блок "Туда / Обратно" в карточке */
+.result-main-directions{
+  margin-top:6px;
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+  font-size:13px;
+  color:var(--muted);
+}
+.result-leg-row{
+  display:flex;
+  gap:6px;
+  align-items:flex-start;
+}
+.result-leg-label{
+  font-weight:600;
+  color:var(--ink);
+  min-width:74px;
+}
+.result-leg-body{
+  flex:1;
+}
+
     .result-main-left-times{
       margin-top:4px;
       font-size:14px;
@@ -1127,7 +1150,7 @@
   </div>
 </div>
 
-<div class="version">версия 13.2</div>
+<div class="version">версия 13.3</div>
 
 <script>
 /* ========= helpers ========= */
@@ -1710,110 +1733,7 @@ function applyFiltersAndSort(){
 
   const maxRating = Math.max(...list.map(f=>f.rating||0), 0);
 
-  list.forEach(x=>{
-    const el=document.createElement('div'); el.className='result';
-    el.dataset.id = x.id;
-
-    const transfersText = x.transfers===0
-      ? 'без пересадок'
-      : x.transfers===1
-        ? '1 пересадка'
-        : `${x.transfers} пересадки`;
-
-    const durationLabel = x.durStr || (x.duration_hours?`${x.duration_hours} ч`:'—');
-
-    const ratingStr = x.rating ? x.rating.toFixed(1).replace('.',',') : '';
-    const stressMap = {low:'низкий',medium:'средний',high:'высокий'};
-    const stressLabel = x.stressLevel ? stressMap[x.stressLevel] : '';
-    const stressClass = x.stressLevel ? `badge-stress-${x.stressLevel}` : '';
-
-    const isFav = isFavorite(x.id);
-    const inCompare = isInCompare(x.id);
-
-    const logoHtml = x.airlineCode ? `
-      <div class="airline-logo">
-        <img src="https://pics.avs.io/120/120/${x.airlineCode}.png" alt="${x.airlineCode}" onerror="this.parentNode.textContent='${(x.airlineCode||'').slice(0,2)}'">
-      </div>` : `
-      <div class="airline-logo">${(x.airlineCode||x.airline||'').slice(0,2) || '—'}</div>
-    `;
-
-    const isRecommended = x.rating && (x.rating >= maxRating - 0.3);
-
-    const timesText = x.depTime && x.arrTime
-      ? `${x.depTime} · прилёт ${x.arrTime}`
-      : x.depTime
-        ? `вылет ${x.depTime}`
-        : x.arrTime
-          ? `прилёт ${x.arrTime}`
-          : '';
-
-    const detailsExtras = [];
-    detailsExtras.push('Ручная кладь обычно включена, багаж — по тарифу авиакомпании.');
-    if(x.transfers>0) detailsExtras.push('При пересадках возможна смена терминала — проверь детали на Aviasales.');
-    if(x.duration_hours>5) detailsExtras.push('Длительный перелёт, заложи время на отдых и питание.');
-    const extrasText = detailsExtras.join(' ');
-
-    el.innerHTML = `
-      <div class="result-main">
-        <div>
-          <div class="result-main-left-top">${x.origin} ${x.origin_airport?`(${x.origin_airport})`:''} → ${x.destination} ${x.dest_airport?`(${x.dest_airport})`:''}</div>
-          <div class="result-main-left-sub">${x.depDateStr}${x.retDateStr?(' — '+x.retDateStr):''}</div>
-          ${timesText ? `<div class="result-main-left-times">${timesText}</div>` : ''}
-        </div>
-        <div class="route-timeline">
-          <div class="route-timeline-top">
-            <span>${durationLabel}</span>
-            <span>${transfersText}</span>
-          </div>
-          <div class="route-line">
-            <div class="route-line-fill"></div>
-            <div class="route-bird-plane" aria-hidden="true">🕊️✈️</div>
-          </div>
-        </div>
-        <div class="result-main-right">
-          <div class="price">${x.price.toLocaleString('ru-RU')} ${x.currency}</div>
-          <div class="airline-logo-wrap">
-            ${logoHtml}
-            <span>${x.airline || 'авиакомпания неизвестна'}</span>
-          </div>
-          <a href="${x.deeplink}" target="_blank" rel="noopener">
-            <button class="btn-primary btn-sm">На Aviasales</button>
-          </a>
-        </div>
-      </div>
-
-      <div class="result-tags">
-        ${ratingStr ? `<span class="badge badge-rating" title="Оценка Yuvia: учитываем длительность, пересадки, ночные перелёты и ещё несколько факторов.">Оценка маршрута ${ratingStr}</span>` : ''}
-        ${stressLabel ? `<span class="badge ${stressClass}" title="Стресс Yuvia: ночные вылеты, короткие стыковки, смена аэропортов и т.п.">стресс: ${stressLabel}</span>` : ''}
-        <span class="badge badge-chip">${transfersText}</span>
-        ${x.duration_hours ? `<span class="badge badge-chip">в пути ~${x.duration_hours} ч</span>` : ''}
-        ${isRecommended ? `<span class="badge badge-yuvia">Рекомендация Yuvia</span>` : ''}
-      </div>
-
-      <div class="result-footer">
-        <div>
-          <strong>Туда:</strong> ${x.depDateStr || ''}${x.depTime?(' · вылет '+x.depTime):''}
-          ${x.arrTime?(' · прилёт '+x.arrTime):''}
-          <br>
-          <strong>Пересадки:</strong> ${transfersText}
-          <br>
-          <strong>Дополнительно:</strong> ${extrasText}
-        </div>
-        <div class="result-footer-actions">
-          <button type="button" class="btn-ghost btn-sm btn-fav" data-id="${x.id}">
-            ${isFav ? '★ В избранном' : '☆ В избранное'}
-          </button>
-          <button type="button" class="btn-ghost btn-sm btn-compare" data-id="${x.id}">
-            ${inCompare ? '✓ В сравнении' : '⇄ Добавить в сравнение'}
-          </button>
-          <button type="button" class="btn-ghost btn-sm btn-help" data-id="${x.id}">
-            Помощь Yuvia
-          </button>
-        </div>
-      </div>
-    `;
-    r.appendChild(el);
-  });
+list.forEach(x=>{
 
   document.querySelectorAll('.btn-fav').forEach(btn=>{
     btn.addEventListener('click',()=>{
@@ -1849,7 +1769,9 @@ function applyFiltersAndSort(){
 /* ========= простая "оценка Yuvia" ========= */
 function computeRatingAndStress(x){
   let rating = 9.5;
-  const t = x.duration_hours || 0;
+
+  // главное – длительность туда
+  const t = x.duration_to_hours || x.duration_hours || 0;
   if(t>3) rating -= (t-3)*0.35;
   rating -= (x.transfers||0)*1.7;
 
@@ -1869,41 +1791,95 @@ function computeRatingAndStress(x){
   return {rating, stressLevel};
 }
 
+
 /* ========= нормализация рейса ========= */
 function normalizeFlight(x,{ori,dst,cur,d1,d2,oneway,adults}){
   const rawDepDate = x.depart_date || x.departure_at || '';
   const rawRetDate = x.return_date || x.return_at || '';
 
-  const depDateStr = extractDateStr(rawDepDate);
-  const retDateStr = extractDateStr(rawRetDate);
+  let depDateStr = extractDateStr(rawDepDate);
+  let retDateStr = extractDateStr(rawRetDate);
 
-  const depTime = extractTime(x.depart_time || x.departure_time || x.departure_at || '');
-  const arrTime = extractTime(x.arrival_time || x.arr_time || x.return_at || '');
+  // если API не вернул дату возврата, но у пользователя она есть — показываем её
+  if(!retDateStr && d2){
+    retDateStr = ddmmyyyy(d2);
+  }
+
+  // время вылета туда (как и раньше)
+  const depTime = extractTime(
+    x.depart_time || x.departure_time || x.departure_at || ''
+  );
+
+  // время "прилёта" оставляем для фильтров как было
+  const arrTime = extractTime(
+    x.arrival_time || x.arr_time || x.return_at || ''
+  );
+
+  // отдельные поля для туда / обратно
+  const depTimeTo = depTime;
+  const retDepTime = extractTime(
+    x.return_time || x.return_at || rawRetDate || ''
+  );
+
+  // длительности
+  const durTo  = x.duration_to  ?? x.duration ?? 0;
+  const durBack = x.duration_back ?? 0;
+
+  const duration_to_hours   = durTo    ? Math.round(durTo/60)    : 0;
+  const duration_back_hours = durBack  ? Math.round(durBack/60)  : 0;
+
+  // "главная" длительность для бейджа и рейтинга
+  const duration_hours =
+    duration_to_hours ||
+    (x.duration_hours ?? Math.round(((x.duration ?? durTo) || 0)/60));
 
   const hh = depTime ? parseInt(depTime.slice(0,2),10) : null;
-  const airlineCode = x.airline_code || x.airline_iata || x.airline || '';
-  const dur = x.duration || x.duration_to || 0;
-  const duration_hours = x.duration_hours ?? Math.round((dur||0)/60);
 
-  const deeplink = buildDeeplink({ori,dst,d1,d2:(oneway==='yes'?null:d2),currency:cur,adults,oneway});
+  const airlineCode = x.airline_code || x.airline_iata || x.airline || '';
+
+  const deeplink = buildDeeplink({
+    ori,
+    dst,
+    d1,
+    d2:(oneway==='yes'?null:d2),
+    currency:cur,
+    adults,
+    oneway
+  });
 
   const base = {
     origin:x.origin,
     destination:x.destination,
-    origin_airport:x.origin_airport || x.origin_airport_code || x.origin_airport_iata || '',
-    dest_airport:x.destination_airport || x.destination_airport_code || x.destination_airport_iata || '',
+    origin_airport:
+      x.origin_airport || x.origin_airport_code || x.origin_airport_iata || '',
+    dest_airport:
+      x.destination_airport || x.destination_airport_code || x.destination_airport_iata || '',
     price:Math.round(x.price ?? x.value ?? 0),
     currency:x.currency || cur,
     airline:x.airline || airlineCode || '',
     airlineCode,
-    transfers:(typeof x.transfers==='number')?x.transfers:(x.number_of_changes ?? 0),
-    duration:dur,
-    duration_to:dur,
+    transfers:(typeof x.transfers==='number')
+      ? x.transfers
+      : (x.number_of_changes ?? 0),
+
+    // длительности
+    duration:durTo,
+    duration_to:durTo,
+    duration_back:durBack,
     duration_hours,
-    durStr:duration_hours?`${duration_hours} ч`:'',
-    depTime, arrTime,
+    duration_to_hours,
+    duration_back_hours,
+    durStr:duration_hours ? `${duration_hours} ч` : '',
+
+    // времена
+    depTime,          // для фильтров "время вылета"
+    arrTime,          // для фильтров "время прилёта"
+    depTimeTo,        // вылет туда
+    retDepTime,       // вылет обратно
+
     depSort:(hh===null?0:hh*60 + (parseInt(depTime.slice(3,5),10)||0)),
-    depDateStr, retDateStr,
+    depDateStr,
+    retDateStr,
     deeplink
   };
 
@@ -1912,13 +1888,14 @@ function normalizeFlight(x,{ori,dst,cur,d1,d2,oneway,adults}){
   const id = [
     ori,dst,
     depDateStr,retDateStr,
-    depTime,arrTime,
+    depTimeTo,retDepTime,
     airlineCode,
     base.price
   ].join('|');
 
   return {...base, rating, stressLevel, id};
 }
+
 
 /* ========= matrix helper ========= */
 function showMatrixSafe(ori,dst,cur,d1,flex){
