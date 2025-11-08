@@ -12,12 +12,12 @@
   <style>
     :root{
       /* Палитра под логотип */
-      --bg:#ffffff;                 /* чисто белый фон */
+      --bg:#ffffff;
       --surface:#ffffff;
-      --ink:#053227;                /* тёмная ель */
+      --ink:#053227;
       --muted:#6b7280;
 
-      --accent:#075e54;             /* тёмный зелёный */
+      --accent:#075e54;
       --accent-soft:#e3f3ee;
       --accent-soft-2:#fff7e3;
       --berry:#b1365b;
@@ -183,37 +183,282 @@
       padding:7px 14px;
     }
 
+    /* ---------- НОВЫЙ ВИД КАРТОЧЕК РЕЗУЛЬТАТОВ ---------- */
+
     .result{
       display:grid;
-      grid-template-columns:minmax(0,1fr) auto;
-      gap:8px 12px;
-      padding:13px 14px;
-      margin-bottom:8px;
-      border-radius:16px;
+      grid-template-columns:minmax(0,3fr) minmax(220px,1.5fr);
+      gap:12px 18px;
+      padding:14px 16px;
+      margin-bottom:10px;
+      border-radius:18px;
       border:1px solid var(--line);
       background:#ffffff;
+      transition:box-shadow .18s ease, transform .18s ease, border-color .18s ease;
+    }
+    .result:hover{
+      box-shadow:0 18px 40px rgba(15,23,42,0.12);
+      transform:translateY(-2px);
+      border-color:rgba(7,94,84,0.22);
     }
 
-    .result-main-title{
-      font-weight:600;
-      margin-bottom:2px;
+    .result-main{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
     }
-    .result-meta,
-    .result-times{
-      font-size:13px;
+    .result-side{
+      text-align:right;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      align-items:flex-end;
+    }
+
+    .result-header-row{
+      display:grid;
+      grid-template-columns:1.1fr 1.4fr 1.1fr;
+      gap:10px;
+      align-items:center;
+      margin-bottom:4px;
+    }
+
+    .result-time-col{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+    .result-time-main{
+      display:flex;
+      align-items:baseline;
+      gap:6px;
+    }
+    .result-time{
+      font-size:20px;
+      font-weight:600;
+    }
+    .result-city{
+      font-size:14px;
+    }
+    .result-airport-code{
+      font-size:12px;
       color:var(--muted);
+    }
+    .result-date{
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .result-time-col-arr{text-align:right;}
+    .result-time-col-arr .result-time-main{justify-content:flex-end;}
+    .result-time-col-arr .result-airport-code,
+    .result-time-col-arr .result-date{text-align:right;}
+
+    .result-timeline{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:4px;
+    }
+    .result-timeline-line{
+      position:relative;
+      width:100%;
+      height:4px;
+      border-radius:999px;
+      background:linear-gradient(90deg,#a7f3d0,#22c55e);
+    }
+    .result-timeline-dot{
+      position:absolute;
+      top:50%;
+      width:10px;
+      height:10px;
+      border-radius:999px;
+      background:#ffffff;
+      border:2px solid #22c55e;
+      transform:translate(-50%,-50%);
+    }
+    .result-timeline-dot.start{left:0%;}
+    .result-timeline-dot.mid{left:50%;}
+    .result-timeline-dot.end{left:100%;}
+    .result-timeline-meta{
+      display:flex;
+      justify-content:center;
+      gap:8px;
+      font-size:11px;
+      color:var(--muted);
+    }
+
+    .result-badges-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      margin-top:4px;
+    }
+    .badge-pill{
+      display:inline-flex;
+      align-items:center;
+      padding:4px 8px;
+      border-radius:999px;
+      font-size:11px;
+      border:1px solid rgba(148,163,184,0.5);
+      background:#f9fafb;
+    }
+    .badge-airline{
+      background:#ecfeff;
+      border-color:rgba(8,145,178,0.45);
+    }
+    .badge-soft{
+      background:#fef9c3;
+      border-color:rgba(234,179,8,0.55);
+    }
+
+    .result-ai-row{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-top:6px;
+      font-size:13px;
+      flex-wrap:wrap;
+    }
+    .result-ai-score{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+      padding:6px 8px;
+      border-radius:12px;
+      background:#ecfdf5;
+      font-size:11px;
+      min-width:70px;
+    }
+    .result-ai-score-number{
+      font-size:16px;
+      font-weight:600;
+    }
+    .result-ai-score-label{
+      text-transform:uppercase;
+      letter-spacing:.05em;
+      color:#047857;
+    }
+    .result-ai-text{
+      flex:1;
+      min-width:140px;
+      color:var(--muted);
+    }
+    .result-ai-stress{
+      padding:4px 8px;
+      border-radius:999px;
+      font-size:11px;
+      text-transform:lowercase;
+    }
+    .result-ai-stress-1{
+      background:#dcfce7;
+      color:#166534;
+    }
+    .result-ai-stress-2{
+      background:#fef9c3;
+      color:#92400e;
+    }
+    .result-ai-stress-3{
+      background:#fee2e2;
+      color:#b91c1c;
+    }
+
+    .result-details-toggle{
+      margin-top:8px;
+      border-radius:999px;
+      border:1px dashed var(--line);
+      background:#f9fafb;
+      padding:6px 10px;
+      font-size:12px;
+      color:var(--accent);
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+    }
+    .result-details-toggle:hover{
+      background:#ecfdf5;
+    }
+    .result-details-caret{
+      transition:transform .18s ease;
+    }
+
+    .result-details{
+      display:none;
+      font-size:13px;
+      margin-top:6px;
+      padding-top:6px;
+      border-top:1px dashed var(--line);
+    }
+    .result-details.open{display:block;}
+    .result-details-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+      gap:6px 12px;
+    }
+    .result-details-label{
+      font-size:11px;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.04em;
+    }
+    .result-details-value{
+      font-size:13px;
+    }
+    .result-details-note{
+      margin-top:6px;
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .result-price-wrap{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      gap:4px;
+      margin-bottom:6px;
     }
     .price{
       font-weight:700;
       font-size:18px;
       white-space:nowrap;
     }
+    .result-right-reco{
+      font-size:11px;
+      padding:3px 8px;
+      border-radius:999px;
+      background:var(--accent-soft-2);
+      color:#92400e;
+    }
+
     .airline-logo{
       display:inline-block;
       height:24px;
       width:auto;
       border-radius:6px;
       margin-top:4px;
+    }
+
+    .result-side-buttons{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      margin-top:8px;
+    }
+    .result-main-btn{
+      width:100%;
+    }
+    .result-ghost-btn{
+      width:100%;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:#ffffff;
+      color:var(--accent);
+      font-size:13px;
+      padding:7px 10px;
+      cursor:pointer;
+    }
+    .result-ghost-btn:hover{
+      background:#f3faf8;
     }
 
     .bad{color:var(--danger)}
@@ -265,43 +510,33 @@
     /* ------- Форма поиска: 4 линии ------- */
 
     /* одинаковая высота всех полей в шапке: города, даты, пассажиры */
-.search-grid input,
-.pax-trigger{
-  height:48px;
-  padding-top:9px;
-  padding-bottom:9px;
-  /* остальное (border-radius, шрифт) наследуется из общих стилей input */
-}
+    .search-grid input,
+    .pax-trigger{
+      height:48px;
+      padding-top:9px;
+      padding-bottom:9px;
+    }
 
-
-    /* 3 строки внутри сетки:
-       1 — текст, 2 — поля, 3 — подсказки
-       6 колонок:
-       1 Откуда, 2 стрелка, 3 Куда, 4 Дата вылета,
-       5 Дата возвращения, 6 Пассажиры
-    */
     .search-grid{
       display:grid;
       grid-template-columns:
         1.25fr   /* Откуда */
-        52px    /* Стрелка */
+        52px     /* Стрелка */
         1.25fr   /* Куда */
-        0.9fr   /* Дата вылета */
-        0.9fr   /* Дата возвращения */
-        1.05fr; /* Пассажиры */
+        0.9fr    /* Дата вылета */
+        0.9fr    /* Дата возвращения */
+        1.05fr;  /* Пассажиры */
       grid-auto-rows:auto;
       column-gap:14px;
       row-gap:4px;
       align-items:start;
     }
 
-    /* строка 1 — текст, прижат к НИЗУ клетки */
     .search-grid .label{
       margin:0;
       align-self:end;
     }
 
-    /* строка 3 — подсказки, прижаты к ВЕРХУ клетки */
     .search-grid .hint{
       margin:0;
       align-self:start;
@@ -314,20 +549,14 @@
       align-self:start;
     }
 
-    /* клетка со стрелкой */
-  .swap-cell{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  /* небольшой оптический сдвиг влево, чтобы казалось строго по центру */
-  transform:translateX(-10px);   /* если хочется ещё чуть левее, попробуй -5 или -6 */
-}
-
-
-    /* класс оставляем, но без растягивания по строкам */
+    .swap-cell{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transform:translateX(-10px);
+    }
     .swap-cell--full{}
 
-    /* круглая кнопка-стрелка */
     .swap-btn{
       width:40px;
       height:40px;
@@ -348,7 +577,6 @@
       background:#ecfdf5;
     }
 
-    /* 4-я строка – кнопки */
     .search-actions-row{
       margin-top:14px;
       display:flex;
@@ -393,7 +621,6 @@
       color:var(--muted);
     }
 
-    /* панель с выбором пассажиров — выпадающее окошко */
     .pax-panel{
       position:absolute;
       right:0;
@@ -406,7 +633,6 @@
       z-index:50;
     }
 
-    /* скрыта по умолчанию */
     .pax-panel.hidden{
       display:none;
     }
@@ -485,6 +711,7 @@
 
       .swap-cell{
         justify-content:flex-start;
+        transform:none;
       }
 
       .search-actions-row{
@@ -496,6 +723,57 @@
         right:auto;
         left:0;
       }
+
+      .result{
+        grid-template-columns:1fr;
+      }
+      .result-side{
+        align-items:flex-start;
+        text-align:left;
+      }
+    }
+
+    /* панель сравнения */
+    .compare-bar{
+      margin:8px 0 8px;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px dashed var(--line);
+      background:#f8fafc;
+      font-size:13px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .compare-bar.hidden{display:none;}
+    .compare-title{font-weight:600;}
+    .compare-list{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+    .compare-item{
+      padding:6px 8px;
+      border-radius:10px;
+      background:#ffffff;
+      border:1px solid var(--line);
+      min-width:160px;
+    }
+    .compare-route{font-weight:500;font-size:13px;}
+    .compare-meta{font-size:11px;color:var(--muted);}
+    .compare-price{font-size:13px;margin-top:2px;}
+    .compare-clear-btn{
+      align-self:flex-start;
+      border-radius:999px;
+      border:1px dashed var(--line);
+      background:#ffffff;
+      padding:5px 10px;
+      font-size:12px;
+      cursor:pointer;
+      color:var(--accent);
+    }
+    .compare-clear-btn:hover{
+      background:#f1f5f9;
     }
 
     /* overlay загрузки */
@@ -515,7 +793,6 @@
       text-align:center;
     }
 
-    /* маленькая птица по центру */
     .loading-logo-wrap{
       position:relative;
       display:inline-block;
@@ -570,15 +847,13 @@
       color:var(--muted);
     }
 
-    /* ---------- Анимированный логотип в оверлее ---------- */
-
+    /* анимированный логотип (слои) */
     .loading-logo-anim{
       position:relative;
       width:210px;
       height:300px;
       margin:0 auto;
     }
-
     .loading-logo-anim .logo-layer{
       position:absolute;
       inset:0;
@@ -587,20 +862,16 @@
       object-fit:contain;
       pointer-events:none;
     }
-
     .loading-logo-anim .logo-bird{
       animation:bird-bob 1.2s ease-in-out infinite;
     }
-
     .loading-logo-anim .logo-wing{
       transform-origin:28% 52%;
       animation:wing-flap 0.6s ease-in-out infinite;
     }
-
     .loading-logo-anim .logo-sun{
       animation:sun-bob 2.4s ease-in-out infinite;
     }
-
     .loading-logo-anim .logo-arca{
       animation:arc-sway 2.4s ease-in-out infinite;
     }
@@ -609,39 +880,20 @@
     }
 
     @keyframes wing-flap{
-      0%,100%{
-        transform:rotate(0deg);
-      }
-      50%{
-        transform:rotate(-18deg) translateY(-6px);
-      }
+      0%,100%{transform:rotate(0deg);}
+      50%{transform:rotate(-18deg) translateY(-6px);}
     }
-
     @keyframes bird-bob{
-      0%,100%{
-        transform:translateY(0);
-      }
-      50%{
-        transform:translateY(-4px);
-      }
+      0%,100%{transform:translateY(0);}
+      50%{transform:translateY(-4px);}
     }
-
     @keyframes arc-sway{
-      0%,100%{
-        transform:rotate(0deg);
-      }
-      50%{
-        transform:rotate(3deg);
-      }
+      0%,100%{transform:rotate(0deg);}
+      50%{transform:rotate(3deg);}
     }
-
     @keyframes sun-bob{
-      0%,100%{
-        transform:translateY(0);
-      }
-      50%{
-        transform:translateY(-3px);
-      }
+      0%,100%{transform:translateY(0);}
+      50%{transform:translateY(-3px);}
     }
 
     .loading-logo-wrap{
@@ -676,6 +928,54 @@
       animation:glow-pulse 2.2s ease-in-out infinite;
     }
 
+    /* Оверлей "Спросить Ювию" (заглушка под ИИ) */
+    .ask-overlay{
+      position:fixed;
+      inset:0;
+      background:rgba(15,23,42,0.35);
+      display:flex;
+      justify-content:flex-end;
+      align-items:stretch;
+      z-index:998;
+    }
+    .ask-overlay.hidden{display:none;}
+    .ask-panel{
+      width:340px;
+      max-width:100%;
+      background:#f9fafb;
+      border-left:1px solid var(--line);
+      padding:16px 18px;
+      box-shadow:-12px 0 30px rgba(15,23,42,0.25);
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .ask-title{
+      font-weight:600;
+      font-size:16px;
+    }
+    .ask-close-btn{
+      align-self:flex-end;
+      border:none;
+      background:transparent;
+      font-size:18px;
+      line-height:1;
+      cursor:pointer;
+      color:var(--muted);
+    }
+    .ask-close-btn:hover{color:var(--ink);}
+    .ask-flight-summary{
+      font-size:13px;
+      padding:8px 10px;
+      border-radius:12px;
+      background:#ffffff;
+      border:1px solid var(--line);
+    }
+    .ask-message{
+      font-size:13px;
+      color:var(--muted);
+    }
+
     .version{
       position:fixed;
       bottom:8px;
@@ -694,7 +994,6 @@
 <div class="wrap">
   <!-- Бренд -->
   <header class="brand">
-    <!-- НОВЫЙ ЛОГОТИП -->
     <img src="Logo-Full.png" alt="Yuvia" class="brand-logo">
     <div class="brand-text">
       <div class="brand-name">Yuvia</div>
@@ -918,11 +1217,26 @@
         <div class="chip" id="summaryChip" title="Краткая сводка по результатам">—</div>
       </div>
 
+      <div id="compareBar" class="compare-bar hidden"></div>
+
       <div class="section-title" style="margin-top:4px">Результаты</div>
       <div id="results" class="grid"></div>
 
       <div class="section-title">Соседние даты</div>
       <div id="matrix" class="chips"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Оверлей "Спросить Ювию" -->
+<div id="askYuviaOverlay" class="ask-overlay hidden">
+  <div class="ask-panel">
+    <button type="button" class="ask-close-btn">✕</button>
+    <div class="ask-title">Ювия-помощник</div>
+    <div class="ask-flight-summary" id="askFlightSummary"></div>
+    <div class="ask-message">
+      На этом этапе здесь заглушка. Позже здесь появится живой диалог с ИИ:
+      можно будет задать вопросы по этому рейсу, сравнить его с другими и получить персональные советы.
     </div>
   </div>
 </div>
@@ -945,7 +1259,7 @@
   </div>
 </div>
 
-<div class="version">версия 12.4</div>
+<div class="version">версия 13.0</div>
 
 <script>
 /* ========= helpers ========= */
@@ -1213,6 +1527,28 @@ async function callJSON(path){
 let allResults = [];
 let baseCurrency = 'RUB';
 
+/* избранное + сравнение */
+const FAVORITES_KEY = 'yuvia_favs_v1';
+const COMPARE_KEY   = 'yuvia_cmp_v1';
+
+function loadIdSet(key){
+  try{
+    const raw = localStorage.getItem(key);
+    if(!raw) return new Set();
+    const arr = JSON.parse(raw);
+    if(!Array.isArray(arr)) return new Set();
+    return new Set(arr);
+  }catch(e){ return new Set(); }
+}
+function saveIdSet(key,set){
+  try{
+    localStorage.setItem(key, JSON.stringify(Array.from(set)));
+  }catch(e){}
+}
+
+let favoriteIds = loadIdSet(FAVORITES_KEY);
+let compareIds  = loadIdSet(COMPARE_KEY);
+
 function showLoadingSkeleton(){
   const r = $('#results'); r.innerHTML='';
   for(let i=0;i<4;i++){
@@ -1261,6 +1597,94 @@ function summarize(){
   $('#summaryChip').textContent = `от ${min.toLocaleString('ru-RU')} · средняя ${avg.toLocaleString('ru-RU')} ${baseCurrency}`;
 }
 
+/* псевдо-AI обогащение */
+function buildAiShortText(f){
+  const parts=[];
+  if(f.transfers===0) parts.push('прямой рейс');
+  else parts.push(`${f.transfers} пересадки`);
+  if(f.duration_hours) parts.push(`~${f.duration_hours} ч в пути`);
+  if(f.price) parts.push(`за ${f.price.toLocaleString('ru-RU')} ${f.currency}`);
+  return 'Маршрут: ' + parts.join(', ');
+}
+function enrichFlightsForUI(){
+  if(!allResults.length) return;
+  const prices = allResults.map(f=>f.price).filter(Boolean);
+  const minPrice = prices.length ? Math.min(...prices) : 0;
+  const maxDuration = Math.max(...allResults.map(f=>f.duration_hours||0),1);
+  allResults.forEach(f=>{
+    let score = 7;
+    if(minPrice>0){
+      const rel = f.price/minPrice;
+      if(rel<=1.05) score+=1.5;
+      else if(rel<=1.2) score+=0.5;
+      else if(rel>=1.5) score-=1;
+    }
+    if(f.transfers===0) score+=1;
+    else if(f.transfers>=2) score-=1;
+    const dur = f.duration_hours||0;
+    if(dur && dur<=maxDuration*0.5) score+=0.5;
+    if(dur && dur>=maxDuration*0.9) score-=0.5;
+    if(score<3) score=3;
+    if(score>10) score=10;
+    f.aiScore = Math.round(score*10)/10;
+    f.aiScoreText = f.aiScore.toFixed(1).replace('.',',');
+    let stress;
+    if(dur<=3 && f.transfers===0) stress=1;
+    else if(dur<=6 && f.transfers<=1) stress=2;
+    else stress=3;
+    f.stressLevel = stress;
+    f.stressLabel = stress===1?'низкий':stress===2?'средний':'высокий';
+    const tags=[];
+    if(f.transfers===0) tags.push('без пересадок');
+    if(f.transfers===1) tags.push('1 пересадка');
+    if(dur && dur<=3) tags.push('быстро');
+    if(dur && dur>=6) tags.push('долго в пути');
+    if(minPrice>0 && f.price<=minPrice*1.1) tags.push('выгодно');
+    f.tags = tags;
+    f.aiShort = buildAiShortText(f);
+  });
+}
+
+/* сравнение панель */
+function updateCompareBar(){
+  const bar = $('#compareBar');
+  if(!bar) return;
+  if(!compareIds.size){
+    bar.classList.add('hidden');
+    bar.innerHTML='';
+    return;
+  }
+  const selected = allResults.filter(f=>compareIds.has(f.id));
+  if(!selected.length){
+    bar.classList.add('hidden');
+    bar.innerHTML='';
+    return;
+  }
+  bar.classList.remove('hidden');
+  bar.innerHTML = `
+    <div class="compare-title">Сравнение рейсов (${selected.length})</div>
+    <div class="compare-list">
+      ${selected.map(f=>`
+        <div class="compare-item">
+          <div class="compare-route">${f.origin_airport || f.origin} → ${f.dest_airport || f.destination}</div>
+          <div class="compare-meta">${f.depDateStr} · ${f.depTime || ''} · ${f.durStr || (f.duration_hours?f.duration_hours+' ч':'—')}</div>
+          <div class="compare-price">${f.price.toLocaleString('ru-RU')} ${f.currency}</div>
+        </div>
+      `).join('')}
+    </div>
+    <button type="button" class="compare-clear-btn">Очистить список</button>
+  `;
+  const btn = bar.querySelector('.compare-clear-btn');
+  if(btn){
+    btn.onclick = ()=>{
+      compareIds.clear();
+      saveIdSet(COMPARE_KEY, compareIds);
+      updateCompareBar();
+      applyFiltersAndSort();
+    };
+  }
+}
+
 function withinWindow(timeStr, windowsSelected){
   if(!windowsSelected.length || !timeStr) return true;
   const m = timeStr.match(/^(\d{2}):(\d{2})/);
@@ -1271,12 +1695,50 @@ function withinWindow(timeStr, windowsSelected){
   });
 }
 
+/* оверлей "Спросить Ювию" */
+const askOverlay = $('#askYuviaOverlay');
+const askFlightSummary = $('#askFlightSummary');
+
+function openAskPanel(f){
+  if(!askOverlay || !askFlightSummary) return;
+  askFlightSummary.textContent =
+    `${f.origin} → ${f.destination} · ${f.depDateStr} · ${f.depTime || ''} · ${f.price.toLocaleString('ru-RU')} ${f.currency}`;
+  askOverlay.classList.remove('hidden');
+}
+function closeAskPanel(){
+  if(!askOverlay) return;
+  askOverlay.classList.add('hidden');
+}
+if(askOverlay){
+  askOverlay.addEventListener('click',e=>{
+    if(e.target===askOverlay) closeAskPanel();
+  });
+  const closeBtn = askOverlay.querySelector('.ask-close-btn');
+  if(closeBtn) closeBtn.addEventListener('click', closeAskPanel);
+}
+
+/* избранное/сравнение триггеры */
+function toggleFavorite(id){
+  if(favoriteIds.has(id)) favoriteIds.delete(id);
+  else favoriteIds.add(id);
+  saveIdSet(FAVORITES_KEY, favoriteIds);
+  applyFiltersAndSort();
+}
+function toggleCompare(id){
+  if(compareIds.has(id)) compareIds.delete(id);
+  else compareIds.add(id);
+  saveIdSet(COMPARE_KEY, compareIds);
+  updateCompareBar();
+  applyFiltersAndSort();
+}
+
 function applyFiltersAndSort(){
   const r = $('#results'); r.innerHTML='';
   if(!allResults.length){
     const empty=document.createElement('div'); empty.className='card';
     empty.innerHTML=`<div class="bad">Ничего не нашли.</div><div class="hint">Попробуй поменять даты, валюту или снять фильтры. Ниже — цены на соседние дни.</div>`;
     r.appendChild(empty);
+    updateCompareBar();
     return;
   }
 
@@ -1319,50 +1781,153 @@ function applyFiltersAndSort(){
     const empty=document.createElement('div'); empty.className='card';
     empty.innerHTML=`<div class="bad">После применения фильтров ничего не осталось.</div><div class="hint">Сними часть фильтров или расширь диапазоны.</div>`;
     r.appendChild(empty);
+    updateCompareBar();
     return;
   }
 
   list.forEach(x=>{
-    const el=document.createElement('div'); el.className='result';
-    const left=document.createElement('div');
     const transfersText = x.transfers===0
       ? 'без пересадок'
       : x.transfers===1
         ? '1 пересадка'
         : `${x.transfers} пересадки`;
-    left.innerHTML=`
-      <div class="result-main-title">
-        ${x.origin} ${x.origin_airport?`(${x.origin_airport})`:''}
-        → ${x.destination} ${x.dest_airport?`(${x.dest_airport})`:''}
-      </div>
-      <div class="result-meta">
-        ${x.depDateStr}${x.retDateStr?(' — '+x.retDateStr):''}
-        · ${x.airline || 'авиакомпания неизвестна'}
-        · ${transfersText}
-        · длительность: ${x.durStr || (x.duration_hours?x.duration_hours+' ч':'—')}
-      </div>
-      <div class="result-times">
-        ${x.depTime?('вылет: '+x.depTime):''}
-        ${x.arrTime?(' · прилёт: '+x.arrTime):''}
-      </div>
-    `;
-    const right=document.createElement('div');
-    right.style.textAlign='right';
+
     const logoHtml = x.airlineCode
       ? `<img class="airline-logo" src="https://pics.avs.io/80/24/${x.airlineCode}.png" alt="${x.airlineCode}" onerror="this.style.display='none'">`
       : '';
-    right.innerHTML=`
-      <div class="price">${x.price.toLocaleString('ru-RU')} ${x.currency}</div>
-      ${logoHtml}
-      <div class="row" style="justify-content:flex-end;margin-top:6px">
-        <a href="${x.deeplink}" target="_blank" rel="noopener">
-          <button class="btn-primary">На Aviasales</button>
-        </a>
+
+    const el=document.createElement('div');
+    el.className='result';
+    el.innerHTML = `
+      <div class="result-main">
+        <div class="result-header-row">
+          <div class="result-time-col">
+            <div class="result-time-main">
+              <span class="result-time">${x.depTime || '--:--'}</span>
+              <span class="result-city">${x.origin}</span>
+            </div>
+            <div class="result-airport-code">${x.origin_airport || ''}</div>
+            <div class="result-date">${x.depDateStr}</div>
+          </div>
+          <div class="result-timeline">
+            <div class="result-timeline-line">
+              <span class="result-timeline-dot start"></span>
+              ${x.transfers>0 ? '<span class="result-timeline-dot mid"></span>' : ''}
+              <span class="result-timeline-dot end"></span>
+            </div>
+            <div class="result-timeline-meta">
+              <span>${x.durStr || (x.duration_hours?x.duration_hours+' ч':'—')}</span>
+              <span class="result-timeline-transfers">${transfersText}</span>
+            </div>
+          </div>
+          <div class="result-time-col result-time-col-arr">
+            <div class="result-time-main">
+              <span class="result-time">${x.arrTime || '--:--'}</span>
+              <span class="result-city">${x.destination}</span>
+            </div>
+            <div class="result-airport-code">${x.dest_airport || ''}</div>
+            <div class="result-date">${x.retDateStr || x.depDateStr}</div>
+          </div>
+        </div>
+
+        <div class="result-badges-row">
+          <span class="badge-pill badge-airline">${x.airline || 'авиакомпания неизвестна'}</span>
+          ${x.tags && x.tags.length ? x.tags.map(t=>`<span class="badge-pill badge-soft">${t}</span>`).join('') : ''}
+        </div>
+
+        <div class="result-ai-row">
+          <div class="result-ai-score">
+            <span class="result-ai-score-number">${x.aiScoreText || ''}</span>
+            <span class="result-ai-score-label">оценка маршрута</span>
+          </div>
+          <div class="result-ai-text">${x.aiShort || ''}</div>
+          <div class="result-ai-stress result-ai-stress-${x.stressLevel || 2}">
+            стресс: ${x.stressLabel || 'средний'}
+          </div>
+        </div>
+
+        <button type="button" class="result-details-toggle">
+          Подробнее о маршруте
+          <span class="result-details-caret">▾</span>
+        </button>
+        <div class="result-details">
+          <div class="result-details-grid">
+            <div>
+              <div class="result-details-label">Туда</div>
+              <div class="result-details-value">${x.depDateStr} · вылет в ${x.depTime || '—'}</div>
+            </div>
+            ${x.retDateStr ? `
+            <div>
+              <div class="result-details-label">Обратно</div>
+              <div class="result-details-value">${x.retDateStr} · прилёт в ${x.arrTime || '—'}</div>
+            </div>` : ''}
+            <div>
+              <div class="result-details-label">Пересадки</div>
+              <div class="result-details-value">${transfersText}</div>
+            </div>
+            <div>
+              <div class="result-details-label">Длительность</div>
+              <div class="result-details-value">${x.durStr || (x.duration_hours?x.duration_hours+' ч':'—')}</div>
+            </div>
+          </div>
+          <div class="result-details-note">
+            На следующем этапе здесь появится ещё больше деталей по маршруту, самолёту и багажу.
+          </div>
+        </div>
+      </div>
+
+      <div class="result-side">
+        <div class="result-price-wrap">
+          <div class="price">${x.price.toLocaleString('ru-RU')} ${x.currency}</div>
+          ${x.aiScore >= 9 ? '<div class="result-right-reco">выбор Ювии</div>' : ''}
+        </div>
+        ${logoHtml}
+        <div class="result-side-buttons">
+          <a href="${x.deeplink}" target="_blank" rel="noopener">
+            <button class="btn-primary result-main-btn">На Aviasales</button>
+          </a>
+          <button type="button" class="result-ghost-btn result-fav-btn">
+            ${favoriteIds.has(x.id) ? '★ Сохранено' : '☆ В избранное'}
+          </button>
+          <button type="button" class="result-ghost-btn result-compare-btn">
+            ${compareIds.has(x.id) ? '⧉ В сравнении' : '⧉ Сравнить'}
+          </button>
+          <button type="button" class="result-ghost-btn result-ask-btn">
+            ? Спросить Ювию
+          </button>
+        </div>
       </div>
     `;
-    el.appendChild(left); el.appendChild(right);
+
+    const detailsToggle = el.querySelector('.result-details-toggle');
+    const detailsBlock  = el.querySelector('.result-details');
+    if(detailsToggle && detailsBlock){
+      detailsToggle.addEventListener('click',()=>{
+        const isOpen = detailsBlock.classList.toggle('open');
+        const caret = detailsToggle.querySelector('.result-details-caret');
+        if(caret){
+          caret.style.transform = isOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+        }
+      });
+    }
+
+    const favBtn = el.querySelector('.result-fav-btn');
+    if(favBtn){
+      favBtn.addEventListener('click',()=>toggleFavorite(x.id));
+    }
+    const cmpBtn = el.querySelector('.result-compare-btn');
+    if(cmpBtn){
+      cmpBtn.addEventListener('click',()=>toggleCompare(x.id));
+    }
+    const askBtn = el.querySelector('.result-ask-btn');
+    if(askBtn){
+      askBtn.addEventListener('click',()=>openAskPanel(x));
+    }
+
     r.appendChild(el);
   });
+
+  updateCompareBar();
 }
 
 ['change','input'].forEach(ev=>{
@@ -1387,15 +1952,18 @@ function normalizeFlight(x,{ori,dst,cur,d1,d2,oneway,adults}){
   const airlineCode = x.airline_code || x.airline_iata || x.airline || '';
   const dur = x.duration || x.duration_to || 0;
   const duration_hours = x.duration_hours ?? Math.round((dur||0)/60);
+  const priceRaw = Math.round(x.price ?? x.value ?? 0);
 
   const deeplink = buildDeeplink({ori,dst,d1,d2:(oneway==='yes'?null:d2),currency:cur,adults,oneway});
+  const id = `${ori}-${dst}-${depDateStr}-${retDateStr}-${depTime}-${arrTime}-${priceRaw}`;
 
   return {
+    id,
     origin:x.origin,
     destination:x.destination,
     origin_airport:x.origin_airport || x.origin_airport_code || x.origin_airport_iata || '',
     dest_airport:x.destination_airport || x.destination_airport_code || x.destination_airport_iata || '',
-    price:Math.round(x.price ?? x.value ?? 0),
+    price:priceRaw,
     currency:x.currency || cur,
     airline:x.airline || airlineCode || '',
     airlineCode,
@@ -1513,6 +2081,7 @@ async function doSearch(){
   const listRaw = (json.data||[]).filter(x=>x.price>0 && x.origin===ori && x.destination===dst);
   allResults = listRaw.map(x=>normalizeFlight(x,{ori,dst,cur,d1,d2,oneway:ow,adults}));
 
+  enrichFlightsForUI();
   renderAirlinesFilter();
   renderAirportsFilter();
   summarize();
@@ -1556,6 +2125,11 @@ $('#reset').addEventListener('click',()=>{
   updateWeekendHint();
   syncURLFromState({oc:null,dc:null,d:null,r:null,cur:null,ad:null,ow:null,fx:null,oi:null,di:null});
   initPaxFromAdultsSelect();
+  favoriteIds = new Set();
+  compareIds  = new Set();
+  saveIdSet(FAVORITES_KEY,favoriteIds);
+  saveIdSet(COMPARE_KEY,compareIds);
+  updateCompareBar();
 });
 $('#clearFilters').addEventListener('click',()=>{
   document.querySelector('input[name="stops"][value="any"]').checked=true;
