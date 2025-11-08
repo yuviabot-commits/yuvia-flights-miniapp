@@ -802,7 +802,7 @@
   </div>
 </div>
 
-<div class="version">версия 13.5</div>
+<div class="version">версия 13.6</div>
 
 <script>
 /* ========= helpers ========= */
@@ -1643,17 +1643,28 @@ el.innerHTML = `
     r.appendChild(el);
   });
 
-  document.querySelectorAll('.btn-fav').forEach(btn=>{
-    btn.addEventListener('click',()=>{ const id = btn.getAttribute('data-id'); toggleFavoriteById(id); });
+    document.querySelectorAll('.btn-fav').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const id = btn.getAttribute('data-id');
+      toggleFavoriteById(id);
+    });
   });
+
   document.querySelectorAll('.btn-compare').forEach(btn=>{
-    btn.addEventListener('click',()=>{ const id = btn.getAttribute('data-id'); toggleCompareById(id); });
+    btn.addEventListener('click',()=>{
+      const id = btn.getAttribute('data-id');
+      toggleCompareById(id);
+    });
   });
+
   document.querySelectorAll('.btn-help').forEach(btn=>{
-    btn.addEventListener('click',()=>{ alert('Скоро здесь появится AI-разбор маршрута от Yuvia ✨'); });
+    btn.addEventListener('click',()=>{
+      alert('Скоро здесь появится AI-разбор маршрута от Yuvia ✨');
+    });
   });
-    // раскрытие подробностей под каждым рейсом
-  el.querySelectorAll('.result-leg-toggle').forEach(btnToggle=>{
+
+  // раскрытие подробностей под каждым рейсом
+  document.querySelectorAll('.result-leg-toggle').forEach(btnToggle=>{
     btnToggle.addEventListener('click', ()=>{
       const extra = btnToggle.nextElementSibling;
       if(!extra) return;
@@ -1665,6 +1676,7 @@ el.innerHTML = `
     });
   });
 }
+
 
 ['change','input'].forEach(ev=>{
   $('#sortBy').addEventListener(ev,applyFiltersAndSort);
