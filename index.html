@@ -414,6 +414,78 @@
     .brand-tagline{ font-size:13px; color:var(--muted); }
     .brand-subline{ font-size:13px; color:var(--berry); text-transform:none; letter-spacing:.06em; margin-top:4px; font-weight:500; }
 
+    .search-summary{
+      margin:0 0 16px;
+      padding:10px 14px;
+      border-radius:14px;
+      background:linear-gradient(135deg,rgba(7,94,84,0.08),rgba(13,148,136,0.14));
+      color:#0f4f43;
+      font-size:14px;
+      box-shadow:0 10px 24px rgba(7,94,84,0.08);
+    }
+
+    .advanced-header{
+      margin:4px 0 10px;
+    }
+    .advanced-title{
+      font-size:15px;
+      font-weight:600;
+    }
+    .advanced-subtitle{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:2px;
+    }
+    .advanced-chips{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px 10px;
+      margin:8px 0 6px;
+    }
+    .chip-filter{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      border-radius:var(--radius-pill);
+      padding:6px 12px;
+      border:1px solid rgba(148,163,184,0.6);
+      background:#ffffff;
+      font-size:13px;
+      cursor:pointer;
+      transition:box-shadow .18s ease,border-color .18s ease,background .18s ease,color .18s ease;
+    }
+    .chip-filter:hover{
+      border-color:rgba(7,94,84,0.4);
+      box-shadow:0 8px 20px rgba(7,94,84,0.12);
+    }
+    .chip-active{
+      background:var(--accent-soft);
+      border-color:rgba(45,212,191,0.7);
+      color:var(--accent);
+      box-shadow:0 10px 22px rgba(13,148,136,0.18);
+    }
+    .advanced-airports-panel{
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px dashed var(--line);
+      background:#f9fafb;
+    }
+    .advanced-airports-panel select{
+      width:100%;
+    }
+    .advanced-footer{
+      margin-top:10px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .advanced-hint{
+      font-size:13px;
+      color:var(--muted);
+      margin-top:6px;
+    }
+
     .advanced.hidden{display:none;}
 
     /* ------- Форма поиска ------- */
@@ -792,6 +864,8 @@
     </div>
   </header>
 
+  <div id="searchSummary" class="search-summary hidden"></div>
+
   <!-- Форма поиска (твой исходный код) -->
   <div class="card" id="searchForm">
     <div class="search-grid">
@@ -893,45 +967,60 @@
 
     <div id="advancedBlock" class="advanced hidden">
       <div class="divider"></div>
-      <div class="grid grid-2">
-        <div>
-          <div class="label">Валюта</div>
-          <select id="currency">
-            <option value="RUB">RUB ₽</option>
-            <option value="USD">USD $</option>
-            <option value="EUR">EUR €</option>
-          </select>
-        </div>
-        <div>
-          <div class="label">Маршрут</div>
-          <select id="oneway">
-            <option value="no">Туда-обратно</option>
-            <option value="yes">Только в одну сторону</option>
-          </select>
-        </div>
-        <div>
-          <div class="label">Гибкие даты</div>
-          <select id="flexMode">
-            <option value="none">Отключено</option>
-            <option value="weekend">Ближайшие выходные</option>
-            <option value="plus3">± 3 дня</option>
-            <option value="plus7">± 7 дней</option>
-          </select>
-        </div>
-        <div>
-          <div class="label">Класс обслуживания</div>
-          <select id="cabin">
-            <option value="eco">Эконом</option>
-            <option value="business">Бизнес</option>
-          </select>
-        </div>
-        <div class="row" style="justify-content:flex-end;gap:6px;align-items:flex-end">
-          <button class="btn-secondary" id="swap">Поменять местами</button>
-          <button class="btn-ghost" id="copyLink">Скопировать ссылку</button>
-          <button class="btn-ghost" id="reset">Сбросить форму</button>
-        </div>
+
+      <div class="advanced-header">
+        <div class="advanced-title">Дополнительные настройки</div>
+        <div class="advanced-subtitle">Чипы помогают быстро настроить маршрут — без обязательных полей</div>
       </div>
-      <div class="hint" id="weekendHint" style="margin-top:6px"></div>
+
+      <div class="advanced-chips" id="advancedChips">
+        <button type="button" class="chip chip-filter" id="chipTripMode">Режим: сбалансированный</button>
+        <button type="button" class="chip chip-filter" id="chipRoute">Маршрут: туда-обратно</button>
+        <button type="button" class="chip chip-filter" id="chipFlex">Даты: точные</button>
+        <button type="button" class="chip chip-filter" id="chipStops">Пересадки: не важно</button>
+        <button type="button" class="chip chip-filter" id="chipDuration">В пути: без ограничений</button>
+        <button type="button" class="chip chip-filter" id="chipAirports">Аэропорты: любые</button>
+        <button type="button" class="chip chip-filter" id="chipBaggage">Багаж: не важно</button>
+      </div>
+
+      <div class="hint" id="weekendHint" style="margin-top:0"></div>
+
+      <div class="advanced-airports-panel hidden" id="advancedAirportsPanel">
+        <div class="label">Аэропорты</div>
+        <div class="hint">Список появится после первого поиска — выбери любимые отправления или прибытия.</div>
+        <select id="advAirportFilter" multiple size="5"></select>
+      </div>
+
+      <div class="advanced-hint" id="yuviaRouteHint"></div>
+
+      <div class="advanced-footer">
+        <button class="btn-ghost" id="copyLink">Скопировать ссылку</button>
+        <button class="btn-ghost" id="reset">Сбросить форму</button>
+      </div>
+
+      <div class="hidden" aria-hidden="true">
+        <select id="oneway">
+          <option value="no">Туда-обратно</option>
+          <option value="yes">Только в одну сторону</option>
+        </select>
+        <select id="flexMode">
+          <option value="none">Отключено</option>
+          <option value="weekend">Ближайшие выходные</option>
+          <option value="plus3">± 3 дня</option>
+          <option value="plus7">± 7 дней</option>
+        </select>
+      </div>
+    </div>
+    <div class="hidden" aria-hidden="true">
+      <select id="currency">
+        <option value="RUB">RUB ₽</option>
+        <option value="USD">USD $</option>
+        <option value="EUR">EUR €</option>
+      </select>
+      <select id="cabin">
+        <option value="eco">Эконом</option>
+        <option value="business">Бизнес</option>
+      </select>
     </div>
   </div>
 
@@ -1027,7 +1116,7 @@
   </div>
 </div>
 
-<div class="version">версия 14.0</div>
+<div class="version">версия 16.0</div>
 
 <script>
 /* ========= helpers ========= */
@@ -1254,8 +1343,13 @@ function attachSuggest(inputEl, onPick){
   });
 }
 
-attachSuggest($('#origin'), (item)=>{ originIATA=item.code; $('#originIataHint').textContent='IATA: '+originIATA; });
-attachSuggest($('#destination'), (item)=>{ destIATA=item.code; $('#destIataHint').textContent='IATA: '+destIATA; });
+attachSuggest($('#origin'), (item)=>{ originIATA=item.code; $('#originIataHint').textContent='IATA: '+originIATA; updateSearchSummary(); });
+attachSuggest($('#destination'), (item)=>{ destIATA=item.code; $('#destIataHint').textContent='IATA: '+destIATA; updateSearchSummary(); });
+
+['input','change'].forEach(ev=>{
+  $('#origin').addEventListener(ev, updateSearchSummary);
+  $('#destination').addEventListener(ev, updateSearchSummary);
+});
 
 /* ========= one-way ========= */
 function toggleOneWay(){
@@ -1266,6 +1360,8 @@ function toggleOneWay(){
 }
 $('#oneway').addEventListener('change',()=>{
   toggleOneWay();
+  updateSearchSummary();
+  refreshAdvancedChipsUI();
   syncURLFromState({ow:$('#oneway').value});
 });
 
@@ -1279,6 +1375,7 @@ function updateWeekendHint(){
 }
 $('#flexMode').addEventListener('change',()=>{
   updateWeekendHint();
+  refreshAdvancedChipsUI();
   syncURLFromState({fx:$('#flexMode').value});
 });
 
@@ -1316,6 +1413,8 @@ async function callJSON(path){
 /* ========= состояние результатов + избранное/сравнение ========= */
 let allResults = [];
 let baseCurrency = 'RUB';
+let advBaggageMode = 'any';
+let tripMode = 'balanced';
 let favorites = [];
 let compareList = [];
 
@@ -1391,16 +1490,280 @@ function renderAirlinesFilter(){
 }
 function renderAirportsFilter(){
   const sel = $('#airportFilter');
+  if(!sel) return;
+  const advSel = $('#advAirportFilter');
+  const baseSelected = new Set(Array.from(sel.selectedOptions||[]).map(o=>o.value));
+  const advSelected = new Set(Array.from((advSel?.selectedOptions)||[]).map(o=>o.value));
+
   const set = new Set();
   allResults.forEach(x=>{
     if(x.origin_airport) set.add(`FROM:${x.origin_airport}`);
     if(x.dest_airport) set.add(`TO:${x.dest_airport}`);
   });
-  const cur = new Set(Array.from(sel.selectedOptions||[]).map(o=>o.value));
-  sel.innerHTML = [...set].sort().map(a=>{
+  const optionsHtml = [...set].sort().map(a=>{
     return `<option value="${a}">${a.replace(/^FROM:/,'Отправление: ').replace(/^TO:/,'Прибытие: ')}</option>`;
   }).join('');
-  Array.from(sel.options).forEach(o=>{ if(cur.has(o.value)) o.selected=true; });
+
+  sel.innerHTML = optionsHtml;
+  Array.from(sel.options).forEach(o=>{ if(baseSelected.has(o.value)) o.selected=true; });
+
+  if(advSel){
+    advSel.innerHTML = optionsHtml;
+    const preferred = advSelected.size ? advSelected : baseSelected;
+    Array.from(advSel.options).forEach(o=>{ o.selected = preferred.has(o.value); });
+  }
+  refreshAdvancedChipsUI();
+}
+
+function syncAdvAirportsWithBase(){
+  const baseSel = $('#airportFilter');
+  const advSel = $('#advAirportFilter');
+  if(!baseSel || !advSel) return;
+  const values = new Set(Array.from(baseSel.selectedOptions||[]).map(o=>o.value));
+  Array.from(advSel.options).forEach(o=>{ o.selected = values.has(o.value); });
+  refreshAdvancedChipsUI();
+}
+
+function refreshAdvancedChipsUI(){
+  const tripChip = $('#chipTripMode');
+  if(tripChip){
+    const map = {
+      balanced:'Режим: сбалансированный',
+      cheap:'Режим: экономлю деньги',
+      fast:'Режим: экономлю время',
+      calm:'Режим: максимум спокойствия'
+    };
+    tripChip.textContent = map[tripMode] || map.balanced;
+    tripChip.classList.toggle('chip-active', tripMode !== 'balanced');
+  }
+
+  const routeChip = $('#chipRoute');
+  if(routeChip){
+    const oneWay = ($('#oneway')?.value === 'yes');
+    routeChip.textContent = oneWay ? 'Маршрут: в одну сторону' : 'Маршрут: туда-обратно';
+    routeChip.classList.toggle('chip-active', oneWay);
+  }
+
+  const flexChip = $('#chipFlex');
+  if(flexChip){
+    const flexVal = $('#flexMode')?.value || 'none';
+    const map = {
+      none:'Даты: точные',
+      weekend:'Даты: ближайшие выходные',
+      plus3:'Даты: ± 3 дня',
+      plus7:'Даты: ± 7 дней'
+    };
+    flexChip.textContent = map[flexVal] || map.none;
+    flexChip.classList.toggle('chip-active', flexVal !== 'none');
+  }
+
+  const stopsChip = $('#chipStops');
+  if(stopsChip){
+    const stopsVal = (document.querySelector('input[name="stops"]:checked')||{}).value || 'any';
+    const map = {
+      any:'Пересадки: не важно',
+      '0':'Пересадки: только прямые',
+      '1':'Пересадки: не более 1 пересадки'
+    };
+    stopsChip.textContent = map[stopsVal] || `Пересадки: ${stopsVal}`;
+    stopsChip.classList.toggle('chip-active', stopsVal !== 'any');
+  }
+
+  const durationChip = $('#chipDuration');
+  if(durationChip){
+    const durMax = $('#durMax');
+    const raw = durMax ? parseInt(durMax.value,10) : NaN;
+    let text = 'В пути: без ограничений';
+    let active = false;
+    if(Number.isFinite(raw) && raw > 0){
+      active = true;
+      text = `В пути: до ${raw} ч`;
+    }
+    durationChip.textContent = text;
+    durationChip.classList.toggle('chip-active', active);
+  }
+
+  const airportsChip = $('#chipAirports');
+  if(airportsChip){
+    const baseSel = $('#airportFilter');
+    const selectedCount = baseSel ? Array.from(baseSel.selectedOptions||[]).length : 0;
+    airportsChip.textContent = selectedCount
+      ? `Аэропорты: выбрано ${selectedCount}`
+      : 'Аэропорты: любые';
+    airportsChip.classList.toggle('chip-active', selectedCount > 0);
+  }
+
+  const baggageChip = $('#chipBaggage');
+  if(baggageChip){
+    const map = {
+      any:'Багаж: не важно',
+      with:'Багаж: только с багажом',
+      no:'Багаж: без багажа'
+    };
+    baggageChip.textContent = map[advBaggageMode] || map.any;
+    baggageChip.classList.toggle('chip-active', advBaggageMode !== 'any');
+  }
+}
+
+function initAdvancedChips(){
+  const tripChip = $('#chipTripMode');
+  if(tripChip){
+    const order = ['balanced','cheap','fast','calm'];
+    tripChip.addEventListener('click',()=>{
+      const idx = order.indexOf(tripMode);
+      tripMode = order[(idx+1)%order.length] || 'balanced';
+      const sort = $('#sortBy');
+      if(sort){
+        if(tripMode==='cheap') sort.value = 'price_asc';
+        else if(tripMode==='fast') sort.value = 'duration_asc';
+        else if(tripMode==='calm') sort.value = 'yuvia_score';
+      }
+      refreshAdvancedChipsUI();
+      applyFiltersAndSort();
+    });
+  }
+
+  const routeChip = $('#chipRoute');
+  if(routeChip){
+    routeChip.addEventListener('click',()=>{
+      const oneWaySelect = $('#oneway');
+      if(!oneWaySelect) return;
+      oneWaySelect.value = oneWaySelect.value === 'yes' ? 'no' : 'yes';
+      toggleOneWay();
+      syncURLFromState({ow:oneWaySelect.value});
+      refreshAdvancedChipsUI();
+      updateSearchSummary();
+    });
+  }
+
+  const flexChip = $('#chipFlex');
+  if(flexChip){
+    const order = ['none','weekend','plus3','plus7'];
+    flexChip.addEventListener('click',()=>{
+      const flexSelect = $('#flexMode');
+      if(!flexSelect) return;
+      const idx = order.indexOf(flexSelect.value);
+      flexSelect.value = order[(idx+1)%order.length] || 'none';
+      updateWeekendHint();
+      syncURLFromState({fx:flexSelect.value});
+      refreshAdvancedChipsUI();
+    });
+  }
+
+  const stopsChip = $('#chipStops');
+  if(stopsChip){
+    const order = ['any','0','1'];
+    stopsChip.addEventListener('click',()=>{
+      const current = (document.querySelector('input[name="stops"]:checked')||{}).value || 'any';
+      const idx = order.indexOf(current);
+      const next = order[(idx+1)%order.length] || 'any';
+      const radio = document.querySelector(`input[name="stops"][value="${next}"]`);
+      if(radio){
+        radio.checked = true;
+        radio.dispatchEvent(new Event('change',{bubbles:true}));
+      } else {
+        applyFiltersAndSort();
+      }
+      refreshAdvancedChipsUI();
+    });
+  }
+
+  const durationChip = $('#chipDuration');
+  if(durationChip){
+    durationChip.addEventListener('click',()=>{
+      const durMax = $('#durMax');
+      if(!durMax) return;
+      const raw = parseInt(durMax.value,10);
+      let next;
+      if(!Number.isFinite(raw) || raw<=0){ next = 3; }
+      else if(raw===3){ next = 6; }
+      else if(raw===6){ next = 9; }
+      else { next = ''; }
+      durMax.value = next === '' ? '' : String(next);
+      durMax.dispatchEvent(new Event('change',{bubbles:true}));
+      refreshAdvancedChipsUI();
+    });
+  }
+
+  const airportsChip = $('#chipAirports');
+  const airportsPanel = $('#advancedAirportsPanel');
+  if(airportsChip && airportsPanel){
+    airportsChip.addEventListener('click',()=>{
+      airportsPanel.classList.toggle('hidden');
+    });
+    document.addEventListener('click',e=>{
+      if(airportsPanel.classList.contains('hidden')) return;
+      if(airportsChip.contains(e.target) || airportsPanel.contains(e.target)) return;
+      airportsPanel.classList.add('hidden');
+    });
+  }
+
+  const advAirportFilter = $('#advAirportFilter');
+  if(advAirportFilter){
+    advAirportFilter.addEventListener('change',()=>{
+      const selectedValues = new Set(Array.from(advAirportFilter.selectedOptions||[]).map(o=>o.value));
+      const baseSel = $('#airportFilter');
+      if(baseSel){
+        Array.from(baseSel.options).forEach(o=>{ o.selected = selectedValues.has(o.value); });
+        baseSel.dispatchEvent(new Event('change',{bubbles:true}));
+      } else {
+        applyFiltersAndSort();
+      }
+      refreshAdvancedChipsUI();
+    });
+  }
+
+  const baseAirportFilter = $('#airportFilter');
+  if(baseAirportFilter){
+    ['change','input'].forEach(ev=>{
+      baseAirportFilter.addEventListener(ev,()=>{
+        syncAdvAirportsWithBase();
+      });
+    });
+  }
+
+  const baggageChip = $('#chipBaggage');
+  if(baggageChip){
+    const order = ['any','with','no'];
+    baggageChip.addEventListener('click',()=>{
+      const idx = order.indexOf(advBaggageMode);
+      advBaggageMode = order[(idx+1)%order.length] || 'any';
+      refreshAdvancedChipsUI();
+      applyFiltersAndSort();
+    });
+  }
+
+  document.querySelectorAll('input[name="stops"]').forEach(radio=>{
+    radio.addEventListener('change', refreshAdvancedChipsUI);
+  });
+
+  const durMax = $('#durMax');
+  if(durMax){
+    ['change','input'].forEach(ev=>{
+      durMax.addEventListener(ev, refreshAdvancedChipsUI);
+    });
+  }
+
+  syncAdvAirportsWithBase();
+  refreshAdvancedChipsUI();
+}
+
+function updateYuviaRouteHint(list){
+  const hint = $('#yuviaRouteHint');
+  if(!hint) return;
+  if(!Array.isArray(list) || !list.length){
+    hint.textContent = 'Как только появятся подходящие рейсы, я подскажу, насколько спокойным выглядит маршрут.';
+    return;
+  }
+
+  const best = list[0] || {};
+  const map = {
+    low:'Маршрут выглядит довольно спокойным: без жёстких пересадок и ночных вылетов.',
+    medium:'Маршрут в целом ок, но есть нюансы — пересадки или длительное время в пути. Можно поиграть фильтрами, если хочешь сделать его мягче.',
+    high:'Маршрут нервный: много пересадок или неудобные вылеты. Я бы попробовал смягчить его — например, через чипы пересадок, времени в пути и багажа.'
+  };
+  const text = map[best.stressLevel] || map.medium;
+  hint.textContent = text;
 }
 function summarize(){
   if(!allResults.length){ $('#summaryChip').textContent='—'; return; }
@@ -1664,6 +2027,8 @@ function withinListAfterFilters(){
       const to   = `TO:${x.dest_airport||''}`;
       if(!airportSel.has(from) && !airportSel.has(to)) return false;
     }
+    if(advBaggageMode === 'with' && x.hasCheckedBaggage === false) return false;
+    if(advBaggageMode === 'no' && x.hasCheckedBaggage === true) return false;
     if(!withinWindow(x.depTime, depWins)) return false;
     if(!withinWindow(x.arrTime, arrWins)) return false;
     return true;
@@ -1673,6 +2038,7 @@ function withinListAfterFilters(){
 /* ========= сортировка и рендер (старый, будет переопределён ниже) ========= */
 function applyFiltersAndSort(){
   const r = $('#results'); r.innerHTML='';
+  updateYuviaRouteHint([]);
   if(!allResults.length){
     const empty=document.createElement('div'); empty.className='card';
     empty.innerHTML=`<div class="bad">Ничего не нашли.</div><div class="hint">Попробуй поменять даты, валюту или снять фильтры. Ниже — цены на соседние дни.</div>`;
@@ -1690,6 +2056,8 @@ function applyFiltersAndSort(){
     if(s==='depart_asc') return (a.depSort||0)-(b.depSort||0);
     return 0;
   });
+
+  updateYuviaRouteHint(list);
 
   if(!list.length){
     const empty=document.createElement('div'); empty.className='card';
@@ -1808,6 +2176,8 @@ async function doSearch(){
   if(ow!=='yes' && d2 && d2<d1){ $('#retHint').textContent='Возврат не может быть раньше вылета'; alert('Дата возврата раньше вылета'); return; }
   if(ow==='yes'){ $('#retHint').textContent=''; }
 
+  updateSearchSummary();
+
   const state = {
     origin_city:oriCity, dest_city:dstCity,
     origin_iata:ori, dest_iata:dst,
@@ -1835,6 +2205,7 @@ async function doSearch(){
     json = await callJSON(`/api/search?${q.toString()}`);
   }catch(e){
     $('#results').innerHTML = `<div class="card"><div class="bad">Ошибка: ${e.message}</div><div class="hint">Попробуй повторить поиск позже.</div></div>`;
+    updateYuviaRouteHint([]);
     setLoading(false, 4000);
     return;
   }
@@ -1861,6 +2232,7 @@ function swapCities(){
   $('#originIataHint').textContent = originIATA?('IATA: '+originIATA):'';
   $('#destIataHint').textContent = destIATA?('IATA: '+destIATA):'';
   syncURLFromState({oc:$('#origin').value.trim(), dc:$('#destination').value.trim(), oi:originIATA, di:destIATA});
+  updateSearchSummary();
 }
 ['#swap','#swapInline'].forEach(id=>{ const el = document.querySelector(id); if(el) el.addEventListener('click',swapCities); });
 
@@ -1881,9 +2253,34 @@ $('#reset').addEventListener('click',()=>{
   originIATA=''; destIATA='';
   $('#originIataHint').textContent=''; $('#destIataHint').textContent='';
   $('#results').innerHTML=''; $('#matrix').innerHTML='';
+  $('#airlineFilter').innerHTML='';
+  $('#airportFilter').innerHTML='';
+  const advAirportFilter = $('#advAirportFilter');
+  if(advAirportFilter) advAirportFilter.innerHTML='';
+  const panel = $('#advancedAirportsPanel');
+  if(panel) panel.classList.add('hidden');
+
+  document.querySelector('input[name="stops"][value="any"]').checked = true;
+  document.querySelectorAll('.depwin,.arrwin').forEach(cb=>cb.checked=false);
+  $('#durMax').value=''; $('#priceMin').value=''; $('#priceMax').value='';
+
+  advBaggageMode = 'any';
+  tripMode = 'balanced';
+  $('#sortBy').value = 'yuvia_score';
+  baseCurrency = 'RUB';
+  allResults = [];
+
+  toggleOneWay();
   updateWeekendHint();
+  updateSearchSummary();
+  updateYuviaRouteHint([]);
   syncURLFromState({oc:null,dc:null,d:null,r:null,cur:null,ad:null,ow:null,fx:null,oi:null,di:null});
   initPaxFromAdultsSelect();
+  renderAirlinesFilter();
+  renderAirportsFilter();
+  syncAdvAirportsWithBase();
+  refreshAdvancedChipsUI();
+  summarize();
   renderFavoritesBlock();
   renderCompareBlock();
 });
@@ -1893,6 +2290,11 @@ $('#clearFilters').addEventListener('click',()=>{
   $('#durMax').value=''; $('#priceMin').value=''; $('#priceMax').value='';
   Array.from($('#airlineFilter').options).forEach(o=>o.selected=false);
   Array.from($('#airportFilter').options).forEach(o=>o.selected=false);
+  advBaggageMode = 'any';
+  const panel = $('#advancedAirportsPanel');
+  if(panel) panel.classList.add('hidden');
+  syncAdvAirportsWithBase();
+  refreshAdvancedChipsUI();
   applyFiltersAndSort();
 });
 $('#toggleAdvanced').addEventListener('click',e=>{
@@ -1914,7 +2316,10 @@ function initMinDateHints(){
 function normalizeDepartDate(){
   let d = parseDateSmart($('#depart').value);
   d = clampToFuture(d);
-  if(!d) return;
+  if(!d){
+    updateSearchSummary();
+    return;
+  }
   const iso = toISO(d);
   $('#depart').value = iso;
   $('#ret').min = iso;
@@ -1924,21 +2329,75 @@ function normalizeDepartDate(){
     $('#ret').value='';
     $('#retHint').textContent='';
   }
+  updateSearchSummary();
 }
 ['change','blur','input'].forEach(ev=>{ $('#depart').addEventListener(ev, normalizeDepartDate); });
 
 function normalizeReturnDate(){
   let r = parseDateSmart($('#ret').value);
-  if(!r) return;
+  if(!r){
+    updateSearchSummary();
+    return;
+  }
   r = clampToFuture(r);
   const d = parseDateSmart($('#depart').value);
   if(d && r < d) r = d;
   $('#ret').value = toISO(r);
+  updateSearchSummary();
 }
 ['change','blur','input'].forEach(ev=>{ $('#ret').addEventListener(ev, normalizeReturnDate); });
 
 /* ========= блок пассажиров ========= */
 const paxState = {adults:1, children:0, infants:0, cabin:'eco'};
+
+function updateSearchSummary(){
+  const summary = $('#searchSummary');
+  if(!summary) return;
+
+  const origin = $('#origin')?.value.trim() || '';
+  const destination = $('#destination')?.value.trim() || '';
+  if(!origin || !destination){
+    summary.textContent = '';
+    summary.classList.add('hidden');
+    return;
+  }
+
+  const departDate = parseDateSmart($('#depart')?.value || '');
+  const retDate = parseDateSmart($('#ret')?.value || '');
+  const isOneWay = ($('#oneway')?.value === 'yes');
+
+  let dateText = '';
+  if(departDate && retDate && !isOneWay){
+    if(
+      departDate.getFullYear() === retDate.getFullYear() &&
+      departDate.getMonth() === retDate.getMonth()
+    ){
+      dateText = `${fmt2(departDate.getDate())}–${fmt2(retDate.getDate())}.${fmt2(departDate.getMonth()+1)}.${departDate.getFullYear()}`;
+    } else {
+      dateText = `${ddmmyyyy(departDate)} – ${ddmmyyyy(retDate)}`;
+    }
+  } else if(departDate){
+    dateText = ddmmyyyy(departDate);
+  }
+
+  const totalPax = (paxState?.adults || 0) + (paxState?.children || 0) + (paxState?.infants || 0);
+  const paxWord = (()=>{
+    const mod10 = totalPax % 10;
+    const mod100 = totalPax % 100;
+    if(mod10 === 1 && mod100 !== 11) return 'пассажир';
+    if(mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return 'пассажира';
+    return 'пассажиров';
+  })();
+  const paxLabel = `${totalPax} ${paxWord}`;
+  const cabinLabel = paxState?.cabin === 'business' ? 'бизнес' : 'эконом';
+
+  let text = `Маршрут: ${origin} → ${destination}`;
+  if(dateText) text += `, ${dateText}`;
+  text += `, ${paxLabel}, ${cabinLabel}`;
+
+  summary.textContent = text;
+  summary.classList.remove('hidden');
+}
 
 function updatePaxSummary(){
   const total = paxState.adults + paxState.children + paxState.infants;
@@ -1954,6 +2413,8 @@ function updatePaxSummary(){
     const cnt = document.querySelector(`.pax-count[data-kind="${kind}"]`);
     if(cnt) cnt.textContent = paxState[kind];
   });
+
+  updateSearchSummary();
 }
 
 function initPaxFromAdultsSelect(){
@@ -2008,7 +2469,11 @@ renderRecent();
 toggleOneWay();
 initMinDateHints();
 restoreFromURL();
+initAdvancedChips();
 initPaxFromAdultsSelect();
+updateSearchSummary();
+refreshAdvancedChipsUI();
+updateYuviaRouteHint([]);
 loadFavorites();
 renderFavoritesBlock();
 renderCompareBlock();
@@ -2095,6 +2560,48 @@ function normalizeFlight(x,{ori,dst,cur,d1,d2,oneway,adults}){
 
   const deeplink = buildDeeplink({ori,dst,d1,d2:(oneway==='yes'?null:d2),currency:cur,adults,oneway});
 
+  const baggageText = makeBaggageText(x);
+  const handBaggageText = makeHandBaggageText(x);
+
+  let hasCheckedBaggage = null;
+  if(typeof x.baggage_included === 'boolean'){
+    hasCheckedBaggage = x.baggage_included;
+  } else if(x.baggage && typeof x.baggage === 'object'){
+    const included = x.baggage.included;
+    if(typeof included === 'boolean') hasCheckedBaggage = included;
+    else if(typeof x.baggage.weight_kg === 'number' && x.baggage.weight_kg > 0) hasCheckedBaggage = true;
+    else if(typeof x.baggage.weight === 'number' && x.baggage.weight > 0) hasCheckedBaggage = true;
+    else if(typeof x.baggage.pieces === 'number' && x.baggage.pieces > 0) hasCheckedBaggage = true;
+  } else if(typeof x.baggage === 'string'){
+    const str = x.baggage.toLowerCase();
+    if(/без багажа|no\s*baggage|только ручн|hand luggage only/.test(str)) hasCheckedBaggage = false;
+    else if(/багаж включ|checked baggage|with baggage|багаж включен/.test(str)) hasCheckedBaggage = true;
+  }
+
+  if(hasCheckedBaggage === null){
+    const weight = x.baggage_weight_kg ?? x.baggage_kg ?? x.checked_baggage_kg;
+    if(typeof weight === 'number' && weight > 0) hasCheckedBaggage = true;
+  }
+  if(hasCheckedBaggage === null && typeof x.no_baggage === 'boolean'){
+    hasCheckedBaggage = !x.no_baggage;
+  }
+  if(hasCheckedBaggage === null && typeof x.hand_luggage_only === 'boolean' && x.hand_luggage_only){
+    hasCheckedBaggage = false;
+  }
+
+  const fareHints = [x.fare_family, x.fare_name, x.tariff_name, x.fare_brand].filter(v=>typeof v==='string');
+  if(hasCheckedBaggage === null && fareHints.length){
+    const text = fareHints.join(' ').toLowerCase();
+    if(/light|lite|базов|только ручн|hand\s*luggage/.test(text)) hasCheckedBaggage = false;
+    else if(/classic|standard|plus|comfort|opt/.test(text)) hasCheckedBaggage = true;
+  }
+
+  if(hasCheckedBaggage === null){
+    const baggageLower = (baggageText||'').toLowerCase();
+    if(/без багажа|no\s*baggage|только ручн|hand luggage only/.test(baggageLower)) hasCheckedBaggage = false;
+    else if(/багаж включ|checked baggage|багаж включен|включен багаж|with baggage/.test(baggageLower)) hasCheckedBaggage = true;
+  }
+
   const base = {
     origin:x.origin,
     destination:x.destination,
@@ -2126,8 +2633,9 @@ function normalizeFlight(x,{ori,dst,cur,d1,d2,oneway,adults}){
     depSort:(hh===null?0:hh*60 + (parseInt(depTime.slice(3,5),10)||0)),
     deeplink,
 
-    baggageText: makeBaggageText(x),
-    handBaggageText: makeHandBaggageText(x),
+    baggageText,
+    handBaggageText,
+    hasCheckedBaggage,
     flightNumber: x.flight_number || x.flight || x.thread_number || x.thread || ''
   };
 
@@ -2147,6 +2655,7 @@ function normalizeFlight(x,{ori,dst,cur,d1,d2,oneway,adults}){
 /* ПЕРЕОПРЕДЕЛЁННЫЙ рендер карточек */
 function applyFiltersAndSort(){
   const r = $('#results'); r.innerHTML='';
+  updateYuviaRouteHint([]);
   if(!allResults.length){
     const empty=document.createElement('div'); empty.className='card';
     empty.innerHTML=`<div class="bad">Ничего не нашли.</div><div class="hint">Попробуй поменять даты, валюту или снять фильтры. Ниже — цены на соседние дни.</div>`;
@@ -2164,6 +2673,8 @@ function applyFiltersAndSort(){
     if(s==='depart_asc') return (a.depSort||0)-(b.depSort||0);
     return 0;
   });
+
+  updateYuviaRouteHint(list);
 
   if(!list.length){
     const empty=document.createElement('div'); empty.className='card';
