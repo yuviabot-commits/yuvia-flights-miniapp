@@ -5,24 +5,70 @@
   <title>Yuvia Flight Concierge</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    * { box-sizing: border-box; }
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
+
     :root {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color-scheme: light;
+      --bg-primary: #F7F4EF;
+      --bg-secondary: #EEF3F1;
+      --bg-card: rgba(252, 249, 244, 0.9);
+      --border-soft: #E2E8F0;
+      --text-primary: #1F2733;
+      --text-secondary: #6B7280;
+      --accent-primary: #11A26A;
+      --accent-primary-dark: #0B7C4E;
+      --accent-secondary: #F97316;
+      --accent-sun: #FACC6B;
     }
+
+    * { box-sizing: border-box; }
+
     body {
       margin: 0;
-      background: #F7F4EF;
-      color: #1F2733;
+      font-family: 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(900px 900px at -10% -20%, #E7FFF3 0, transparent 60%),
+        radial-gradient(900px 900px at 110% 0%, #FFEEDC 0, transparent 60%),
+        radial-gradient(1200px 1000px at 50% 110%, #E3F2FF 0, #F7F4EF 50%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
     }
+
     a { color: inherit; text-decoration: none; }
     button { font-family: inherit; }
     input, select { font-family: inherit; }
 
     .page {
       min-height: 100vh;
-      background: #F7F4EF;
+      position: relative;
     }
+
+    .glow-blob {
+      position: fixed;
+      width: 480px;
+      height: 480px;
+      border-radius: 50%;
+      filter: blur(60px);
+      opacity: 0.6;
+      pointer-events: none;
+      z-index: -1;
+    }
+    .glow-1 {
+      background: rgba(17, 162, 106, 0.15);
+      top: -160px;
+      left: -120px;
+    }
+    .glow-2 {
+      background: rgba(249, 115, 22, 0.12);
+      top: -120px;
+      right: -160px;
+    }
+    .glow-3 {
+      background: rgba(250, 204, 107, 0.18);
+      bottom: -140px;
+      left: 20%;
+    }
+
     .top-nav {
       padding: 16px 24px;
     }
@@ -34,53 +80,143 @@
       justify-content: space-between;
       gap: 16px;
     }
-    .logo-circle {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #11A26A 0%, #F97316 60%, #FACC6B 100%);
+    .logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
+    .logo-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      background:
+        radial-gradient(circle at 20% 20%, #FACC6B 0, transparent 45%),
+        linear-gradient(135deg, #11A26A 0%, #F97316 55%, #FACC6B 100%);
+      box-shadow:
+        0 10px 25px rgba(17, 162, 106, 0.2),
+        0 0 0 1px rgba(255, 255, 255, 0.6);
+    }
+    .logo-text-main {
+      font-weight: 700;
+      font-size: 20px;
+      letter-spacing: 0.03em;
+    }
+    .logo-text-sub {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
     .content-wrap {
       max-width: 1280px;
       margin: 0 auto;
-      padding: 24px 16px 40px;
-    }
-    .card {
-      background: #FFFFFF;
-      border-radius: 20px;
-      box-shadow: 0 18px 50px rgba(15, 23, 42, 0.12);
-      padding: 24px;
+      padding: 8px 16px 40px;
     }
 
+    .card {
+      position: relative;
+      background: var(--bg-card);
+      border-radius: 26px;
+      padding: 26px 26px 28px;
+      box-shadow:
+        0 24px 80px rgba(15, 23, 42, 0.16),
+        0 0 0 1px rgba(255, 255, 255, 0.80);
+      backdrop-filter: blur(18px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      overflow: hidden;
+      animation: card-pop 0.45s ease-out;
+    }
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      border: 1px solid rgba(255, 255, 255, 0.65);
+      pointer-events: none;
+      mix-blend-mode: soft-light;
+    }
+
+    @keyframes card-pop {
+      from { opacity: 0; transform: translateY(16px) scale(0.98); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .card-inner-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 18px;
+      align-items: flex-start;
+    }
     .intro-title {
-      font-size: 22px;
-      font-weight: 600;
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
       margin-bottom: 6px;
     }
     .intro-sub {
       font-size: 14px;
-      color: #6B7280;
-      margin-bottom: 16px;
+      color: var(--text-secondary);
+      max-width: 520px;
+    }
+    .hero-bird {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .hero-bird img {
+      width: 72px;
+      height: auto;
+      filter: drop-shadow(0 22px 40px rgba(15, 23, 42, 0.35));
+    }
+    .hero-bird-text {
+      font-size: 12px;
+      color: var(--text-secondary);
+      max-width: 180px;
+      line-height: 1.4;
     }
 
     .tabs {
-      display: flex;
+      display: inline-flex;
       gap: 8px;
       flex-wrap: wrap;
-      margin-bottom: 16px;
+      margin-bottom: 18px;
+      padding: 4px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.8);
+      box-shadow: 0 10px 35px rgba(148, 163, 184, 0.18);
     }
     .tab-btn {
-      padding: 10px 18px;
+      padding: 8px 18px;
       border-radius: 999px;
-      border: 1px solid #E2E8F0;
-      font-size: 14px;
+      border: none;
+      font-size: 13px;
       background: transparent;
       cursor: pointer;
+      color: var(--text-secondary);
+      position: relative;
+      transition: color 0.2s, transform 0.15s;
+    }
+    .tab-btn::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(120deg, rgba(17, 162, 106, 0.09), rgba(249, 115, 22, 0.09));
+      opacity: 0;
+      transition: opacity 0.2s;
+      z-index: -1;
+    }
+    .tab-btn:hover {
+      transform: translateY(-1px);
+      color: var(--text-primary);
     }
     .tab-btn.active {
-      background: #EEF3F1;
-      border-color: #11A26A;
-      color: #1F2733;
+      background: #FFFFFF;
+      color: var(--text-primary);
+      box-shadow: 0 8px 25px rgba(148, 163, 184, 0.18);
+    }
+    .tab-btn.active::before {
+      opacity: 1;
     }
 
     .tab-content { display: none; }
@@ -99,19 +235,27 @@
       min-width: 0;
     }
     .field-label {
-      font-size: 13px;
-      color: #6B7280;
+      font-size: 12px;
+      color: var(--text-secondary);
     }
     .field-input {
-      padding: 10px 12px;
-      border-radius: 12px;
-      border: 1px solid #E2E8F0;
+      padding: 11px 13px;
+      border-radius: 14px;
+      border: 1px solid var(--border-soft);
       font-size: 14px;
+      background: rgba(255, 255, 255, 0.9);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    }
+    .field-input:focus {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 1px rgba(17, 162, 106, 0.2);
+      background: #FFFFFF;
     }
 
     .section-title {
-      font-weight: 500;
-      font-size: 14px;
+      font-weight: 600;
+      font-size: 13px;
       margin-top: 16px;
       margin-bottom: 8px;
     }
@@ -124,20 +268,24 @@
     .chip {
       border-radius: 999px;
       padding: 6px 12px;
-      border: 1px solid #E2E8F0;
+      border: 1px solid rgba(226, 232, 240, 0.9);
       font-size: 13px;
-      background: #FFFFFF;
+      background: rgba(255, 255, 255, 0.95);
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 6px;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s, transform 0.15s;
     }
-    .chip input {
-      margin: 0;
+    .chip input { margin: 0; }
+    .chip:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(148, 163, 184, 0.25);
     }
     .chip-toggle.active {
-      background: #EEF3F1;
-      border-color: #11A26A;
+      background: linear-gradient(135deg, #FFFFFF 0%, #EEF3F1 100%);
+      border-color: var(--accent-primary);
+      box-shadow: 0 8px 22px rgba(17, 162, 106, 0.2);
     }
 
     .form-footer {
@@ -150,28 +298,47 @@
     }
     .form-hint {
       font-size: 13px;
-      color: #6B7280;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .form-hint::before {
+      content: "✨";
     }
     .btn-primary {
-      padding: 10px 20px;
+      padding: 10px 22px;
       border-radius: 999px;
       border: none;
-      background: #11A26A;
-      color: #FFFFFF;
       font-size: 14px;
-      font-weight: 500;
+      font-weight: 600;
       cursor: pointer;
+      background-image: linear-gradient(120deg, #11A26A, #0B7C4E);
+      color: #FFFFFF;
+      box-shadow:
+        0 14px 35px rgba(17, 162, 106, 0.48),
+        0 0 0 1px rgba(255, 255, 255, 0.4);
+      transition: transform 0.12s ease-out, box-shadow 0.18s ease-out, filter 0.18s;
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow:
+        0 18px 40px rgba(17, 162, 106, 0.6),
+        0 0 0 1px rgba(255, 255, 255, 0.45);
+      filter: brightness(1.02);
     }
     .btn-primary[disabled] {
-      background: #0B7C4E;
-      opacity: 0.8;
+      background-image: linear-gradient(120deg, #0B7C4E, #0B7C4E);
+      box-shadow: 0 8px 22px rgba(15, 23, 42, 0.3);
       cursor: default;
+      opacity: 0.9;
+      transform: none;
     }
 
     .layout-results {
       margin-top: 20px;
       display: grid;
-      grid-template-columns: minmax(0, 2fr) minmax(0, 1.1fr);
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1.05fr);
       gap: 20px;
     }
     @media (max-width: 900px) {
@@ -183,7 +350,7 @@
     .results-header {
       margin-bottom: 10px;
       font-size: 13px;
-      color: #6B7280;
+      color: var(--text-secondary);
       display: flex;
       justify-content: space-between;
       gap: 8px;
@@ -191,20 +358,38 @@
     }
 
     .route-card {
-      border-radius: 16px;
-      border: 1px solid #E2E8F0;
-      padding: 14px;
+      position: relative;
+      border-radius: 18px;
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      padding: 14px 14px 14px 18px;
       margin-bottom: 10px;
       cursor: pointer;
-      background: #FFFFFF;
+      background: linear-gradient(135deg, #FFFFFF 0%, #F9FAFB 100%);
       display: flex;
       flex-direction: column;
       gap: 8px;
-      transition: box-shadow 0.15s ease, border-color 0.15s ease;
+      transition: box-shadow 0.18s, border-color 0.18s, transform 0.12s;
+      overflow: hidden;
+    }
+    .route-card::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 14px;
+      bottom: 14px;
+      width: 3px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #11A26A, #F97316);
+      opacity: 0.7;
     }
     .route-card.selected {
-      border-color: #11A26A;
-      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.14);
+      border-color: rgba(17, 162, 106, 0.8);
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.16);
+      transform: translateY(-1px);
+    }
+    .route-card:hover {
+      box-shadow: 0 14px 32px rgba(148, 163, 184, 0.42);
+      transform: translateY(-1px);
     }
     .route-card-header {
       display: flex;
@@ -213,7 +398,7 @@
       align-items: flex-start;
     }
     .route-title {
-      font-weight: 500;
+      font-weight: 600;
       font-size: 14px;
       margin-bottom: 4px;
     }
@@ -222,20 +407,27 @@
       min-width: 110px;
     }
     .route-price {
-      font-weight: 600;
+      font-weight: 700;
       font-size: 16px;
     }
+
     .btn-ghost {
       margin-top: 6px;
       padding: 4px 10px;
       border-radius: 999px;
-      border: 1px solid #E2E8F0;
-      background: transparent;
+      border: 1px solid rgba(226, 232, 240, 0.95);
+      background: rgba(255, 255, 255, 0.9);
       font-size: 12px;
       cursor: pointer;
+      transition: background 0.18s, border-color 0.18s, transform 0.12s, box-shadow 0.18s;
+    }
+    .btn-ghost:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(148, 163, 184, 0.35);
+      border-color: rgba(148, 163, 184, 0.8);
     }
     .btn-ghost.active {
-      border-color: #11A26A;
+      border-color: var(--accent-primary);
       background: #EEF3F1;
     }
 
@@ -244,8 +436,14 @@
       align-items: center;
       gap: 8px;
       font-size: 12px;
-      color: #6B7280;
+      color: var(--text-secondary);
       margin-bottom: 6px;
+    }
+    .timeline-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-primary);
     }
     .timeline-bar {
       position: relative;
@@ -268,45 +466,65 @@
       align-items: center;
     }
 
+    .btn-outline {
+      margin-top: 10px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border-soft);
+      background: rgba(255, 255, 255, 0.95);
+      font-size: 13px;
+      cursor: pointer;
+      transition: box-shadow 0.18s, transform 0.12s, border-color 0.18s;
+    }
+    .btn-outline:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 22px rgba(148, 163, 184, 0.35);
+      border-color: rgba(148, 163, 184, 0.9);
+    }
+    .btn-outline-primary {
+      border: none;
+      background-image: linear-gradient(120deg, #11A26A, #0B7C4E);
+      color: #FFFFFF;
+      margin-left: 10px;
+      box-shadow: 0 14px 35px rgba(17, 162, 106, 0.5);
+    }
+    .btn-outline-primary:hover {
+      box-shadow: 0 18px 40px rgba(17, 162, 106, 0.6);
+    }
+
     .yuvia-panel {
-      background: #EEF3F1;
-      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(238, 243, 241, 0.96), rgba(241, 248, 246, 0.98));
+      border-radius: 20px;
       padding: 16px;
       height: 100%;
       display: flex;
       flex-direction: column;
       gap: 12px;
+      box-shadow: 0 12px 34px rgba(148, 163, 184, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.7);
     }
     .yuvia-panel-title {
-      font-weight: 600;
+      font-weight: 700;
       font-size: 15px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .yuvia-panel-title::before {
+      content: "🕊️";
+      font-size: 16px;
     }
     .yuvia-bubble {
       padding: 12px;
-      border-radius: 12px;
+      border-radius: 14px;
       background: #FFFFFF;
       font-size: 14px;
+      box-shadow: 0 8px 24px rgba(148, 163, 184, 0.28);
     }
     .yuvia-footer {
       margin-top: auto;
       font-size: 12px;
-      color: #6B7280;
-    }
-
-    .btn-outline {
-      margin-top: 10px;
-      padding: 8px 14px;
-      border-radius: 999px;
-      border: 1px solid #E2E8F0;
-      background: #FFFFFF;
-      font-size: 13px;
-      cursor: pointer;
-    }
-    .btn-outline-primary {
-      border: none;
-      background: #11A26A;
-      color: #FFFFFF;
-      margin-left: 10px;
+      color: var(--text-secondary);
     }
 
     .compare-drawer {
@@ -314,12 +532,13 @@
       bottom: 0;
       left: 0;
       right: 0;
-      background: #FFFFFF;
-      border-top: 1px solid #E2E8F0;
-      box-shadow: 0 -10px 30px rgba(15,23,42,0.12);
+      background: rgba(252, 249, 244, 0.98);
+      border-top: 1px solid rgba(226, 232, 240, 0.9);
+      box-shadow: 0 -16px 40px rgba(15, 23, 42, 0.28);
       padding: 16px;
       z-index: 40;
       display: none;
+      backdrop-filter: blur(18px);
     }
     .compare-drawer.active { display: block; }
     .compare-header {
@@ -336,53 +555,58 @@
     }
     .compare-card {
       min-width: 220px;
-      border-radius: 14px;
-      border: 1px solid #E2E8F0;
+      border-radius: 16px;
+      border: 1px solid rgba(226, 232, 240, 0.95);
       padding: 10px;
       font-size: 13px;
+      background: #FFFFFF;
+      box-shadow: 0 10px 26px rgba(148, 163, 184, 0.3);
     }
 
     .trip-bar {
       position: fixed;
       left: 16px;
       right: 16px;
-      bottom: 70px;
+      bottom: 76px;
       max-width: 1280px;
       margin: 0 auto;
-      padding: 12px;
+      padding: 12px 18px;
       border-radius: 999px;
-      background: #FFFFFF;
-      box-shadow: 0 12px 40px rgba(15,23,42,0.18);
-      border: 1px solid #E2E8F0;
+      background: linear-gradient(120deg, rgba(255, 255, 255, 0.96), rgba(238, 243, 241, 0.98));
+      box-shadow: 0 18px 50px rgba(15, 23, 42, 0.32);
+      border: 1px solid rgba(226, 232, 240, 0.9);
       display: none;
       justify-content: space-between;
       align-items: center;
       font-size: 13px;
       gap: 12px;
       z-index: 35;
+      backdrop-filter: blur(14px);
     }
     .trip-bar.active { display: flex; }
 
     .modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(15,23,42,0.35);
+      background: rgba(15, 23, 42, 0.4);
       display: none;
       align-items: center;
       justify-content: center;
       z-index: 50;
+      backdrop-filter: blur(10px);
     }
     .modal-backdrop.active {
       display: flex;
     }
     .modal {
       background: #FFFFFF;
-      border-radius: 20px;
+      border-radius: 22px;
       max-width: 640px;
       width: 100%;
       max-height: 85vh;
       overflow: auto;
       padding: 20px;
+      box-shadow: 0 24px 70px rgba(15, 23, 42, 0.55);
     }
     .modal-header {
       display: flex;
@@ -391,25 +615,51 @@
       margin-bottom: 10px;
     }
     .segment-card {
-      border-radius: 14px;
-      border: 1px solid #E2E8F0;
+      border-radius: 16px;
+      border: 1px solid rgba(226, 232, 240, 0.95);
       padding: 12px;
       margin-bottom: 10px;
       font-size: 13px;
+      background: linear-gradient(135deg, #FFFFFF 0%, #F9FAFB 100%);
+      box-shadow: 0 8px 24px rgba(148, 163, 184, 0.3);
     }
 
     .hidden { display: none !important; }
+
+    @media (max-width: 640px) {
+      .card {
+        padding: 18px 16px 22px;
+        border-radius: 22px;
+      }
+      .card-inner-header {
+        flex-direction: column;
+      }
+      .hero-bird {
+        align-self: flex-end;
+      }
+      .tabs {
+        width: 100%;
+        justify-content: space-between;
+      }
+      .trip-bar {
+        bottom: 90px;
+      }
+    }
   </style>
 </head>
 <body>
 <div class="page">
+  <div class="glow-blob glow-1"></div>
+  <div class="glow-blob glow-2"></div>
+  <div class="glow-blob glow-3"></div>
+
   <header class="top-nav">
     <div class="top-nav-inner">
-      <div style="display:flex;align-items:center;gap:12px;">
+      <div class="logo-wrap">
         <div class="logo-circle"></div>
         <div>
-          <div style="font-weight:600;font-size:18px;">Yuvia</div>
-          <div style="font-size:12px;color:#6B7280;">умный тревел-консьерж</div>
+          <div class="logo-text-main">Yuvia</div>
+          <div class="logo-text-sub">умный тревел-консьерж</div>
         </div>
       </div>
     </div>
@@ -417,10 +667,21 @@
 
   <main class="content-wrap">
     <section class="card">
-      <div class="intro-title">Подобрать перелёт с Yuvia</div>
-      <div class="intro-sub">
-        Не только цена, но и спокойствие: я подсвечу ночные вылеты,
-        сомнительные стыковки и помогу выбрать маршрут под твой стиль.
+      <div class="card-inner-header">
+        <div>
+          <div class="intro-title">Подобрать перелёт с Yuvia</div>
+          <div class="intro-sub">
+            Не только цена, но и спокойствие: я подсвечу ночные вылеты,
+            сомнительные стыковки и помогу выбрать маршрут под твой стиль.
+          </div>
+        </div>
+        <div class="hero-bird">
+          <img src="Logo-bird.png" alt="Yuvia" />
+          <div class="hero-bird-text">
+            Твой личный тревел-консьерж: умеет быть и в бизнес-лаунже, и с
+            гитарой в горах.
+          </div>
+        </div>
       </div>
 
       <div class="tabs">
@@ -452,7 +713,7 @@
           </div>
 
           <div style="margin-top:12px;display:flex;gap:12px;align-items:center;">
-            <label style="font-size:13px;color:#6B7280;">
+            <label style="font-size:13px;color:var(--text-secondary);">
               <input type="checkbox" id="flexible-input" checked style="margin-right:6px;">
               Можно сдвинуть даты на ±3 дня, если так будет удобнее/дешевле
             </label>
@@ -487,7 +748,7 @@
 
           <div class="form-footer">
             <div class="form-hint">
-              Yuvia запомнит твой стиль и в следующий раз подстроится автоматически ✈️
+              Yuvia запомнит твой стиль и в следующий раз подстроится автоматически.
             </div>
             <button type="submit" class="btn-primary" id="search-btn">
               Подобрать маршруты
@@ -565,7 +826,7 @@
         <div style="margin-top:16px;">
           <button type="button" class="btn-primary">Проверить маршрут (скоро)</button>
         </div>
-        <p style="font-size:13px;color:#6B7280;margin-top:12px;">
+        <p style="font-size:13px;color:var(--text-secondary);margin-top:12px;">
           Даже с уже купленными билетами Yuvia сможет посчитать стресс,
           подсветить риски пересадок и собрать маршрут по городу под твои часы.
         </p>
@@ -576,11 +837,11 @@
   <!-- нижняя плашка с сохранённым маршрутом -->
   <div class="trip-bar" id="trip-bar">
     <div>
-      <div style="font-weight:500;" id="trip-title"></div>
+      <div style="font-weight:600;" id="trip-title"></div>
       <div style="color:#6B7280;" id="trip-sub"></div>
     </div>
     <div style="text-align:right;">
-      <div id="trip-price"></div>
+      <div id="trip-price" style="font-weight:600;"></div>
       <div style="font-size:12px;color:#6B7280;">
         позже сюда можно добавить кнопку «маршрут по городу»
       </div>
@@ -619,7 +880,7 @@
 </div>
 
 <script>
-  // ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДАТ/СТРЕССА =====
+  // ==== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====
   function addMinutes(date, minutes) {
     return new Date(date.getTime() + minutes * 60000);
   }
@@ -627,25 +888,24 @@
     return Math.round((b.getTime() - a.getTime()) / 60000);
   }
   function isNight(date) {
-    const h = date.getHours();
+    var h = date.getHours();
     return h < 6 || h >= 23;
   }
-
   function computeStressForSegments(segments, prefs) {
-    let score = 0;
-    let tags = [];
-    let hasNight = false;
-    let hasOvernight = false;
+    var score = 0;
+    var tags = [];
+    var hasNight = false;
+    var hasOvernight = false;
 
-    const first = new Date(segments[0].departTime);
-    const last = new Date(segments[segments.length - 1].arriveTime);
+    var first = new Date(segments[0].departTime);
+    var last = new Date(segments[segments.length - 1].arriveTime);
 
-    const totalDuration = minutesBetween(first, last);
-    const connections = segments.length - 1;
+    var totalDuration = minutesBetween(first, last);
+    var connections = segments.length - 1;
 
     segments.forEach(function (s) {
-      const d = new Date(s.departTime);
-      const a = new Date(s.arriveTime);
+      var d = new Date(s.departTime);
+      var a = new Date(s.arriveTime);
       if (isNight(d) || isNight(a)) {
         hasNight = true;
         score += prefs.avoidNightFlights ? 2 : 1;
@@ -706,14 +966,13 @@
       tags: Array.from(new Set(tags))
     };
   }
-
   function getStressLabel(score) {
     if (score <= 3) return { label: 'Минимальный стресс', tone: 'low' };
     if (score <= 6) return { label: 'Умеренный стресс', tone: 'medium' };
     return { label: 'Высокий стресс', tone: 'high' };
   }
 
-  // ===== ГЕНЕРАЦИЯ МОКОВЫХ МАРШРУТОВ =====
+  // ==== МОКОВОЕ "API" ====
   function createSegment(from, to, fromCode, toCode, depart, durationMin, airline, flightNumber, baggageIncluded, handLuggageOnly) {
     return {
       id: fromCode + '-' + toCode + '-' + flightNumber + '-' + depart.toISOString(),
@@ -807,7 +1066,7 @@
     return routes;
   }
 
-  // ===== ГЛОБАЛЬНОЕ СОСТОЯНИЕ =====
+  // ==== ГЛОБАЛЬНОЕ СОСТОЯНИЕ ====
   var state = {
     routes: [],
     selectedRouteId: null,
@@ -825,7 +1084,7 @@
     }
   };
 
-  // ===== ПЕРЕКЛЮЧЕНИЕ ТАБОВ =====
+  // ==== ТАБЫ ====
   document.querySelectorAll('.tab-btn').forEach(function (btn) {
     btn.addEventListener('click', function () {
       var tab = btn.getAttribute('data-tab');
@@ -838,7 +1097,7 @@
     });
   });
 
-  // Установка сегодняшней даты
+  // сегодняшняя дата
   (function setToday() {
     var input = document.getElementById('date-input');
     var today = new Date();
@@ -846,7 +1105,7 @@
     input.value = iso;
   })();
 
-  // Приоритет
+  // приоритет
   document.querySelectorAll('.chip-toggle').forEach(function (chip) {
     chip.addEventListener('click', function () {
       var pr = chip.getAttribute('data-priority');
@@ -857,7 +1116,7 @@
     });
   });
 
-  // ===== ОБРАБОТЧИК ПОДБОРА МАРШРУТОВ =====
+  // ==== ОБРАБОТКА ПОИСКА ====
   var searchForm = document.getElementById('search-form');
   var searchBtn = document.getElementById('search-btn');
   var resultsBlock = document.getElementById('results-block');
@@ -892,7 +1151,6 @@
     state.compareIds = [];
     state.selectedRouteId = null;
 
-    // имитируем "сетевой" запрос
     setTimeout(function () {
       state.routes = searchFlightsMock(params);
       if (state.routes.length > 0) {
@@ -969,19 +1227,18 @@
       route.tags.slice(0, 4).forEach(function (tag) {
         var t = document.createElement('span');
         t.className = 'pill';
-        t.style.border = '1px solid #E2E8F0';
+        t.style.border = '1px solid var(--border-soft)';
         t.style.color = '#6B7280';
         t.textContent = tag;
         badges.appendChild(t);
       });
-
-      card.appendChild(badges);
 
       card.addEventListener('click', function () {
         state.selectedRouteId = route.id;
         renderResults();
       });
 
+      card.appendChild(badges);
       routesListEl.appendChild(card);
     });
 
@@ -998,11 +1255,16 @@
 
     var meta = document.createElement('div');
     meta.className = 'timeline-meta';
-    meta.textContent =
+    var dot = document.createElement('span');
+    dot.className = 'timeline-dot';
+    meta.appendChild(dot);
+    var text = document.createElement('span');
+    text.textContent =
       route.segments[0].fromCode + ' ' + formatTime(route.segments[0].departTime) +
       ' — ' +
       route.segments[route.segments.length - 1].toCode + ' ' + formatTime(route.segments[route.segments.length - 1].arriveTime) +
       ' • ' + Math.round(totalMinutes / 60) + ' ч';
+    meta.appendChild(text);
     wrap.appendChild(meta);
 
     var bar = document.createElement('div');
@@ -1021,7 +1283,7 @@
       segEl.className = 'timeline-segment';
       segEl.style.left = left + '%';
       segEl.style.width = width + '%';
-      segEl.style.background = idx % 2 === 0 ? '#11A26A' : '#F97316';
+      segEl.style.background = idx % 2 === 0 ? 'var(--accent-primary)' : 'var(--accent-secondary)';
       bar.appendChild(segEl);
     });
 
@@ -1034,7 +1296,7 @@
     return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
   }
 
-  // ===== ПАНЕЛЬ Yuvia =====
+  // ==== ПАНЕЛЬ YUVIA ====
   function renderYuviaPanel() {
     var route = state.routes.find(function (r) { return r.id === state.selectedRouteId; });
     yuviaPanelEl.innerHTML = '';
@@ -1117,7 +1379,7 @@
     yuviaPanelEl.appendChild(footer);
   }
 
-  // ===== СРАВНЕНИЕ =====
+  // ==== СРАВНЕНИЕ ====
   var compareDrawerEl = document.getElementById('compare-drawer');
   var compareListEl = document.getElementById('compare-list');
   var compareTitleEl = document.getElementById('compare-title');
@@ -1151,7 +1413,7 @@
       var card = document.createElement('div');
       card.className = 'compare-card';
       card.innerHTML =
-        '<div style="font-weight:500;margin-bottom:4px;">' + r.title + '</div>' +
+        '<div style="font-weight:600;margin-bottom:4px;">' + r.title + '</div>' +
         '<div style="font-size:12px;color:#6B7280;">' +
         (r.totalConnections === 0 ? 'Без пересадок' : (r.totalConnections + ' пересад.')) +
         ' • ' + Math.round(r.totalDurationMinutes / 60) + ' ч в пути</div>' +
@@ -1161,7 +1423,7 @@
     });
   }
 
-  // ===== СОХРАНЁННЫЙ TRIP =====
+  // ==== TRIP BAR ====
   var tripBarEl = document.getElementById('trip-bar');
   var tripTitleEl = document.getElementById('trip-title');
   var tripSubEl = document.getElementById('trip-sub');
@@ -1177,7 +1439,6 @@
       renderTripBar();
     } catch (e) {}
   }
-
   function saveTrip(trip) {
     state.savedTrip = trip;
     try {
@@ -1185,7 +1446,6 @@
     } catch (e) {}
     renderTripBar();
   }
-
   function renderTripBar() {
     if (!state.savedTrip) {
       tripBarEl.classList.remove('active');
@@ -1198,16 +1458,13 @@
     tripSubEl.textContent = route.title + ' • ' + Math.round(route.totalDurationMinutes / 60) + ' ч в пути • стресс ' + route.stressScore + '/10';
     tripPriceEl.textContent = route.price.toLocaleString('ru-RU') + ' ' + route.currency;
   }
-
   loadTrip();
 
-  // кнопки «детали» и «сохранить»
   document.getElementById('details-btn').addEventListener('click', function () {
     var route = state.routes.find(function (r) { return r.id === state.selectedRouteId; });
     if (!route) return;
     openModal(route);
   });
-
   document.getElementById('save-trip-btn').addEventListener('click', function () {
     if (!state.searchParams) return;
     var route = state.routes.find(function (r) { return r.id === state.selectedRouteId; });
@@ -1221,7 +1478,7 @@
     saveTrip(trip);
   });
 
-  // ===== МОДАЛЬНЫЕ ДЕТАЛИ =====
+  // ==== МОДАЛКА ====
   var modalBackdropEl = document.getElementById('modal-backdrop');
   var modalSubtitleEl = document.getElementById('modal-subtitle');
   var modalSegmentsEl = document.getElementById('modal-segments');
@@ -1253,11 +1510,9 @@
     });
     modalBackdropEl.classList.add('active');
   }
-
   function closeModal() {
     modalBackdropEl.classList.remove('active');
   }
-
   function formatDate(iso) {
     var d = new Date(iso);
     return d.toLocaleDateString('ru-RU', { day: '2-digit', month: 'short' });
