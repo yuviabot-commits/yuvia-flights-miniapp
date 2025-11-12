@@ -967,81 +967,47 @@
 
     <div id="advancedBlock" class="advanced hidden">
       <div class="divider"></div>
-      <div class="grid grid-2">
-        <div>
-          <div class="label">Маршрут</div>
-          <select id="oneway">
-            <option value="no">Туда-обратно</option>
-            <option value="yes">Только в одну сторону</option>
-          </select>
-        </div>
-        <div>
-          <div class="label">Гибкие даты</div>
-          <select id="flexMode">
-            <option value="none">Отключено</option>
-            <option value="weekend">Ближайшие выходные</option>
-            <option value="plus3">± 3 дня</option>
-            <option value="plus7">± 7 дней</option>
-          </select>
-        </div>
-        <div>
-          <div class="label">Пересадки в маршруте</div>
-          <select id="advStops">
-            <option value="any">Не важно</option>
-            <option value="0">Только прямые рейсы</option>
-            <option value="1">Не более 1 пересадки</option>
-          </select>
-        </div>
-        <div>
-          <div class="label">В пути не больше</div>
-          <div class="row" style="align-items:center; gap:8px; flex-wrap:wrap">
-            <input type="number" id="advMaxDuration" min="0" step="1" placeholder="например, 5" style="flex:1 1 120px; min-width:0">
-            <span style="font-size:13px;color:var(--muted)">часов</span>
-          </div>
-        </div>
-        <div>
-          <div class="label">Аэропорты</div>
-          <select id="advAirportsMode">
-            <option value="any">Любые аэропорты</option>
-            <option value="manual">Выбрать аэропорты вручную</option>
-          </select>
-          <select id="advAirportFilter" multiple size="4" class="hidden" style="margin-top:8px"></select>
-        </div>
-        <div>
-          <div class="label">Багаж</div>
-          <div class="row" style="flex-wrap:wrap; gap:8px; align-items:center">
-            <label style="display:flex; align-items:center; gap:6px">
-              <input type="radio" name="advBaggage" value="any" checked>
-              <span>Не важно</span>
-            </label>
-            <label style="display:flex; align-items:center; gap:6px">
-              <input type="radio" name="advBaggage" value="with">
-              <span>Только с багажом</span>
-            </label>
-            <label style="display:flex; align-items:center; gap:6px">
-              <input type="radio" name="advBaggage" value="no">
-              <span>Только без багажа (только ручная кладь)</span>
-            </label>
-          </div>
-        </div>
-        <div class="row" style="justify-content:flex-end;gap:6px;align-items:flex-end">
-          <button class="btn-ghost" id="copyLink">Скопировать ссылку</button>
-          <button class="btn-ghost" id="reset">Сбросить форму</button>
-        </div>
+
+      <div class="advanced-header">
+        <div class="advanced-title">Дополнительные настройки</div>
+        <div class="advanced-subtitle">Все по желанию — чипы работают как быстрые фильтры маршрута</div>
       </div>
 
-      <div class="hidden" aria-hidden="true">
-        <select id="oneway">
-          <option value="no">Туда-обратно</option>
-          <option value="yes">Только в одну сторону</option>
-        </select>
-        <select id="flexMode">
-          <option value="none">Отключено</option>
-          <option value="weekend">Ближайшие выходные</option>
-          <option value="plus3">± 3 дня</option>
-          <option value="plus7">± 7 дней</option>
-        </select>
+      <div class="advanced-chips" id="advancedChips">
+        <button type="button" class="chip chip-filter" id="chipTripMode">Режим: сбалансированный</button>
+        <button type="button" class="chip chip-filter" id="chipRoute">Маршрут: туда-обратно</button>
+        <button type="button" class="chip chip-filter" id="chipFlex">Даты: точные</button>
+        <button type="button" class="chip chip-filter" id="chipStops">Пересадки: не важно</button>
+        <button type="button" class="chip chip-filter" id="chipDuration">В пути: без ограничений</button>
+        <button type="button" class="chip chip-filter" id="chipAirports">Аэропорты: любые</button>
+        <button type="button" class="chip chip-filter" id="chipBaggage">Багаж: не важно</button>
       </div>
+
+      <div class="hint" id="weekendHint"></div>
+
+      <div class="advanced-airports-panel hidden" id="advancedAirportsPanel">
+        <div class="label">Аэропорты</div>
+        <div class="hint">Список появится после первого поиска — можно выбрать 1–2 любимых.</div>
+        <select id="advAirportFilter" multiple size="5"></select>
+      </div>
+
+      <div class="advanced-hint" id="yuviaRouteHint"></div>
+
+      <div class="advanced-footer">
+        <button class="btn-ghost" id="copyLink">Скопировать ссылку</button>
+        <button class="btn-ghost" id="reset">Сбросить форму</button>
+      </div>
+
+      <select id="oneway" style="display:none">
+        <option value="no">Туда-обратно</option>
+        <option value="yes">Только в одну сторону</option>
+      </select>
+      <select id="flexMode" style="display:none">
+        <option value="none">Отключено</option>
+        <option value="weekend">Ближайшие выходные</option>
+        <option value="plus3">± 3 дня</option>
+        <option value="plus7">± 7 дней</option>
+      </select>
     </div>
     <div class="hidden" aria-hidden="true">
       <select id="currency">
@@ -1159,7 +1125,7 @@
   </div>
 </div>
 
-<div class="version">версия 15.0</div>
+<div class="version">версия 16.0</div>
 
 <script>
 /* ========= helpers ========= */
@@ -1412,9 +1378,11 @@ $('#oneway').addEventListener('change',()=>{
 function updateWeekendHint(){
   const fm = $('#flexMode').value;
   const h = $('#weekendHint');
-  if(fm!=='weekend'){ h.textContent=''; return; }
+  if(!h) return;
+  if(fm!=='weekend'){ h.textContent=''; h.classList.add('hidden'); return; }
   const {sat,sun}=weekendAround(new Date());
   h.textContent = `Ближайшие выходные: ${ddmmyyyy(sat)} — ${ddmmyyyy(sun)}`;
+  h.classList.remove('hidden');
 }
 $('#flexMode').addEventListener('change',()=>{
   updateWeekendHint();
@@ -1457,6 +1425,7 @@ async function callJSON(path){
 let allResults = [];
 let baseCurrency = 'RUB';
 let advBaggageMode = 'any';
+let tripMode = 'balanced';
 let favorites = [];
 let compareList = [];
 
@@ -1534,7 +1503,6 @@ function renderAirportsFilter(){
   const sel = $('#airportFilter');
   if(!sel) return;
   const advSel = $('#advAirportFilter');
-  const advMode = $('#advAirportsMode');
   const baseSelected = new Set(Array.from(sel.selectedOptions||[]).map(o=>o.value));
   const advSelected = new Set(Array.from((advSel?.selectedOptions)||[]).map(o=>o.value));
 
@@ -1543,9 +1511,8 @@ function renderAirportsFilter(){
     if(x.origin_airport) set.add(`FROM:${x.origin_airport}`);
     if(x.dest_airport) set.add(`TO:${x.dest_airport}`);
   });
-  const optionsHtml = [...set].sort().map(a=>{
-    return `<option value="${a}">${a.replace(/^FROM:/,'Отправление: ').replace(/^TO:/,'Прибытие: ')}</option>`;
-  }).join('');
+  const options = [...set].sort();
+  const optionsHtml = options.map(a=>`<option value="${a}">${a.replace(/^FROM:/,'Отправление: ').replace(/^TO:/,'Прибытие: ')}</option>`).join('');
 
   sel.innerHTML = optionsHtml;
   Array.from(sel.options).forEach(o=>{ if(baseSelected.has(o.value)) o.selected=true; });
@@ -1556,116 +1523,127 @@ function renderAirportsFilter(){
     Array.from(advSel.options).forEach(o=>{ o.selected = preferred.has(o.value); });
   }
 
-  if(advSel && advMode){
-    syncAdvAirportsWithBase();
+  syncAdvAirportsWithBase();
+
+  const panel = $('#advancedAirportsPanel');
+  if(panel && options.length===0){
+    panel.classList.add('hidden');
   }
 }
 
 function syncAdvAirportsWithBase(){
   const baseSel = $('#airportFilter');
   const advSel = $('#advAirportFilter');
-  const advMode = $('#advAirportsMode');
-  if(!baseSel || !advSel || !advMode) return;
-  const values = Array.from(baseSel.selectedOptions||[]).map(o=>o.value);
-  const set = new Set(values);
-  if(values.length){
-    advMode.value = 'manual';
-    advSel.classList.remove('hidden');
-    Array.from(advSel.options).forEach(o=>{ o.selected = set.has(o.value); });
-  } else {
-    if(advMode.value === 'manual'){
-      advSel.classList.remove('hidden');
-      Array.from(advSel.options).forEach(o=>{ o.selected = false; });
-    } else {
-      advMode.value = 'any';
-      advSel.classList.add('hidden');
-      Array.from(advSel.options).forEach(o=>{ o.selected = false; });
-    }
-  }
+  if(!baseSel || !advSel) return;
+  const values = new Set(Array.from(baseSel.selectedOptions||[]).map(o=>o.value));
+  Array.from(advSel.options).forEach(o=>{ o.selected = values.has(o.value); });
+  refreshAdvancedChipsUI();
 }
 
-function initAdvancedControls(){
-  const advStops = $('#advStops');
-  if(advStops){
-    const currentStop = (document.querySelector('input[name="stops"]:checked')||{}).value || 'any';
-    advStops.value = currentStop || 'any';
-    advStops.addEventListener('change',()=>{
-      const val = advStops.value || 'any';
-      const radio = document.querySelector(`input[name="stops"][value="${val}"]`);
+function initAdvancedChips(){
+  const tripChip = $('#chipTripMode');
+  if(tripChip){
+    tripChip.addEventListener('click',()=>{
+      const order = ['balanced','cheap','fast','calm'];
+      const idx = order.indexOf(tripMode);
+      tripMode = order[(idx+1)%order.length];
+      const sort = $('#sortBy');
+      if(tripMode==='cheap' && sort) sort.value='price_asc';
+      else if(tripMode==='fast' && sort) sort.value='duration_asc';
+      else if(tripMode==='calm' && sort) sort.value='yuvia_score';
+      refreshAdvancedChipsUI();
+      applyFiltersAndSort();
+    });
+  }
+
+  const routeChip = $('#chipRoute');
+  if(routeChip){
+    routeChip.addEventListener('click',()=>{
+      const sel = $('#oneway');
+      if(!sel) return;
+      sel.value = sel.value === 'yes' ? 'no' : 'yes';
+      sel.dispatchEvent(new Event('change',{bubbles:true}));
+    });
+  }
+
+  const flexChip = $('#chipFlex');
+  if(flexChip){
+    const flexOrder = ['none','weekend','plus3','plus7'];
+    flexChip.addEventListener('click',()=>{
+      const sel = $('#flexMode');
+      if(!sel) return;
+      const current = sel.value || 'none';
+      const idx = flexOrder.indexOf(current);
+      sel.value = flexOrder[(idx+1)%flexOrder.length];
+      sel.dispatchEvent(new Event('change',{bubbles:true}));
+    });
+  }
+
+  const stopsChip = $('#chipStops');
+  if(stopsChip){
+    const stopsOrder = ['any','0','1'];
+    stopsChip.addEventListener('click',()=>{
+      const current = (document.querySelector('input[name="stops"]:checked')||{}).value || 'any';
+      const idx = stopsOrder.indexOf(current);
+      const next = stopsOrder[(idx+1)%stopsOrder.length];
+      const radio = document.querySelector(`input[name="stops"][value="${next}"]`);
       if(radio){
         radio.checked = true;
         radio.dispatchEvent(new Event('change',{bubbles:true}));
       } else {
         applyFiltersAndSort();
       }
-    });
-    document.querySelectorAll('input[name="stops"]').forEach(radio=>{
-      radio.addEventListener('change',()=>{
-        if(advStops) advStops.value = radio.value || 'any';
-      });
+      refreshAdvancedChipsUI();
     });
   }
 
-  const durMaxInput = $('#durMax');
-  const advMaxDuration = $('#advMaxDuration');
-  if(durMaxInput && advMaxDuration){
-    if(durMaxInput.value){
-      advMaxDuration.value = durMaxInput.value;
-    }
-    const syncToBase = ()=>{
-      const raw = advMaxDuration.value;
-      if(raw === '' || raw === null){
-        durMaxInput.value = '';
-      } else {
-        const num = parseInt(raw,10);
-        durMaxInput.value = Number.isFinite(num) ? String(num) : '';
-      }
-    };
-    advMaxDuration.addEventListener('input', syncToBase);
-    advMaxDuration.addEventListener('change',()=>{
-      syncToBase();
-      applyFiltersAndSort();
-    });
-    ['input','change'].forEach(ev=>{
-      durMaxInput.addEventListener(ev,()=>{
-        if(advMaxDuration) advMaxDuration.value = durMaxInput.value;
-      });
+  const durationChip = $('#chipDuration');
+  if(durationChip){
+    durationChip.addEventListener('click',()=>{
+      const input = $('#durMax');
+      if(!input) return;
+      const raw = parseInt(input.value,10);
+      let next;
+      if(!Number.isFinite(raw) || raw<=0) next = 3;
+      else if(raw===3) next = 6;
+      else if(raw===6) next = 9;
+      else next = '';
+      input.value = next === '' ? '' : String(next);
+      input.dispatchEvent(new Event('change',{bubbles:true}));
+      refreshAdvancedChipsUI();
     });
   }
 
-  const advAirportsMode = $('#advAirportsMode');
+  const airportsChip = $('#chipAirports');
+  const airportsPanel = $('#advancedAirportsPanel');
+  if(airportsChip && airportsPanel){
+    airportsChip.addEventListener('click',()=>{
+      airportsPanel.classList.toggle('hidden');
+    });
+    document.addEventListener('click',e=>{
+      if(airportsPanel.classList.contains('hidden')) return;
+      if(airportsPanel.contains(e.target)) return;
+      if(airportsChip.contains(e.target)) return;
+      airportsPanel.classList.add('hidden');
+    });
+  }
+
   const advAirportFilter = $('#advAirportFilter');
-  const baseAirportFilter = $('#airportFilter');
-  if(advAirportsMode){
-    advAirportsMode.addEventListener('change',()=>{
-      if(advAirportsMode.value === 'manual'){
-        if(advAirportFilter) advAirportFilter.classList.remove('hidden');
-        syncAdvAirportsWithBase();
-      } else {
-        if(advAirportFilter){
-          advAirportFilter.classList.add('hidden');
-          Array.from(advAirportFilter.options).forEach(o=>{ o.selected = false; });
-        }
-        if(baseAirportFilter){
-          Array.from(baseAirportFilter.options).forEach(o=>{ o.selected = false; });
-          baseAirportFilter.dispatchEvent(new Event('change',{bubbles:true}));
-        } else {
-          applyFiltersAndSort();
-        }
-      }
-    });
-  }
   if(advAirportFilter){
     advAirportFilter.addEventListener('change',()=>{
-      const selectedValues = new Set(Array.from(advAirportFilter.selectedOptions||[]).map(o=>o.value));
-      if(baseAirportFilter){
-        Array.from(baseAirportFilter.options).forEach(o=>{ o.selected = selectedValues.has(o.value); });
-        baseAirportFilter.dispatchEvent(new Event('change',{bubbles:true}));
+      const base = $('#airportFilter');
+      const selected = new Set(Array.from(advAirportFilter.selectedOptions||[]).map(o=>o.value));
+      if(base){
+        Array.from(base.options).forEach(o=>{ o.selected = selected.has(o.value); });
+        base.dispatchEvent(new Event('change',{bubbles:true}));
       } else {
         applyFiltersAndSort();
       }
+      refreshAdvancedChipsUI();
     });
   }
+
+  const baseAirportFilter = $('#airportFilter');
   if(baseAirportFilter){
     ['change','input'].forEach(ev=>{
       baseAirportFilter.addEventListener(ev,()=>{
@@ -1673,17 +1651,102 @@ function initAdvancedControls(){
       });
     });
   }
-  syncAdvAirportsWithBase();
 
-  document.querySelectorAll('input[name="advBaggage"]').forEach(radio=>{
-    radio.checked = radio.value === advBaggageMode;
-    radio.addEventListener('change',()=>{
-      if(radio.checked){
-        advBaggageMode = radio.value;
-        applyFiltersAndSort();
-      }
+  const baggageChip = $('#chipBaggage');
+  if(baggageChip){
+    const order = ['any','with','no'];
+    baggageChip.addEventListener('click',()=>{
+      const idx = order.indexOf(advBaggageMode);
+      advBaggageMode = order[(idx+1)%order.length];
+      refreshAdvancedChipsUI();
+      applyFiltersAndSort();
     });
-  });
+  }
+
+  refreshAdvancedChipsUI();
+}
+
+function refreshAdvancedChipsUI(){
+  const tripChip = $('#chipTripMode');
+  if(tripChip){
+    const labels = {
+      balanced:'Режим: сбалансированный',
+      cheap:'Режим: экономлю деньги',
+      fast:'Режим: экономлю время',
+      calm:'Режим: максимум спокойствия'
+    };
+    tripChip.textContent = labels[tripMode] || labels.balanced;
+    tripChip.classList.toggle('chip-active', tripMode !== 'balanced');
+  }
+
+  const routeChip = $('#chipRoute');
+  if(routeChip){
+    const onewayVal = $('#oneway')?.value === 'yes';
+    routeChip.textContent = onewayVal ? 'Маршрут: в одну сторону' : 'Маршрут: туда-обратно';
+    routeChip.classList.toggle('chip-active', onewayVal);
+  }
+
+  const flexChip = $('#chipFlex');
+  if(flexChip){
+    const flex = $('#flexMode')?.value || 'none';
+    const flexLabels = {
+      none:'Даты: точные',
+      weekend:'Даты: ближайшие выходные',
+      plus3:'Даты: ± 3 дня',
+      plus7:'Даты: ± 7 дней'
+    };
+    flexChip.textContent = flexLabels[flex] || flexLabels.none;
+    flexChip.classList.toggle('chip-active', flex !== 'none');
+  }
+
+  const stopsChip = $('#chipStops');
+  if(stopsChip){
+    const value = (document.querySelector('input[name="stops"]:checked')||{}).value || 'any';
+    const stopsLabels = {
+      any:'Пересадки: не важно',
+      '0':'Пересадки: только прямые',
+      '1':'Пересадки: не более 1 пересадки'
+    };
+    stopsChip.textContent = stopsLabels[value] || stopsLabels.any;
+    stopsChip.classList.toggle('chip-active', value !== 'any');
+  }
+
+  const durationChip = $('#chipDuration');
+  if(durationChip){
+    const raw = parseInt($('#durMax')?.value,10);
+    if(Number.isFinite(raw) && raw>0){
+      const label = raw===3 ? 'В пути: до 3 ч' : raw===6 ? 'В пути: до 6 ч' : raw===9 ? 'В пути: до 9 ч' : `В пути: до ${raw} ч`;
+      durationChip.textContent = label;
+      durationChip.classList.add('chip-active');
+    } else {
+      durationChip.textContent = 'В пути: без ограничений';
+      durationChip.classList.remove('chip-active');
+    }
+  }
+
+  const airportsChip = $('#chipAirports');
+  if(airportsChip){
+    const advSel = $('#advAirportFilter');
+    const count = advSel ? Array.from(advSel.selectedOptions||[]).length : 0;
+    if(count>0){
+      airportsChip.textContent = `Аэропорты: выбрано ${count}`;
+      airportsChip.classList.add('chip-active');
+    } else {
+      airportsChip.textContent = 'Аэропорты: любые';
+      airportsChip.classList.remove('chip-active');
+    }
+  }
+
+  const baggageChip = $('#chipBaggage');
+  if(baggageChip){
+    const labels = {
+      any:'Багаж: не важно',
+      with:'Багаж: только с багажом',
+      no:'Багаж: без багажа'
+    };
+    baggageChip.textContent = labels[advBaggageMode] || labels.any;
+    baggageChip.classList.toggle('chip-active', advBaggageMode !== 'any');
+  }
 }
 function summarize(){
   if(!allResults.length){ $('#summaryChip').textContent='—'; return; }
@@ -1955,6 +2018,37 @@ function withinListAfterFilters(){
   });
 }
 
+function updateYuviaRouteHint(list){
+  const hint = $('#yuviaRouteHint');
+  if(!hint) return;
+
+  if(!Array.isArray(list) || !list.length){
+    hint.textContent = 'Как только появятся подходящие рейсы, я подскажу, насколько спокойным выглядит маршрут.';
+    return;
+  }
+
+  const top = list[0] || {};
+  const ratingVal = typeof top.rating === 'number' ? top.rating : null;
+  const ratingStr = ratingVal !== null ? ratingVal.toFixed(1).replace('.',',') : '';
+
+  let text;
+  if(top.stressLevel === 'low'){
+    text = 'Маршрут выглядит довольно спокойным: без жёстких пересадок и ночных вылетов.';
+  } else if(top.stressLevel === 'medium'){
+    text = 'Маршрут в целом ок, но есть нюансы — пересадки или длительное время в пути. Можно поиграть фильтрами, если хочешь сделать его мягче.';
+  } else if(top.stressLevel === 'high'){
+    text = 'Маршрут нервный: много пересадок или неудобные вылеты. Я бы попробовал смягчить его — например, через чипы пересадок, времени в пути и багажа.';
+  } else {
+    text = 'Смотри на первые варианты — они выглядят неплохо, но если что, чипы помогут их донастроить.';
+  }
+
+  if(ratingStr){
+    text += ` Оценка Yuvia: ${ratingStr} из 10.`;
+  }
+
+  hint.textContent = text;
+}
+
 /* ========= сортировка и рендер (старый, будет переопределён ниже) ========= */
 function applyFiltersAndSort(){
   const r = $('#results'); r.innerHTML='';
@@ -2053,6 +2147,15 @@ function applyFiltersAndSort(){
   document.querySelectorAll('input[name="stops"]').forEach(n=>n.addEventListener(ev,applyFiltersAndSort));
   document.querySelectorAll('.depwin').forEach(n=>n.addEventListener(ev,applyFiltersAndSort));
   document.querySelectorAll('.arrwin').forEach(n=>n.addEventListener(ev,applyFiltersAndSort));
+});
+$('#sortBy').addEventListener('change',()=>{
+  const sortVal = $('#sortBy').value;
+  if((tripMode==='cheap' && sortVal!=='price_asc') ||
+     (tripMode==='fast' && sortVal!=='duration_asc') ||
+     (tripMode==='calm' && sortVal!=='yuvia_score')){
+    tripMode = 'balanced';
+    refreshAdvancedChipsUI();
+  }
 });
 
 /* ========= matrix + loading + основной поиск ========= */
@@ -2198,7 +2301,6 @@ $('#reset').addEventListener('click',()=>{
   initPaxFromAdultsSelect();
   renderAirlinesFilter();
   renderAirportsFilter();
-  syncAdvAirportsWithBase();
   refreshAdvancedChipsUI();
   summarize();
   renderFavoritesBlock();
@@ -2210,19 +2312,15 @@ $('#clearFilters').addEventListener('click',()=>{
   $('#durMax').value=''; $('#priceMin').value=''; $('#priceMax').value='';
   Array.from($('#airlineFilter').options).forEach(o=>o.selected=false);
   Array.from($('#airportFilter').options).forEach(o=>o.selected=false);
-  const advStops = $('#advStops'); if(advStops) advStops.value='any';
-  const advMaxDuration = $('#advMaxDuration'); if(advMaxDuration) advMaxDuration.value='';
   const advAirportFilter = $('#advAirportFilter');
-  const advAirportsMode = $('#advAirportsMode');
-  if(advAirportsMode) advAirportsMode.value='any';
   if(advAirportFilter){
-    advAirportFilter.classList.add('hidden');
     Array.from(advAirportFilter.options).forEach(o=>o.selected=false);
   }
   advBaggageMode = 'any';
-  const advBaggageAny = document.querySelector('input[name="advBaggage"][value="any"]');
-  if(advBaggageAny) advBaggageAny.checked = true;
+  const panel = $('#advancedAirportsPanel');
+  if(panel) panel.classList.add('hidden');
   syncAdvAirportsWithBase();
+  refreshAdvancedChipsUI();
   applyFiltersAndSort();
 });
 $('#toggleAdvanced').addEventListener('click',e=>{
@@ -2231,6 +2329,10 @@ $('#toggleAdvanced').addEventListener('click',e=>{
   const isHidden = block.classList.contains('hidden');
   block.classList.toggle('hidden',!isHidden);
   $('#toggleAdvanced').textContent = isHidden ? 'Скрыть расширенный поиск' : 'Расширенный поиск';
+  if(!isHidden){
+    const panel = $('#advancedAirportsPanel');
+    if(panel) panel.classList.add('hidden');
+  }
 });
 
 /* ========= даты: ограничения ========= */
@@ -2397,7 +2499,7 @@ renderRecent();
 toggleOneWay();
 initMinDateHints();
 restoreFromURL();
-initAdvancedControls();
+initAdvancedChips();
 initPaxFromAdultsSelect();
 updateSearchSummary();
 refreshAdvancedChipsUI();
