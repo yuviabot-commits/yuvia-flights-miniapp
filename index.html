@@ -414,6 +414,78 @@
     .brand-tagline{ font-size:13px; color:var(--muted); }
     .brand-subline{ font-size:13px; color:var(--berry); text-transform:none; letter-spacing:.06em; margin-top:4px; font-weight:500; }
 
+    .search-summary{
+      margin:0 0 16px;
+      padding:10px 14px;
+      border-radius:14px;
+      background:linear-gradient(135deg,rgba(7,94,84,0.08),rgba(13,148,136,0.14));
+      color:#0f4f43;
+      font-size:14px;
+      box-shadow:0 10px 24px rgba(7,94,84,0.08);
+    }
+
+    .advanced-header{
+      margin:4px 0 10px;
+    }
+    .advanced-title{
+      font-size:15px;
+      font-weight:600;
+    }
+    .advanced-subtitle{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:2px;
+    }
+    .advanced-chips{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px 10px;
+      margin:8px 0 6px;
+    }
+    .chip-filter{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      border-radius:var(--radius-pill);
+      padding:6px 12px;
+      border:1px solid rgba(148,163,184,0.6);
+      background:#ffffff;
+      font-size:13px;
+      cursor:pointer;
+      transition:box-shadow .18s ease,border-color .18s ease,background .18s ease,color .18s ease;
+    }
+    .chip-filter:hover{
+      border-color:rgba(7,94,84,0.4);
+      box-shadow:0 8px 20px rgba(7,94,84,0.12);
+    }
+    .chip-active{
+      background:var(--accent-soft);
+      border-color:rgba(45,212,191,0.7);
+      color:var(--accent);
+      box-shadow:0 10px 22px rgba(13,148,136,0.18);
+    }
+    .advanced-airports-panel{
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px dashed var(--line);
+      background:#f9fafb;
+    }
+    .advanced-airports-panel select{
+      width:100%;
+    }
+    .advanced-footer{
+      margin-top:10px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .advanced-hint{
+      font-size:13px;
+      color:var(--muted);
+      margin-top:6px;
+    }
+
     .advanced.hidden{display:none;}
 
     /* ------- Форма поиска ------- */
@@ -792,6 +864,8 @@
     </div>
   </header>
 
+  <div id="searchSummary" class="search-summary hidden"></div>
+
   <!-- Форма поиска (твой исходный код) -->
   <div class="card" id="searchForm">
     <div class="search-grid">
@@ -955,7 +1029,30 @@
           <button class="btn-ghost" id="reset">Сбросить форму</button>
         </div>
       </div>
-      <div class="hint" id="weekendHint" style="margin-top:6px"></div>
+
+      <div class="hidden" aria-hidden="true">
+        <select id="oneway">
+          <option value="no">Туда-обратно</option>
+          <option value="yes">Только в одну сторону</option>
+        </select>
+        <select id="flexMode">
+          <option value="none">Отключено</option>
+          <option value="weekend">Ближайшие выходные</option>
+          <option value="plus3">± 3 дня</option>
+          <option value="plus7">± 7 дней</option>
+        </select>
+      </div>
+    </div>
+    <div class="hidden" aria-hidden="true">
+      <select id="currency">
+        <option value="RUB">RUB ₽</option>
+        <option value="USD">USD $</option>
+        <option value="EUR">EUR €</option>
+      </select>
+      <select id="cabin">
+        <option value="eco">Эконом</option>
+        <option value="business">Бизнес</option>
+      </select>
     </div>
     <div class="hidden" aria-hidden="true">
       <select id="currency">
@@ -1289,8 +1386,13 @@ function attachSuggest(inputEl, onPick){
   });
 }
 
-attachSuggest($('#origin'), (item)=>{ originIATA=item.code; $('#originIataHint').textContent='IATA: '+originIATA; });
-attachSuggest($('#destination'), (item)=>{ destIATA=item.code; $('#destIataHint').textContent='IATA: '+destIATA; });
+attachSuggest($('#origin'), (item)=>{ originIATA=item.code; $('#originIataHint').textContent='IATA: '+originIATA; updateSearchSummary(); });
+attachSuggest($('#destination'), (item)=>{ destIATA=item.code; $('#destIataHint').textContent='IATA: '+destIATA; updateSearchSummary(); });
+
+['input','change'].forEach(ev=>{
+  $('#origin').addEventListener(ev, updateSearchSummary);
+  $('#destination').addEventListener(ev, updateSearchSummary);
+});
 
 /* ========= one-way ========= */
 function toggleOneWay(){
@@ -1301,6 +1403,8 @@ function toggleOneWay(){
 }
 $('#oneway').addEventListener('change',()=>{
   toggleOneWay();
+  updateSearchSummary();
+  refreshAdvancedChipsUI();
   syncURLFromState({ow:$('#oneway').value});
 });
 
@@ -1314,6 +1418,7 @@ function updateWeekendHint(){
 }
 $('#flexMode').addEventListener('change',()=>{
   updateWeekendHint();
+  refreshAdvancedChipsUI();
   syncURLFromState({fx:$('#flexMode').value});
 });
 
@@ -1853,6 +1958,7 @@ function withinListAfterFilters(){
 /* ========= сортировка и рендер (старый, будет переопределён ниже) ========= */
 function applyFiltersAndSort(){
   const r = $('#results'); r.innerHTML='';
+  updateYuviaRouteHint([]);
   if(!allResults.length){
     const empty=document.createElement('div'); empty.className='card';
     empty.innerHTML=`<div class="bad">Ничего не нашли.</div><div class="hint">Попробуй поменять даты, валюту или снять фильтры. Ниже — цены на соседние дни.</div>`;
@@ -1870,6 +1976,8 @@ function applyFiltersAndSort(){
     if(s==='depart_asc') return (a.depSort||0)-(b.depSort||0);
     return 0;
   });
+
+  updateYuviaRouteHint(list);
 
   if(!list.length){
     const empty=document.createElement('div'); empty.className='card';
@@ -1988,6 +2096,8 @@ async function doSearch(){
   if(ow!=='yes' && d2 && d2<d1){ $('#retHint').textContent='Возврат не может быть раньше вылета'; alert('Дата возврата раньше вылета'); return; }
   if(ow==='yes'){ $('#retHint').textContent=''; }
 
+  updateSearchSummary();
+
   const state = {
     origin_city:oriCity, dest_city:dstCity,
     origin_iata:ori, dest_iata:dst,
@@ -2015,6 +2125,7 @@ async function doSearch(){
     json = await callJSON(`/api/search?${q.toString()}`);
   }catch(e){
     $('#results').innerHTML = `<div class="card"><div class="bad">Ошибка: ${e.message}</div><div class="hint">Попробуй повторить поиск позже.</div></div>`;
+    updateYuviaRouteHint([]);
     setLoading(false, 4000);
     return;
   }
@@ -2041,6 +2152,7 @@ function swapCities(){
   $('#originIataHint').textContent = originIATA?('IATA: '+originIATA):'';
   $('#destIataHint').textContent = destIATA?('IATA: '+destIATA):'';
   syncURLFromState({oc:$('#origin').value.trim(), dc:$('#destination').value.trim(), oi:originIATA, di:destIATA});
+  updateSearchSummary();
 }
 ['#swap','#swapInline'].forEach(id=>{ const el = document.querySelector(id); if(el) el.addEventListener('click',swapCities); });
 
@@ -2061,9 +2173,34 @@ $('#reset').addEventListener('click',()=>{
   originIATA=''; destIATA='';
   $('#originIataHint').textContent=''; $('#destIataHint').textContent='';
   $('#results').innerHTML=''; $('#matrix').innerHTML='';
+  $('#airlineFilter').innerHTML='';
+  $('#airportFilter').innerHTML='';
+  const advAirportFilter = $('#advAirportFilter');
+  if(advAirportFilter) advAirportFilter.innerHTML='';
+  const panel = $('#advancedAirportsPanel');
+  if(panel) panel.classList.add('hidden');
+
+  document.querySelector('input[name="stops"][value="any"]').checked = true;
+  document.querySelectorAll('.depwin,.arrwin').forEach(cb=>cb.checked=false);
+  $('#durMax').value=''; $('#priceMin').value=''; $('#priceMax').value='';
+
+  advBaggageMode = 'any';
+  tripMode = 'balanced';
+  $('#sortBy').value = 'yuvia_score';
+  baseCurrency = 'RUB';
+  allResults = [];
+
+  toggleOneWay();
   updateWeekendHint();
+  updateSearchSummary();
+  updateYuviaRouteHint([]);
   syncURLFromState({oc:null,dc:null,d:null,r:null,cur:null,ad:null,ow:null,fx:null,oi:null,di:null});
   initPaxFromAdultsSelect();
+  renderAirlinesFilter();
+  renderAirportsFilter();
+  syncAdvAirportsWithBase();
+  refreshAdvancedChipsUI();
+  summarize();
   renderFavoritesBlock();
   renderCompareBlock();
 });
@@ -2107,7 +2244,10 @@ function initMinDateHints(){
 function normalizeDepartDate(){
   let d = parseDateSmart($('#depart').value);
   d = clampToFuture(d);
-  if(!d) return;
+  if(!d){
+    updateSearchSummary();
+    return;
+  }
   const iso = toISO(d);
   $('#depart').value = iso;
   $('#ret').min = iso;
@@ -2117,21 +2257,75 @@ function normalizeDepartDate(){
     $('#ret').value='';
     $('#retHint').textContent='';
   }
+  updateSearchSummary();
 }
 ['change','blur','input'].forEach(ev=>{ $('#depart').addEventListener(ev, normalizeDepartDate); });
 
 function normalizeReturnDate(){
   let r = parseDateSmart($('#ret').value);
-  if(!r) return;
+  if(!r){
+    updateSearchSummary();
+    return;
+  }
   r = clampToFuture(r);
   const d = parseDateSmart($('#depart').value);
   if(d && r < d) r = d;
   $('#ret').value = toISO(r);
+  updateSearchSummary();
 }
 ['change','blur','input'].forEach(ev=>{ $('#ret').addEventListener(ev, normalizeReturnDate); });
 
 /* ========= блок пассажиров ========= */
 const paxState = {adults:1, children:0, infants:0, cabin:'eco'};
+
+function updateSearchSummary(){
+  const summary = $('#searchSummary');
+  if(!summary) return;
+
+  const origin = $('#origin')?.value.trim() || '';
+  const destination = $('#destination')?.value.trim() || '';
+  if(!origin || !destination){
+    summary.textContent = '';
+    summary.classList.add('hidden');
+    return;
+  }
+
+  const departDate = parseDateSmart($('#depart')?.value || '');
+  const retDate = parseDateSmart($('#ret')?.value || '');
+  const isOneWay = ($('#oneway')?.value === 'yes');
+
+  let dateText = '';
+  if(departDate && retDate && !isOneWay){
+    if(
+      departDate.getFullYear() === retDate.getFullYear() &&
+      departDate.getMonth() === retDate.getMonth()
+    ){
+      dateText = `${fmt2(departDate.getDate())}–${fmt2(retDate.getDate())}.${fmt2(departDate.getMonth()+1)}.${departDate.getFullYear()}`;
+    } else {
+      dateText = `${ddmmyyyy(departDate)} – ${ddmmyyyy(retDate)}`;
+    }
+  } else if(departDate){
+    dateText = ddmmyyyy(departDate);
+  }
+
+  const totalPax = (paxState?.adults || 0) + (paxState?.children || 0) + (paxState?.infants || 0);
+  const paxWord = (()=>{
+    const mod10 = totalPax % 10;
+    const mod100 = totalPax % 100;
+    if(mod10 === 1 && mod100 !== 11) return 'пассажир';
+    if(mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return 'пассажира';
+    return 'пассажиров';
+  })();
+  const paxLabel = `${totalPax} ${paxWord}`;
+  const cabinLabel = paxState?.cabin === 'business' ? 'бизнес' : 'эконом';
+
+  let text = `Маршрут: ${origin} → ${destination}`;
+  if(dateText) text += `, ${dateText}`;
+  text += `, ${paxLabel}, ${cabinLabel}`;
+
+  summary.textContent = text;
+  summary.classList.remove('hidden');
+}
 
 function updatePaxSummary(){
   const total = paxState.adults + paxState.children + paxState.infants;
@@ -2147,6 +2341,8 @@ function updatePaxSummary(){
     const cnt = document.querySelector(`.pax-count[data-kind="${kind}"]`);
     if(cnt) cnt.textContent = paxState[kind];
   });
+
+  updateSearchSummary();
 }
 
 function initPaxFromAdultsSelect(){
@@ -2203,6 +2399,9 @@ initMinDateHints();
 restoreFromURL();
 initAdvancedControls();
 initPaxFromAdultsSelect();
+updateSearchSummary();
+refreshAdvancedChipsUI();
+updateYuviaRouteHint([]);
 loadFavorites();
 renderFavoritesBlock();
 renderCompareBlock();
@@ -2384,6 +2583,7 @@ function normalizeFlight(x,{ori,dst,cur,d1,d2,oneway,adults}){
 /* ПЕРЕОПРЕДЕЛЁННЫЙ рендер карточек */
 function applyFiltersAndSort(){
   const r = $('#results'); r.innerHTML='';
+  updateYuviaRouteHint([]);
   if(!allResults.length){
     const empty=document.createElement('div'); empty.className='card';
     empty.innerHTML=`<div class="bad">Ничего не нашли.</div><div class="hint">Попробуй поменять даты, валюту или снять фильтры. Ниже — цены на соседние дни.</div>`;
@@ -2401,6 +2601,8 @@ function applyFiltersAndSort(){
     if(s==='depart_asc') return (a.depSort||0)-(b.depSort||0);
     return 0;
   });
+
+  updateYuviaRouteHint(list);
 
   if(!list.length){
     const empty=document.createElement('div'); empty.className='card';
