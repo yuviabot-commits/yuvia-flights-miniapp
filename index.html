@@ -1125,7 +1125,7 @@
   </div>
 </div>
 
-<div class="version">версия 16.0</div>
+<div class="version">версия 17.0</div>
 
 <script>
 /* ========= helpers ========= */
@@ -1413,12 +1413,32 @@ function buildDeeplink({ori, dst, d1, d2, currency, adults, oneway}){
 
 /* ========= API ========= */
 const API_BASE = 'https://yuvia-flights-api.yuviabot.workers.dev';
+const API_SEARCH_PATH = '/api/search';
+const API_MATRIX_PATH = '/api/matrix';
+
+function makeApiURL(path){
+  if(path instanceof URL) return path.toString();
+  if(/^https?:/i.test(path)) return path;
+  return new URL(path, API_BASE).toString();
+}
 
 async function callJSON(path){
-  const url = path.startsWith('http') ? path : API_BASE + path;
+  const url = makeApiURL(path);
   const r = await fetch(url);
   if(!r.ok) throw new Error('HTTP '+r.status);
   return await r.json();
+}
+
+function buildSearchQuery({origin,destination,currency,oneway,departDate,returnDate,adults}){
+  const params = new URLSearchParams();
+  params.set('origin', origin);
+  params.set('destination', destination);
+  params.set('currency', currency);
+  params.set('oneway', oneway==='yes' ? '1' : '0');
+  params.set('depart', toISO(departDate));
+  params.set('ret', (oneway==='yes' || !returnDate) ? '' : toISO(returnDate));
+  params.set('adults', String(adults));
+  return params;
 }
 
 /* ========= состояние результатов + избранное/сравнение ========= */
@@ -1971,7 +1991,7 @@ function showMatrixSafe(ori,dst,cur,d1,flex){
   else if(flex==='plus7') params.set('range','7');
   else if(flex==='weekend') params.set('range','1');
   else params.set('range','0');
-  return callJSON(`/api/matrix?${params.toString()}`)
+  return callJSON(`${API_MATRIX_PATH}?${params.toString()}`)
     .then(m=>{
       const chips=(m.data||[]).slice(0,12).map(it=>({dstr:it.date_str,price:it.price,currency:it.currency}));
       showMatrix(chips);
@@ -2215,17 +2235,20 @@ async function doSearch(){
 
   showMatrixSafeAndSkeleton(ori,dst,cur,d1,flex);
 
-  const q = new URLSearchParams({
-    origin:ori,destination:dst,currency:cur,
-    oneway:ow==='yes'?'1':'0',
-    depart:toISO(d1),
-    ret:(ow==='yes'||!d2)?'':toISO(d2),
-    adults:String(adults)
+  const searchParams = buildSearchQuery({
+    origin:ori,
+    destination:dst,
+    currency:cur,
+    oneway:ow,
+    departDate:d1,
+    returnDate:d2,
+    adults
   });
+  const searchURL = `${API_SEARCH_PATH}?${searchParams.toString()}`;
 
   let json;
   try{
-    json = await callJSON(`/api/search?${q.toString()}`);
+    json = await callJSON(searchURL);
   }catch(e){
     $('#results').innerHTML = `<div class="card"><div class="bad">Ошибка: ${e.message}</div><div class="hint">Попробуй повторить поиск позже.</div></div>`;
     updateYuviaRouteHint([]);
