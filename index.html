@@ -1,793 +1,1267 @@
 <!doctype html>
 <html lang="ru">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Yuvia · умный тревел-консьерж</title>
-<link rel="icon" type="image/png" href="favicon.png">
-<style>
-:root{
-  --ink:#0b1f1a;
-  --muted:#6b7280;
-  --line:#e5e7eb;
+  <meta charset="UTF-8" />
+  <title>Yuvia Flight Concierge</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    * { box-sizing: border-box; }
+    :root {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color-scheme: light;
+    }
+    body {
+      margin: 0;
+      background: #F7F4EF;
+      color: #1F2733;
+    }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: inherit; }
+    input, select { font-family: inherit; }
 
-  --teal:#0d9488;         /* основной бренд */
-  --teal-2:#14b8a6;
-  --sky:#38bdf8;          /* световой акцент */
-  --lime:#84cc16;         /* подсветки рейтинга */
-  --rose:#f43f5e;         /* ошибки */
+    .page {
+      min-height: 100vh;
+      background: #F7F4EF;
+    }
+    .top-nav {
+      padding: 16px 24px;
+    }
+    .top-nav-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .logo-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #11A26A 0%, #F97316 60%, #FACC6B 100%);
+    }
+    .content-wrap {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 24px 16px 40px;
+    }
+    .card {
+      background: #FFFFFF;
+      border-radius: 20px;
+      box-shadow: 0 18px 50px rgba(15, 23, 42, 0.12);
+      padding: 24px;
+    }
 
-  --glass:rgba(255,255,255,0.78);
-  --glass-2:rgba(255,255,255,0.92);
-  --shadow:0 24px 70px rgba(15,23,42,0.18);
-  --r:18px;               /* общий радиус */
-  --r2:24px;
-}
+    .intro-title {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .intro-sub {
+      font-size: 14px;
+      color: #6B7280;
+      margin-bottom: 16px;
+    }
 
-*{box-sizing:border-box}
-html,body{height:100%}
+    .tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .tab-btn {
+      padding: 10px 18px;
+      border-radius: 999px;
+      border: 1px solid #E2E8F0;
+      font-size: 14px;
+      background: transparent;
+      cursor: pointer;
+    }
+    .tab-btn.active {
+      background: #EEF3F1;
+      border-color: #11A26A;
+      color: #1F2733;
+    }
 
-body{
-  margin:0;
-  font:15px/1.55 Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-  color:var(--ink);
-  background:
-    radial-gradient(1600px 800px at 0 -20%, rgba(13,148,136,.20), transparent 60%),
-    radial-gradient(1200px 600px at 100% -10%, rgba(56,189,248,.18), transparent 60%),
-    linear-gradient(180deg,#f8fafc 0%, #eef2f7 100%);
-  background-attachment:fixed;
-}
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
 
-/* ====== Шапка ====== */
-.header{
-  position:sticky; top:0; z-index:50;
-  backdrop-filter:saturate(120%) blur(14px);
-  background:linear-gradient(180deg, rgba(255,255,255,.84), rgba(255,255,255,.62));
-  border-bottom:1px solid rgba(15,23,42,.06);
-}
-.header-inner{
-  max-width:1180px; margin:0 auto; padding:10px 16px; display:flex; align-items:center; gap:14px;
-}
-.logo{display:flex; align-items:center; gap:10px}
-.logo img{width:40px; height:40px}
-.brand{font-weight:700; letter-spacing:.02em}
-.tag{font-size:12px; color:#0f766e; text-transform:uppercase; letter-spacing:.18em}
+    .form-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      min-width: 0;
+    }
+    .field-label {
+      font-size: 13px;
+      color: #6B7280;
+    }
+    .field-input {
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid #E2E8F0;
+      font-size: 14px;
+    }
 
-/* ====== Герой-панель ====== */
-.hero{
-  max-width:1180px; margin:18px auto 0; padding:0 16px 18px;
-}
-.assistant-strip{
-  position:relative;
-  display:flex; gap:10px; align-items:flex-start;
-  margin:10px 0 14px;
-}
-.assistant-avatar{
-  width:36px; height:36px; border-radius:999px;
-  background:#0f766e url("Logo-Full.png") center/24px 24px no-repeat;
-  box-shadow:0 0 0 3px rgba(13,148,136,.25), 0 8px 24px rgba(13,148,136,.35);
-}
-.assistant-bubble{
-  flex:1;
-  padding:10px 12px;
-  border-radius:14px;
-  background:linear-gradient(120deg, rgba(13,148,136,.08), rgba(2,132,199,.08));
-  box-shadow:0 12px 28px rgba(15,23,42,.12);
-  font-size:14px; color:#0f172a;
-}
-.assistant-bubble small{color:var(--muted)}
-.assistant-pulse{
-  position:absolute; left:-2px; top:-2px; width:40px; height:40px; border-radius:999px;
-  box-shadow:0 0 0 0 rgba(13,148,136,.35);
-  animation:pulse 2.4s ease-out infinite;
-}
-@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(13,148,136,.28)} 70%{box-shadow:0 0 0 14px rgba(13,148,136,0)} 100%{box-shadow:0 0 0 0 rgba(13,148,136,0)}}
+    .section-title {
+      font-weight: 500;
+      font-size: 14px;
+      margin-top: 16px;
+      margin-bottom: 8px;
+    }
 
-/* ====== Панель поиска ====== */
-.search-card{
-  position:relative;
-  padding:18px;
-  background:
-    radial-gradient(800px 300px at 0 0, rgba(13,148,136,.22), transparent 70%),
-    radial-gradient(600px 260px at 100% 0, rgba(56,189,248,.18), transparent 70%),
-    var(--glass-2);
-  border:1px solid rgba(148,163,184,.35);
-  border-radius:var(--r2);
-  box-shadow:var(--shadow);
-}
+    .chip-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .chip {
+      border-radius: 999px;
+      padding: 6px 12px;
+      border: 1px solid #E2E8F0;
+      font-size: 13px;
+      background: #FFFFFF;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .chip input {
+      margin: 0;
+    }
+    .chip-toggle.active {
+      background: #EEF3F1;
+      border-color: #11A26A;
+    }
 
-.grid{
-  display:grid; gap:12px;
-  grid-template-columns: 1.2fr 52px 1.2fr 1fr 1fr .9fr .9fr;
-  align-items:end;
-}
-.label{font-size:12px; color:var(--muted); margin:0 0 -4px}
-.input, .select, .button{
-  height:46px; padding:10px 12px;
-  background:#fff; border:1px solid var(--line); border-radius:14px; font:inherit;
-}
-.input:focus, .select:focus{outline:none; border-color:rgba(13,148,136,.7); box-shadow:0 0 0 1px rgba(13,148,136,.3)}
+    .form-footer {
+      margin-top: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .form-hint {
+      font-size: 13px;
+      color: #6B7280;
+    }
+    .btn-primary {
+      padding: 10px 20px;
+      border-radius: 999px;
+      border: none;
+      background: #11A26A;
+      color: #FFFFFF;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .btn-primary[disabled] {
+      background: #0B7C4E;
+      opacity: 0.8;
+      cursor: default;
+    }
 
-.swap{
-  display:flex; align-items:center; justify-content:center;
-  width:40px; height:40px; border-radius:999px; border:1px solid rgba(13,148,136,.28);
-  background:#fff; color:#0f766e; cursor:pointer; transition:.18s;
-  box-shadow:0 10px 24px rgba(13,148,136,.25);
-}
-.swap:hover{background:#ecfdf5}
+    .layout-results {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1.1fr);
+      gap: 20px;
+    }
+    @media (max-width: 900px) {
+      .layout-results {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
 
-.button{
-  border:1px solid transparent; border-radius:999px; cursor:pointer; white-space:nowrap;
-  background:linear-gradient(135deg, #0d9488, #0ea5a8); color:#fff; font-weight:600;
-  box-shadow:0 16px 40px rgba(13,148,136,.45);
-}
-.button:hover{filter:saturate(1.06)}
+    .results-header {
+      margin-bottom: 10px;
+      font-size: 13px;
+      color: #6B7280;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+    }
 
-.ghost{
-  background:transparent; color:#0d9488; border-color:rgba(148,163,184,.6)
-}
+    .route-card {
+      border-radius: 16px;
+      border: 1px solid #E2E8F0;
+      padding: 14px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      background: #FFFFFF;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+    .route-card.selected {
+      border-color: #11A26A;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.14);
+    }
+    .route-card-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: flex-start;
+    }
+    .route-title {
+      font-weight: 500;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+    .route-price-block {
+      text-align: right;
+      min-width: 110px;
+    }
+    .route-price {
+      font-weight: 600;
+      font-size: 16px;
+    }
+    .btn-ghost {
+      margin-top: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid #E2E8F0;
+      background: transparent;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .btn-ghost.active {
+      border-color: #11A26A;
+      background: #EEF3F1;
+    }
 
-/* Чипы-пресеты */
-.chips{display:flex; gap:8px; flex-wrap:wrap; margin:12px 0 0}
-.chip{
-  padding:7px 12px; border-radius:999px; font-size:13px; cursor:pointer;
-  border:1px solid rgba(148,163,184,.6); background:#fff; color:#334155; transition:.16s;
-}
-.chip:hover{box-shadow:0 10px 24px rgba(15,23,42,.12)}
-.chip.active{background:rgba(13,148,136,.08); border-color:rgba(13,148,136,.6); color:#0f766e; box-shadow:0 10px 26px rgba(13,148,136,.18)}
+    .timeline-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: #6B7280;
+      margin-bottom: 6px;
+    }
+    .timeline-bar {
+      position: relative;
+      height: 6px;
+      border-radius: 999px;
+      background: #E5E7EB;
+      overflow: hidden;
+    }
+    .timeline-segment {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+    }
 
-/* ====== Макет: фильтры + результаты + ассистент ====== */
-.layout{
-  display:grid; gap:14px; margin:18px 0 0;
-  grid-template-columns: 260px minmax(0,1fr) 310px;
-}
-.card{
-  background:var(--glass);
-  border:1px solid rgba(148,163,184,.35);
-  border-radius:var(--r);
-  box-shadow:var(--shadow);
-  padding:14px;
-}
+    .pill {
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 11px;
+      display: inline-flex;
+      align-items: center;
+    }
 
-/* Фильтры */
-.filters .title{font-weight:600; margin:0 0 8px}
-.filters .row{display:flex; flex-wrap:wrap; gap:6px}
-.pill{display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; border:1px solid var(--line); background:#fff; font-size:13px}
-.pill input{accent-color:#0d9488}
+    .yuvia-panel {
+      background: #EEF3F1;
+      border-radius: 16px;
+      padding: 16px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .yuvia-panel-title {
+      font-weight: 600;
+      font-size: 15px;
+    }
+    .yuvia-bubble {
+      padding: 12px;
+      border-radius: 12px;
+      background: #FFFFFF;
+      font-size: 14px;
+    }
+    .yuvia-footer {
+      margin-top: auto;
+      font-size: 12px;
+      color: #6B7280;
+    }
 
-/* Результаты */
-.toolbar{display:flex; gap:8px; align-items:center; margin-bottom:8px}
-.select{border-radius:999px; padding:8px 14px; height:38px}
-.summary-chip{padding:6px 10px; border-radius:999px; font-size:12px; background:#ecfeff; color:#0369a1; border:1px solid #bae6fd}
+    .btn-outline {
+      margin-top: 10px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid #E2E8F0;
+      background: #FFFFFF;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .btn-outline-primary {
+      border: none;
+      background: #11A26A;
+      color: #FFFFFF;
+      margin-left: 10px;
+    }
 
-/* Скелетоны */
-.skeleton{height:72px; border-radius:14px; background:linear-gradient(90deg,#f5f7fb 20%,#e9eef5 40%,#f5f7fb 60%); background-size:200% 100%; animation:sh 1.1s infinite ease-in-out; margin-bottom:10px}
-@keyframes sh{0%{background-position:-200% 0} 100%{background-position:200% 0}}
+    .compare-drawer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #FFFFFF;
+      border-top: 1px solid #E2E8F0;
+      box-shadow: 0 -10px 30px rgba(15,23,42,0.12);
+      padding: 16px;
+      z-index: 40;
+      display: none;
+    }
+    .compare-drawer.active { display: block; }
+    .compare-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+    .compare-list {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+    }
+    .compare-card {
+      min-width: 220px;
+      border-radius: 14px;
+      border: 1px solid #E2E8F0;
+      padding: 10px;
+      font-size: 13px;
+    }
 
-/* Карточка рейса */
-.result{
-  display:flex; flex-direction:column; gap:10px; padding:12px 12px 10px; margin-bottom:10px;
-  border-radius:16px; border:1px solid var(--line); background:#fff; transition:.16s; box-shadow:0 6px 18px rgba(15,23,42,.06)
-}
-.result:hover{transform:translateY(-1px); box-shadow:0 16px 40px rgba(15,23,42,.12); border-color:rgba(13,148,136,.22)}
-.result-header{display:flex; justify-content:space-between; gap:12px}
-.route{font-weight:700}
-.meta{font-size:13px; color:var(--muted)}
-.pricebox{min-width:160px; text-align:right}
-.price{font-weight:800; font-size:18px; white-space:nowrap}
-.logoAir{display:flex; align-items:center; gap:6px; color:var(--muted); font-size:12px}
-.logoAir .circle{width:28px; height:28px; border-radius:999px; border:1px solid #e5e7eb; overflow:hidden; display:flex; align-items:center; justify-content:center; background:#fff}
+    .trip-bar {
+      position: fixed;
+      left: 16px;
+      right: 16px;
+      bottom: 70px;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 12px;
+      border-radius: 999px;
+      background: #FFFFFF;
+      box-shadow: 0 12px 40px rgba(15,23,42,0.18);
+      border: 1px solid #E2E8F0;
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      gap: 12px;
+      z-index: 35;
+    }
+    .trip-bar.active { display: flex; }
 
-.legs{border-radius:12px; background:#f9fafb; padding:10px 12px; display:flex; flex-direction:column; gap:6px}
-.seg{display:grid; grid-template-columns: 1.05fr minmax(0,1.1fr) 1.05fr; gap:10px; align-items:center}
-.t{font-size:18px; font-weight:700}
-.c{font-size:12px; color:var(--muted)}
-.ln{height:4px; border-radius:999px; background:linear-gradient(90deg, rgba(13,148,136,.22), rgba(13,148,136,.06)); position:relative; overflow:hidden; margin:3px 0}
-.ln:after{content:""; position:absolute; inset:0; background:linear-gradient(90deg,#0ea5a8,#22c55e); opacity:.24}
-.seglabel{font-size:11px; font-weight:700; color:#475569; letter-spacing:.06em; text-transform:uppercase}
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15,23,42,0.35);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
+    .modal-backdrop.active {
+      display: flex;
+    }
+    .modal {
+      background: #FFFFFF;
+      border-radius: 20px;
+      max-width: 640px;
+      width: 100%;
+      max-height: 85vh;
+      overflow: auto;
+      padding: 20px;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .segment-card {
+      border-radius: 14px;
+      border: 1px solid #E2E8F0;
+      padding: 12px;
+      margin-bottom: 10px;
+      font-size: 13px;
+    }
 
-.badges{display:flex; gap:6px; flex-wrap:wrap}
-.badge{padding:4px 9px; border-radius:999px; font-size:12px; background:#f3f4f6; border:1px solid #e5e7eb; color:#334155}
-.badge.rate{background:linear-gradient(180deg, rgba(132,204,22,.12), rgba(34,197,94,.12)); border-color:rgba(132,204,22,.55); color:#166534; font-weight:700}
-.badge.stress-low{background:#ecfdf5; border-color:rgba(16,185,129,.55); color:#065f46}
-.badge.stress-medium{background:#fff7ed; border-color:#fbbf24; color:#92400e}
-.badge.stress-high{background:#fef2f2; border-color:#f87171; color:#b91c1c}
-.actions{display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end}
-.btn{padding:6px 10px; border-radius:999px; border:1px solid var(--line); background:#fff; cursor:pointer}
-.btn:hover{box-shadow:0 6px 18px rgba(15,23,42,.12)}
-.btn.primary{border-color:transparent; background:linear-gradient(135deg,#0d9488,#0ea5a8); color:#fff; font-weight:600}
-
-/* Ассистент-панель справа */
-.assist{
-  position:sticky; top:74px;
-  display:flex; flex-direction:column; gap:10px;
-}
-.assist h3{margin:2px 0 4px}
-.hint{font-size:13px; color:var(--muted)}
-.note{font-size:12px; color:var(--muted)}
-
-.recent{display:flex; gap:8px; flex-wrap:wrap}
-.recent .chip{background:#f8fafc}
-
-.matrix{display:flex; gap:8px; flex-wrap:wrap}
-
-/* Мелочи */
-.version{position:fixed; right:10px; bottom:10px; font-size:12px; color:#64748b; background:#f1f5f9; border:1px solid #e2e8f0; border-radius:8px; padding:4px 7px}
-
-/* Адаптив */
-@media (max-width:1100px){
-  .layout{grid-template-columns:1fr; }
-  .assist{position:static}
-}
-</style>
+    .hidden { display: none !important; }
+  </style>
 </head>
 <body>
-
-<!-- ===== ШАПКА ===== -->
-<header class="header">
-  <div class="header-inner">
-    <div class="logo">
-      <img src="Logo-Full.png" alt="">
-      <div>
-        <div class="brand">Yuvia</div>
-        <div class="tag">умный тревел-консьерж</div>
-      </div>
-    </div>
-  </div>
-</header>
-
-<!-- ===== ГЕРОЙ И ПОИСК ===== -->
-<section class="hero">
-
-  <div class="assistant-strip">
-    <div class="assistant-avatar"></div>
-    <div class="assistant-pulse"></div>
-    <div id="yuviaMsg" class="assistant-bubble">
-      Готова помочь — задай маршрут и даты. <small>Лайфхак: чипы подскажут быстрые пресеты.</small>
-    </div>
-  </div>
-
-  <div class="search-card" id="searchCard">
-    <div class="grid">
-      <div class="label">Откуда</div>
-      <div></div>
-      <div class="label">Куда</div>
-      <div class="label">Туда</div>
-      <div class="label">Обратно</div>
-      <div class="label">Валюта</div>
-      <div class="label">Пассажиры</div>
-
-      <div><input class="input" id="origin" placeholder="Москва"></div>
-      <div><button class="swap" id="swapBtn" title="Поменять местами">⇆</button></div>
-      <div><input class="input" id="destination" placeholder="Казань"></div>
-      <div><input class="input" type="date" id="dateFrom"></div>
-      <div><input class="input" type="date" id="dateTo"></div>
-      <div>
-        <select class="select" id="currency">
-          <option value="RUB">RUB ₽</option>
-          <option value="USD">USD $</option>
-          <option value="EUR">EUR €</option>
-        </select>
-      </div>
-      <div>
-        <select class="select" id="adults">
-          <option>1</option><option>2</option><option>3</option>
-          <option>4</option><option>5</option><option>6</option>
-        </select>
-      </div>
-
-      <div style="grid-column:1/-1; display:flex; gap:10px; justify-content:flex-end; margin-top:4px">
-        <button class="button" id="searchBtn">Искать</button>
-        <button class="button ghost" id="togglePresets">Показать пресеты</button>
-      </div>
-    </div>
-
-    <!-- Чипы пресетов -->
-    <div id="presets" class="chips" style="display:none">
-      <div class="chip" data-type="route">Только прямые</div>
-      <div class="chip" data-type="duration">До 3 часов</div>
-      <div class="chip" data-type="weekend">Ближайшие выходные</div>
-      <div class="chip" data-type="baggage">Только с багажом</div>
-      <div class="chip" data-type="airports">Любимые аэропорты</div>
-    </div>
-  </div>
-</section>
-
-<!-- ===== ОСНОВНОЙ ЛЕЙАУТ ===== -->
-<section class="hero">
-  <div class="layout">
-
-    <!-- Фильтры -->
-    <aside class="card filters">
-      <div class="title">Фильтры</div>
-
-      <div class="label">Пересадки</div>
-      <div class="row">
-        <label class="pill"><input type="radio" name="stops" value="any" checked> любые</label>
-        <label class="pill"><input type="radio" name="stops" value="0"> прямые</label>
-        <label class="pill"><input type="radio" name="stops" value="1"> не более 1</label>
-      </div>
-
-      <div class="label" style="margin-top:10px">Время вылета</div>
-      <div class="row">
-        <label class="pill"><input type="checkbox" class="depWin" value="night"> ночь (00–06)</label>
-        <label class="pill"><input type="checkbox" class="depWin" value="morning"> утро (06–12)</label>
-        <label class="pill"><input type="checkbox" class="depWin" value="day"> день (12–18)</label>
-        <label class="pill"><input type="checkbox" class="depWin" value="evening"> вечер (18–24)</label>
-      </div>
-
-      <div class="label" style="margin-top:10px">Длительность, максимум (ч)</div>
-      <input class="input" type="number" id="durMax" placeholder="например, 5">
-
-      <div class="label" style="margin-top:10px">Цена</div>
-      <div class="row">
-        <input class="input" type="number" id="pmin" placeholder="мин" style="width:46%">
-        <input class="input" type="number" id="pmax" placeholder="макс" style="width:46%">
-      </div>
-
-      <div class="label" style="margin-top:10px">Авиакомпании</div>
-      <select class="select" id="airlines" size="6" multiple style="width:100%"></select>
-
-      <button class="btn" id="clearFilters" style="margin-top:10px; width:100%">Сбросить фильтры</button>
-      <div class="note" style="margin-top:6px">Совет: чипы над формой — быстрые пресеты этих же фильтров.</div>
-    </aside>
-
-    <!-- Результаты -->
-    <main>
-      <div class="card">
-        <div class="toolbar">
-          <div class="label" style="margin:0">Сортировка</div>
-          <select class="select" id="sort">
-            <option value="score">Сначала рекомендации Yuvia</option>
-            <option value="price_asc">Сначала дешёвые</option>
-            <option value="price_desc">Сначала дорогие</option>
-            <option value="duration_asc">Короткий путь</option>
-            <option value="depart_asc">Ранний вылет</option>
-          </select>
-          <div id="summaryChip" class="summary-chip">—</div>
+<div class="page">
+  <header class="top-nav">
+    <div class="top-nav-inner">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="logo-circle"></div>
+        <div>
+          <div style="font-weight:600;font-size:18px;">Yuvia</div>
+          <div style="font-size:12px;color:#6B7280;">умный тревел-консьерж</div>
         </div>
-
-        <div id="results"></div>
-
-        <div class="label" style="margin-top:6px">Соседние даты</div>
-        <div id="matrix" class="matrix"></div>
       </div>
-    </main>
+    </div>
+  </header>
 
-    <!-- Ассистент, недавние и подсказки -->
-    <aside class="assist">
-      <div class="card">
-        <h3>Рекомендации Yuvia</h3>
-        <div id="routeHint" class="hint">Пока нечего оценивать — выполните поиск.</div>
+  <main class="content-wrap">
+    <section class="card">
+      <div class="intro-title">Подобрать перелёт с Yuvia</div>
+      <div class="intro-sub">
+        Не только цена, но и спокойствие: я подсвечу ночные вылеты,
+        сомнительные стыковки и помогу выбрать маршрут под твой стиль.
       </div>
 
-      <div class="card">
-        <h3>Недавние запросы</h3>
-        <div id="recent" class="recent"></div>
-        <div class="note" style="margin-top:4px">Сохраняется локально на устройстве.</div>
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="search">Подобрать рейсы</button>
+        <button class="tab-btn" data-tab="direction">Подобрать направление</button>
+        <button class="tab-btn" data-tab="ticket">Проверить мой билет</button>
       </div>
 
-      <div class="card">
-        <h3>Как получить лучший тариф?</h3>
-        <ul class="hint" style="padding-left:18px; margin:6px 0 0">
-          <li>Сдвиньте даты на ±3 дня — чип «Ближайшие выходные» работает мгновенно.</li>
-          <li>Проверьте альтернативные аэропорты — часто дешевле.</li>
-          <li>Ищите &laquo;прямые&raquo; и &laquo;до 3 часов&raquo; — спокойнее и быстрее.</li>
-        </ul>
-      </div>
-    </aside>
+      <!-- ТАБ 1: ПОИСК РЕЙСОВ -->
+      <div class="tab-content active" id="tab-search">
+        <form id="search-form">
+          <div class="form-row">
+            <div class="field">
+              <label class="field-label">Откуда</label>
+              <input class="field-input" id="from-input" value="Москва" placeholder="Город вылета">
+            </div>
+            <div class="field">
+              <label class="field-label">Куда</label>
+              <input class="field-input" id="to-input" value="Казань" placeholder="Город назначения">
+            </div>
+            <div class="field" style="max-width:180px;">
+              <label class="field-label">Дата вылета</label>
+              <input class="field-input" type="date" id="date-input">
+            </div>
+            <div class="field" style="max-width:140px;">
+              <label class="field-label">Пассажиры</label>
+              <input class="field-input" type="number" min="1" max="9" id="passengers-input" value="1">
+            </div>
+          </div>
 
+          <div style="margin-top:12px;display:flex;gap:12px;align-items:center;">
+            <label style="font-size:13px;color:#6B7280;">
+              <input type="checkbox" id="flexible-input" checked style="margin-right:6px;">
+              Можно сдвинуть даты на ±3 дня, если так будет удобнее/дешевле
+            </label>
+          </div>
+
+          <div class="section-title">Стиль поездки</div>
+          <div class="chip-row">
+            <button type="button" class="chip chip-toggle" data-priority="price">Сэкономить</button>
+            <button type="button" class="chip chip-toggle active" data-priority="balance">Баланс</button>
+            <button type="button" class="chip chip-toggle" data-priority="comfort">Комфорт и спокойствие</button>
+          </div>
+
+          <div class="section-title">Твои ощущения и триггеры</div>
+          <div class="chip-row">
+            <label class="chip">
+              <input type="checkbox" id="pref-night" checked>
+              Избегать ночных перелётов
+            </label>
+            <label class="chip">
+              <input type="checkbox" id="pref-short" checked>
+              Не люблю короткие стыковки
+            </label>
+            <label class="chip">
+              <input type="checkbox" id="pref-afraid">
+              Боюсь пересадок
+            </label>
+            <label class="chip">
+              <input type="checkbox" id="pref-overnight" checked>
+              Не хочу ночевать в аэропорту
+            </label>
+          </div>
+
+          <div class="form-footer">
+            <div class="form-hint">
+              Yuvia запомнит твой стиль и в следующий раз подстроится автоматически ✈️
+            </div>
+            <button type="submit" class="btn-primary" id="search-btn">
+              Подобрать маршруты
+            </button>
+          </div>
+        </form>
+
+        <div id="results-block" style="margin-top:20px;display:none;">
+          <div class="layout-results">
+            <div>
+              <div class="results-header">
+                <span id="results-count"></span>
+                <span>Клик по карточке — подробности справа.</span>
+              </div>
+              <div id="routes-list"></div>
+              <div id="routes-actions" style="display:none;">
+                <button type="button" class="btn-outline" id="details-btn">
+                  Открыть подробности выбранного маршрута
+                </button>
+                <button type="button" class="btn-outline btn-outline-primary" id="save-trip-btn">
+                  Сохранить как маршрут поездки
+                </button>
+              </div>
+            </div>
+            <div>
+              <div id="yuvia-panel" class="yuvia-panel">
+                <!-- заполняется скриптом -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ТАБ 2: ПОДОБРАТЬ НАПРАВЛЕНИЕ -->
+      <div class="tab-content" id="tab-direction">
+        <p style="font-size:14px;margin-top:0;margin-bottom:12px;">
+          Здесь позже можно будет включить настоящий подбор направлений «куда-нибудь».
+          Сейчас это аккуратная заготовка, чтобы сохранить UX.
+        </p>
+        <div class="form-row">
+          <div class="field">
+            <label class="field-label">Откуда выезжаешь</label>
+            <input class="field-input" placeholder="Москва">
+          </div>
+          <div class="field" style="max-width:180px;">
+            <label class="field-label">Когда</label>
+            <input class="field-input" type="date">
+          </div>
+          <div class="field" style="max-width:200px;">
+            <label class="field-label">Бюджет на человека</label>
+            <input class="field-input" type="number" placeholder="Например, 15000">
+          </div>
+        </div>
+        <div style="margin-top:16px;">
+          <button type="button" class="btn-primary">Подобрать идеи (скоро)</button>
+        </div>
+      </div>
+
+      <!-- ТАБ 3: ПРОВЕРИТЬ БИЛЕТ -->
+      <div class="tab-content" id="tab-ticket">
+        <p style="font-size:14px;margin-top:0;margin-bottom:12px;">
+          Здесь потом будет ввод кода брони и анализ уже купленных билетов:
+          стыковки, риски, советы. Сейчас это аккуратная заглушка.
+        </p>
+        <div class="form-row">
+          <div class="field" style="max-width:220px;">
+            <label class="field-label">Код брони / номер билета</label>
+            <input class="field-input" placeholder="Например, AB12CD">
+          </div>
+          <div class="field" style="max-width:220px;">
+            <label class="field-label">Авиакомпания</label>
+            <input class="field-input" placeholder="Например, Aeroflot">
+          </div>
+        </div>
+        <div style="margin-top:16px;">
+          <button type="button" class="btn-primary">Проверить маршрут (скоро)</button>
+        </div>
+        <p style="font-size:13px;color:#6B7280;margin-top:12px;">
+          Даже с уже купленными билетами Yuvia сможет посчитать стресс,
+          подсветить риски пересадок и собрать маршрут по городу под твои часы.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <!-- нижняя плашка с сохранённым маршрутом -->
+  <div class="trip-bar" id="trip-bar">
+    <div>
+      <div style="font-weight:500;" id="trip-title"></div>
+      <div style="color:#6B7280;" id="trip-sub"></div>
+    </div>
+    <div style="text-align:right;">
+      <div id="trip-price"></div>
+      <div style="font-size:12px;color:#6B7280;">
+        позже сюда можно добавить кнопку «маршрут по городу»
+      </div>
+    </div>
   </div>
-</section>
 
-<div class="version">версия 18.0</div>
+  <!-- сравнение -->
+  <div class="compare-drawer" id="compare-drawer">
+    <div class="compare-header">
+      <div id="compare-title">Сравнение маршрутов</div>
+      <button type="button" style="border:none;background:transparent;cursor:pointer;font-size:12px;color:#6B7280;" id="compare-close-btn">
+        Скрыть
+      </button>
+    </div>
+    <div class="compare-list" id="compare-list"></div>
+  </div>
+
+  <!-- модальное окно деталей -->
+  <div class="modal-backdrop" id="modal-backdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <div style="font-weight:600;font-size:16px;">Детали маршрута</div>
+          <div style="font-size:13px;color:#6B7280;" id="modal-subtitle"></div>
+        </div>
+        <button type="button" class="btn-outline" id="modal-close-btn">Закрыть</button>
+      </div>
+      <div id="modal-segments"></div>
+      <div style="margin-top:8px;font-size:13px;color:#6B7280;">
+        В будущем здесь появится подробный чек-лист «День вылета» и советы,
+        что делать в каждой точке маршрута: от входа в аэропорт до выхода в
+        город по прилёту.
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
-/* ========= УТИЛЫ ========= */
-const $ = sel => document.querySelector(sel);
-const fmt2 = n => String(n).padStart(2,'0');
-const toISO = d => (!d?'' : `${d.getFullYear()}-${fmt2(d.getMonth()+1)}-${fmt2(d.getDate())}`);
-const parseISO = s => { if(!s) return null; const [y,m,d]=s.split('-').map(Number); const dt=new Date(y,m-1,d); return isNaN(dt)?null:dt; };
-const today = (()=>{const t=new Date(); return new Date(t.getFullYear(),t.getMonth(),t.getDate());})();
+  // ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДАТ/СТРЕССА =====
+  function addMinutes(date, minutes) {
+    return new Date(date.getTime() + minutes * 60000);
+  }
+  function minutesBetween(a, b) {
+    return Math.round((b.getTime() - a.getTime()) / 60000);
+  }
+  function isNight(date) {
+    const h = date.getHours();
+    return h < 6 || h >= 23;
+  }
 
-function timeWindowToRange(v){
-  if(v==='night') return [0,6]; if(v==='morning') return [6,12]; if(v==='day') return [12,18]; if(v==='evening') return [18,24]; return null;
-}
-function withinWindow(hhmm, set){
-  if(!set.size || !hhmm) return true;
-  const m = hhmm.match(/^(\d{2}):(\d{2})/); if(!m) return true;
-  const val = (+m[1]) + (+m[2]/60);
-  for(const s of set){ const [a,b]=timeWindowToRange(s); if(val>=a && val<b) return true; }
-  return false;
-}
-function durationLabel(min){
-  if(!min||min<=0) return '—';
-  const h=Math.floor(min/60), m=min%60;
-  return `${h? h+' ч ' : ''}${m? m+' мин' : ''}`.trim();
-}
+  function computeStressForSegments(segments, prefs) {
+    let score = 0;
+    let tags = [];
+    let hasNight = false;
+    let hasOvernight = false;
 
-/* ========= API ========= */
-const API = 'https://yuvia-flights-api.yuviabot.workers.dev';
-async function jget(url){ const r=await fetch(url); if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }
-function searchURL({ori,dst,cur,ow,d1,d2,ad}){
-  const p=new URLSearchParams({origin:ori,destination:dst,currency:cur, oneway:ow==='yes'?'1':'0', depart:toISO(d1), ret: (ow==='yes'||!d2)?'':toISO(d2), adults:String(ad||1)});
-  return `${API}/api/search?${p}`;
-}
-function matrixURL({ori,dst,cur,center,range}){
-  const p=new URLSearchParams({origin:ori,destination:dst,currency:cur, center:toISO(center), range:String(range||0)});
-  return `${API}/api/matrix?${p}`;
-}
+    const first = new Date(segments[0].departTime);
+    const last = new Date(segments[segments.length - 1].arriveTime);
 
-/* ========= Автокомплит ========= */
-let originIATA='', destIATA='';
-async function suggestCity(q){
-  if(!q || q.trim().length<2) return [];
-  const r = await fetch(`https://autocomplete.travelpayouts.com/places2?term=${encodeURIComponent(q)}&locale=ru&types[]=city`);
-  if(!r.ok) return [];
-  return r.json();
-}
-function attachSuggest(input, onPick){
-  let box=null, active=false;
-  function close(){ if(box){ box.remove(); box=null; } active=false; }
-  input.addEventListener('input', async ()=>{
-    const q=input.value.trim(); if(q.length<2){ close(); return; }
-    const list=await suggestCity(q); if(!list.length){ close(); return; }
-    if(!box){ box=document.createElement('div'); document.body.appendChild(box); Object.assign(box.style,{position:'absolute',zIndex:10000, background:'#fff', border:'1px solid #e5e7eb', borderRadius:'12px', boxShadow:'0 14px 36px rgba(15,23,42,.18)', overflow:'hidden'}); }
-    const r=input.getBoundingClientRect(); box.style.left=(r.left+scrollX)+'px'; box.style.top=(r.bottom+scrollY)+'px'; box.style.minWidth=r.width+'px';
-    box.innerHTML='';
-    list.slice(0,7).forEach(it=>{
-      const row=document.createElement('div'); row.textContent=`${it.name}, ${it.country_name} (${it.code})`; Object.assign(row.style,{padding:'8px 10px', cursor:'pointer', fontSize:'14px'}); row.onmouseenter=()=>row.style.background='#f1f5f9'; row.onmouseleave=()=>row.style.background='#fff';
-      row.onclick=()=>{ input.value=it.name; onPick(it); close(); };
-      box.appendChild(row);
+    const totalDuration = minutesBetween(first, last);
+    const connections = segments.length - 1;
+
+    segments.forEach(function (s) {
+      const d = new Date(s.departTime);
+      const a = new Date(s.arriveTime);
+      if (isNight(d) || isNight(a)) {
+        hasNight = true;
+        score += prefs.avoidNightFlights ? 2 : 1;
+      }
     });
-    active=true;
-  });
-  document.addEventListener('pointerdown',e=>{ if(active && box && !box.contains(e.target) && e.target!==input){ close(); }},true);
-}
-attachSuggest($('#origin'), it=>{ originIATA=it.code; pushMsg(`Поняла: вылетаем из ${it.name}.`); });
-attachSuggest($('#destination'), it=>{ destIATA=it.code; pushMsg(`Приняла: летим в ${it.name}.`); });
 
-/* ========= Состояние/фильтры ========= */
-let all = [];           // все результаты (нормализованные)
-let baseCur='RUB';
-let baggageMode='any';  // any | with | no
-let recent = [];
+    for (var i = 0; i < segments.length - 1; i++) {
+      var a = new Date(segments[i].arriveTime);
+      var d = new Date(segments[i + 1].departTime);
+      var conn = minutesBetween(a, d);
+      if (conn < 50) {
+        score += prefs.avoidShortConnections ? 3 : 2;
+        tags.push('Короткая стыковка');
+      } else if (conn < 90) {
+        score += 1;
+      } else if (conn > 240) {
+        score += 1;
+        tags.push('Долгая стыковка');
+      }
+      if (conn > 480 && isNight(a) && !isNight(d)) {
+        hasOvernight = true;
+        score += prefs.avoidAirportOvernights ? 3 : 2;
+        tags.push('Ночёвка в аэропорту');
+      }
+    }
 
-function collectFilters(){
-  const stops = (document.querySelector('input[name="stops"]:checked')||{}).value || 'any';
-  const depSet = new Set(Array.from(document.querySelectorAll('.depWin:checked')).map(x=>x.value));
-  const durMax = parseInt($('#durMax').value,10);
-  const pmin = parseInt($('#pmin').value,10), pmax=parseInt($('#pmax').value,10);
-  const airlines = new Set(Array.from($('#airlines').selectedOptions||[]).map(o=>o.value));
-  return {stops, depSet, durMax, pmin, pmax, airlines};
-}
+    if (prefs.avoidEarlyDepartures && first.getHours() < 8) {
+      score += 2;
+      tags.push('Ранний вылет');
+    }
+    if (prefs.avoidLateArrivals && last.getHours() > 23) {
+      score += 2;
+      tags.push('Позднее прибытие');
+    }
 
-function applyFiltersAndSort(){
-  const out = $('#results'); out.innerHTML='';
+    if (connections >= 2) {
+      score += prefs.afraidOfConnections ? 3 : 2;
+      tags.push(connections + ' пересадки');
+    } else if (connections === 1) {
+      score += prefs.afraidOfConnections ? 2 : 1;
+      tags.push('1 пересадка');
+    } else {
+      tags.push('Без пересадок');
+    }
 
-  if(!all.length){
-    out.innerHTML='<div class="skeleton"></div><div class="skeleton"></div>';
-    return;
+    if (totalDuration > 12 * 60) {
+      score += 2;
+      tags.push('Долгая дорога');
+    }
+
+    var normalized = Math.min(10, Math.round(score));
+    return {
+      stressScore: normalized,
+      hasNightSegments: hasNight,
+      hasAirportOvernight: hasOvernight,
+      totalDurationMinutes: totalDuration,
+      totalConnections: connections,
+      tags: Array.from(new Set(tags))
+    };
   }
 
-  const f = collectFilters();
-  let list = all.filter(x=>{
-    if(f.stops==='0' && x.transfers>0) return false;
-    if(f.stops==='1' && x.transfers>1) return false;
-    if(Number.isFinite(f.durMax) && x.durTo > f.durMax*60) return false;
-    if(Number.isFinite(f.pmin) && x.price < f.pmin) return false;
-    if(Number.isFinite(f.pmax) && x.price > f.pmax) return false;
-    if(f.airlines.size && !f.airlines.has(x.airline)) return false;
-    if(baggageMode==='with' && x.hasBaggage===false) return false;
-    if(baggageMode==='no' && x.hasBaggage===true) return false;
-    if(!withinWindow(x.depTime, f.depSet)) return false;
-    return true;
-  });
-
-  const s=$('#sort').value;
-  list.sort((a,b)=>{
-    if(s==='score') return (b.rating||0)-(a.rating||0);
-    if(s==='price_asc') return a.price-b.price;
-    if(s==='price_desc') return b.price-a.price;
-    if(s==='duration_asc') return (a.durTo||0)-(b.durTo||0);
-    if(s==='depart_asc') return (a.depSort||0)-(b.depSort||0);
-    return 0;
-  });
-
-  if(!list.length){
-    out.innerHTML='<div class="card" style="background:#fff">После фильтров ничего не осталось. Попробуй смягчить условия.</div>';
-    $('#routeHint').textContent = 'Видимо, задан строгий набор ограничений. Сними часть фильтров — я помогу найти мягче.';
-    return;
+  function getStressLabel(score) {
+    if (score <= 3) return { label: 'Минимальный стресс', tone: 'low' };
+    if (score <= 6) return { label: 'Умеренный стресс', tone: 'medium' };
+    return { label: 'Высокий стресс', tone: 'high' };
   }
 
-  const maxScore = Math.max(...list.map(x=>x.rating||0),0);
+  // ===== ГЕНЕРАЦИЯ МОКОВЫХ МАРШРУТОВ =====
+  function createSegment(from, to, fromCode, toCode, depart, durationMin, airline, flightNumber, baggageIncluded, handLuggageOnly) {
+    return {
+      id: fromCode + '-' + toCode + '-' + flightNumber + '-' + depart.toISOString(),
+      from: from,
+      to: to,
+      fromCode: fromCode,
+      toCode: toCode,
+      departTime: depart.toISOString(),
+      arriveTime: addMinutes(depart, durationMin).toISOString(),
+      airline: airline,
+      flightNumber: flightNumber,
+      baggageIncluded: baggageIncluded,
+      handLuggageOnly: handLuggageOnly
+    };
+  }
 
-  list.forEach(x=>{
-    const el=document.createElement('div'); el.className='result';
-    const toDur=durationLabel(x.durTo), bkDur=x.durBack?durationLabel(x.durBack):'';
-    const transfers = x.transfers===0 ? 'прямой' : (x.transfers===1 ? '1 пересадка' : `${x.transfers} пересадки`);
-    const stressCls = x.stress==='low'?'stress-low': x.stress==='high'?'stress-high':'stress-medium';
-    const isTop = x.rating && x.rating >= maxScore-0.3;
+  function searchFlightsMock(params) {
+    var baseDate = new Date(params.departDate);
+    baseDate.setHours(9, 0, 0, 0);
 
-    const logo = x.airlineCode
-      ? `<div class="circle"><img onerror="this.parentNode.textContent='${(x.airlineCode||'').slice(0,2)}'" src="https://pics.avs.io/120/120/${x.airlineCode}.png" style="width:70%;height:70%;object-fit:contain"></div>`
-      : `<div class="circle">${(x.airline||'').slice(0,2)||'–'}</div>`;
+    var segmentsVariants = [];
 
-    el.innerHTML=`
-      <div class="result-header">
-        <div>
-          <div class="route">${x.originCity} ⇄ ${x.destCity}</div>
-          <div class="meta">${x.depDateStr}${x.retDateStr?` — ${x.retDateStr}`:''}${x.flight?` · ${x.flight}`:''}</div>
-        </div>
-        <div class="pricebox">
-          <div class="price">${x.price.toLocaleString('ru-RU')} ${x.currency}</div>
-          <div class="logoAir">${logo}<span>${x.airline||x.airlineCode||''}</span></div>
-        </div>
-      </div>
+    // 1. Прямой дневной
+    segmentsVariants.push([
+      createSegment(params.from, params.to, 'FROM', 'TO', new Date(baseDate), 90, 'Yuvia Air', 'YA101', true, false)
+    ]);
 
-      <div class="legs">
-        <div class="seglabel">Туда</div>
-        <div class="seg">
-          <div>
-            <div class="t">${x.depTime||'—'}</div>
-            <div class="c">${x.originCity} · ${x.originApt||''}</div>
-            <div class="c">${x.depDateStr||''}</div>
-          </div>
-          <div><div class="c" style="text-align:center">${toDur}</div><div class="ln"></div><div class="c" style="text-align:center">${transfers}</div></div>
-          <div>
-            <div class="t">${x.arrTime||''}</div>
-            <div class="c">${x.destCity} · ${x.destApt||''}</div>
-            <div class="c">${x.depDateStr||''}</div>
-          </div>
-        </div>
+    // 2. Утренний с пересадкой
+    var morning = new Date(baseDate);
+    morning.setHours(7);
+    var seg2a = createSegment(params.from, 'Город пересадки', 'FROM', 'HUB', morning, 60, 'SkyHub', 'SH220', false, true);
+    var seg2bDepart = addMinutes(new Date(seg2a.arriveTime), 55);
+    var seg2b = createSegment('Город пересадки', params.to, 'HUB', 'TO', seg2bDepart, 70, 'SkyHub', 'SH221', false, true);
+    segmentsVariants.push([seg2a, seg2b]);
 
-        ${x.retDepTime||x.arrTimeBack||x.retDateStr ? `
-        <div class="seglabel" style="margin-top:6px">Обратно</div>
-        <div class="seg">
-          <div>
-            <div class="t">${x.retDepTime||'—'}</div>
-            <div class="c">${x.destCity} · ${x.destApt||''}</div>
-            <div class="c">${x.retDateStr||''}</div>
-          </div>
-          <div><div class="c" style="text-align:center">${bkDur||'—'}</div><div class="ln"></div><div class="c" style="text-align:center">${transfers}</div></div>
-          <div>
-            <div class="t">${x.arrTimeBack||''}</div>
-            <div class="c">${x.originCity} · ${x.originApt||''}</div>
-            <div class="c">${x.retDateStr||''}</div>
-          </div>
-        </div>` : ``}
-      </div>
+    // 3. Ночной прямой
+    var night = new Date(baseDate);
+    night.setHours(23);
+    segmentsVariants.push([
+      createSegment(params.from, params.to, 'FROM', 'TO', night, 100, 'NightLines', 'NL777', true, false)
+    ]);
 
-      <div class="badges">
-        ${x.rating? `<span class="badge rate">Оценка ${x.rating.toFixed(1).replace('.',',')}</span>`:''}
-        <span class="badge ${stressCls}">стресс: ${x.stressRu}</span>
-        <span class="badge">${transfers}</span>
-        ${x.durTo? `<span class="badge">туда: ${toDur}</span>`:''}
-        ${x.durBack? `<span class="badge">обратно: ${bkDur}</span>`:''}
-        ${isTop? `<span class="badge" style="background:linear-gradient(135deg, rgba(13,148,136,.10), rgba(14,165,233,.18)); border-color:rgba(14,165,233,.55); color:#075985; font-weight:700">Рекомендация Yuvia</span>`:''}
-      </div>
+    // 4. Длинный с ночёвкой
+    var eve = new Date(baseDate);
+    eve.setHours(20);
+    var seg4a = createSegment(params.from, 'Поздний хаб', 'FROM', 'H1', eve, 150, 'LongTrip', 'LT330', true, false);
+    var seg4bDepart = addMinutes(new Date(seg4a.arriveTime), 9 * 60);
+    var seg4b = createSegment('Поздний хаб', params.to, 'H1', 'TO', seg4bDepart, 90, 'LongTrip', 'LT331', true, false);
+    segmentsVariants.push([seg4a, seg4b]);
 
-      <div class="actions">
-        <a href="${x.deeplink}" target="_blank" rel="noopener"><button class="btn primary">На Aviasales</button></a>
-        <button class="btn" data-act="fav" data-id="${x.id}">☆ В избранное</button>
-        <button class="btn" data-act="cmp" data-id="${x.id}">⇄ Сравнить</button>
-      </div>
-    `;
-    out.appendChild(el);
-  });
+    var currency = 'RUB';
+    var basePrice = 11467;
 
-  updateHint(list);
-  summarize(list);
-}
+    var routes = segmentsVariants.map(function (segments, idx) {
+      var stressInfo = computeStressForSegments(segments, params.preferences);
+      var multipliers = [1, 0.9, 0.8, 1.15];
+      var priceMultiplier = multipliers[idx] || 1;
+      var price = Math.round(basePrice * priceMultiplier);
+      var titles = [
+        'Спокойный дневной без пересадок',
+        'Быстро, но со стыковкой',
+        'Ночной перелёт',
+        'Длинный маршрут с ночёвкой'
+      ];
+      return {
+        id: 'route-' + idx,
+        title: titles[idx] || ('Маршрут ' + (idx + 1)),
+        price: price,
+        currency: currency,
+        segments: segments,
+        stressScore: stressInfo.stressScore,
+        hasNightSegments: stressInfo.hasNightSegments,
+        hasAirportOvernight: stressInfo.hasAirportOvernight,
+        totalDurationMinutes: stressInfo.totalDurationMinutes,
+        totalConnections: stressInfo.totalConnections,
+        tags: stressInfo.tags
+      };
+    });
 
-function summarize(list){
-  if(!list.length){ $('#summaryChip').textContent='—'; return; }
-  const prices=list.map(x=>x.price).sort((a,b)=>a-b);
-  const min=prices[0], avg=Math.round(prices.reduce((s,v)=>s+v,0)/prices.length);
-  $('#summaryChip').textContent=`от ${min.toLocaleString('ru-RU')} · средняя ${avg.toLocaleString('ru-RU')} ${baseCur}`;
-}
+    var priority = params.preferences.priority;
+    routes.sort(function (a, b) {
+      if (priority === 'price') {
+        return a.price - b.price;
+      } else if (priority === 'comfort') {
+        return a.stressScore - b.stressScore;
+      } else {
+        return (a.price + a.stressScore * 500) - (b.price + b.stressScore * 500);
+      }
+    });
 
-function updateAirlines(){
-  const sel=$('#airlines'); const set=new Set(all.map(x=>x.airline).filter(Boolean));
-  const cur=new Set(Array.from(sel.selectedOptions||[]).map(o=>o.value));
-  sel.innerHTML=[...set].sort().map(a=>`<option value="${a}">${a}</option>`).join('');
-  Array.from(sel.options).forEach(o=>{ if(cur.has(o.value)) o.selected=true; });
-}
+    return routes;
+  }
 
-function updateHint(list){
-  const hint=$('#routeHint');
-  if(!list.length){ hint.textContent='Задайте маршрут и нажмите «Искать». Я оценю спокойствие и предложу мягкие варианты.'; return; }
-  const top=list[0];
-  const stressMap={low:'низкий', medium:'средний', high:'высокий'};
-  let txt='Маршрут выглядит ';
-  if(top.stress==='low') txt+='спокойным — без ночных вылетов и жёстких стыковок.';
-  else if(top.stress==='medium') txt+='нормальным, но есть нюансы (пересадки/время в пути).';
-  else txt+='напряжённым: много пересадок или неудобные вылеты.';
-  if(top.rating) txt+=` Оценка Yuvia: ${top.rating.toFixed(1).replace('.',',')} из 10.`;
-  hint.textContent=txt;
-}
-
-/* ========= Нормализация результата ========= */
-function extractTime(val){ if(!val) return ''; const m=String(val).match(/T(\d{2}:\d{2})|^(\d{2}:\d{2})/); return m? (m[1]||m[2]) : ''; }
-function extractDateStr(val){
-  if(!val) return ''; let iso='';
-  if(/^\d{4}-\d{2}-\d{2}/.test(val)) iso=val.slice(0,10);
-  else { const m=String(val).match(/(\d{4}-\d{2}-\d{2})/); if(m) iso=m[1]; }
-  if(!iso) return ''; const [y,m,d]=iso.split('-'); return `${d}.${m}.${y}`;
-}
-function birdDeeplink({ori,dst,d1,d2,cur,ad,ow}){
-  const DD1 = d1 ? (fmt2(d1.getDate())+fmt2(d1.getMonth()+1)) : '';
-  const DD2 = d2 ? (fmt2(d2.getDate())+fmt2(d2.getMonth()+1)) : '';
-  const slug = ow==='yes' ? `/${ori}${DD1}${dst}1` : `/${ori}${DD1}${dst}${DD2}1`;
-  const params = new URLSearchParams({marker:672309, with_request:'true', adults:String(ad||1), currency:(cur||'RUB').toLowerCase(), utm_source:'yuvia_new'});
-  return `https://www.aviasales.ru/search${slug}?${params}`;
-}
-function scoreAndStress(x){
-  let r=9.4;
-  const h = x.durTo/60; if(h>3) r -= (h-3)*0.35;
-  r -= (x.transfers||0)*1.6;
-  const hh=x.depTime?parseInt(x.depTime.slice(0,2),10):null; if(hh!==null && (hh<6||hh>=23)) r -= .8;
-  r=Math.max(4, Math.min(10, r)); r=Math.round(r*10)/10;
-  let stress='medium'; if(r>=8.5) stress='low'; else if(r<7) stress='high';
-  return {r, stress};
-}
-function norm(x,{ori,dst,cur,d1,d2,ow,ad}){
-  const depStr = extractDateStr(x.depart_date||x.departure_at||'');
-  const retStr = extractDateStr(x.return_date||x.return_at||'') || (d2? `${fmt2(d2.getDate())}.${fmt2(d2.getMonth()+1)}.${d2.getFullYear()}`:'');
-
-  const depTime = extractTime(x.depart_time||x.departure_time||x.departure_at||'');
-  const arrTime = extractTime(x.arrival_time||x.arr_time||x.arrival_at||'');
-  const retDepTime = extractTime(x.return_time||x.return_departure_time||x.return_departure_at||'');
-  const arrTimeBack = extractTime(x.return_arrival_time||x.return_arr_time||x.return_arrival_at||'');
-
-  const durTo = x.duration_to ?? x.duration ?? 0;
-  const durBack = x.duration_back ?? 0;
-
-  const airlineCode = x.airline_code || x.airline_iata || x.airline || '';
-  const transfers = (typeof x.transfers==='number')?x.transfers:(x.number_of_changes ?? 0);
-
-  let hasBaggage=null;
-  const btext=(x.baggage||x.baggage_info||'')+'';
-  if(/без багажа|hand luggage only|только руч/.test(btext.toLowerCase())) hasBaggage=false;
-  if(/багаж включ/.test(btext.toLowerCase())) hasBaggage=true;
-
-  const base = {
-    origin:x.origin, destination:x.destination,
-    originCity:x.origin_city||'', destCity:x.dest_city||'',
-    originApt:x.origin_airport||'', destApt:x.destination_airport||'',
-    airline:x.airline||airlineCode||'', airlineCode,
-    transfers, durTo, durBack,
-    depTime, arrTime, retDepTime, arrTimeBack,
-    depDateStr:depStr, retDateStr:retStr,
-    depSort: depTime? (+depTime.slice(0,2))*60 + (+depTime.slice(3,5)) : 0,
-    price:Math.round(x.price??x.value??0), currency:x.currency||cur,
-    deeplink: birdDeeplink({ori,dst,d1,d2: (ow==='yes'?null:d2), cur, ad, ow}),
-    flight: x.flight_number||x.thread||'',
-    hasBaggage
+  // ===== ГЛОБАЛЬНОЕ СОСТОЯНИЕ =====
+  var state = {
+    routes: [],
+    selectedRouteId: null,
+    compareIds: [],
+    searchParams: null,
+    savedTrip: null,
+    preferences: {
+      priority: 'balance',
+      avoidNightFlights: true,
+      avoidShortConnections: true,
+      avoidEarlyDepartures: false,
+      avoidLateArrivals: false,
+      afraidOfConnections: false,
+      avoidAirportOvernights: true
+    }
   };
-  const {r, stress} = scoreAndStress({durTo, transfers, depTime});
-  const ru={'low':'низкий','medium':'средний','high':'высокий'};
-  const id=[ori,dst,depStr,retStr,depTime,retDepTime,airlineCode,base.price].join('|');
-  return {...base, rating:r, stress, stressRu:ru[stress], id};
-}
 
-/* ========= Недавние ========= */
-function saveRecent(item){
-  const k='yuvia_recent';
-  const list=JSON.parse(localStorage.getItem(k)||'[]');
-  const norm=JSON.stringify({...item, ts:undefined});
-  const idx=list.findIndex(x=>JSON.stringify({...x,ts:undefined})===norm);
-  if(idx!==-1) list.splice(idx,1);
-  list.unshift({...item, ts:Date.now()}); while(list.length>6) list.pop();
-  localStorage.setItem(k, JSON.stringify(list));
-  renderRecent();
-}
-function renderRecent(){
-  const cont=$('#recent'); cont.innerHTML='';
-  const list=JSON.parse(localStorage.getItem('yuvia_recent')||'[]');
-  list.forEach(r=>{
-    const chip=document.createElement('div'); chip.className='chip'; chip.textContent=
-      `${r.origin_city} → ${r.dest_city} ${r.depart || ''}${r.oneway==='yes'?' (OW)':''}`;
-    chip.onclick=()=>{ $('#origin').value=r.origin_city; $('#destination').value=r.dest_city; $('#dateFrom').value=r.depart; $('#dateTo').value=r.ret; $('#currency').value=r.currency; $('#adults').value=r.adults; originIATA=r.origin_iata; destIATA=r.dest_iata; doSearch(); };
-    cont.appendChild(chip);
-  });
-}
-
-/* ========= Ассистент-сообщения ========= */
-function pushMsg(text){
-  const el=$('#yuviaMsg'); el.textContent=text;
-}
-
-/* ========= Матрица ========= */
-function showMatrixSafe(ori,dst,cur,center){
-  const range = 3; // ±3
-  jget(matrixURL({ori,dst,cur,center,range}))
-    .then(m=>{
-      const list=(m.data||[]).slice(0,10).map(it=>({date:it.date_str, price:it.price, currency:it.currency}));
-      const box=$('#matrix'); box.innerHTML='';
-      list.forEach(c=>{
-        const chip=document.createElement('div'); chip.className='chip'; chip.textContent = `${c.date} · от ${c.price} ${c.currency}`;
-        chip.onclick=()=>{ const [dd,mm,yy]=c.date.split('.'); $('#dateFrom').value=`${yy}-${mm}-${dd}`; doSearch(); };
-        box.appendChild(chip);
+  // ===== ПЕРЕКЛЮЧЕНИЕ ТАБОВ =====
+  document.querySelectorAll('.tab-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var tab = btn.getAttribute('data-tab');
+      document.querySelectorAll('.tab-btn').forEach(function (b) {
+        b.classList.toggle('active', b === btn);
       });
-    })
-    .catch(()=>{});
-}
+      document.querySelectorAll('.tab-content').forEach(function (c) {
+        c.classList.toggle('active', c.id === 'tab-' + tab);
+      });
+    });
+  });
 
-/* ========= Поиск ========= */
-async function doSearch(){
-  const oriCity=$('#origin').value.trim();
-  const dstCity=$('#destination').value.trim();
-  if(!oriCity || !dstCity){ alert('Укажите города'); return; }
+  // Установка сегодняшней даты
+  (function setToday() {
+    var input = document.getElementById('date-input');
+    var today = new Date();
+    var iso = today.toISOString().slice(0, 10);
+    input.value = iso;
+  })();
 
-  async function ensure(code, city){ if(code) return code; const s=await suggestCity(city); return s[0]?.code||''; }
-  originIATA = await ensure(originIATA, oriCity);
-  destIATA   = await ensure(destIATA, dstCity);
-  if(!originIATA || !destIATA){ alert('Не удалось определить IATA'); return; }
+  // Приоритет
+  document.querySelectorAll('.chip-toggle').forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      var pr = chip.getAttribute('data-priority');
+      state.preferences.priority = pr;
+      document.querySelectorAll('.chip-toggle').forEach(function (c) {
+        c.classList.toggle('active', c === chip);
+      });
+    });
+  });
 
-  let d1=parseISO($('#dateFrom').value), d2=parseISO($('#dateTo').value);
-  if(!d1){ alert('Дата вылета обязательна'); return; }
-  if(d1<today){ d1=today; $('#dateFrom').value = toISO(d1); }
-  if(d2 && d2<d1){ d2=d1; $('#dateTo').value=toISO(d2); }
+  // ===== ОБРАБОТЧИК ПОДБОРА МАРШРУТОВ =====
+  var searchForm = document.getElementById('search-form');
+  var searchBtn = document.getElementById('search-btn');
+  var resultsBlock = document.getElementById('results-block');
+  var routesListEl = document.getElementById('routes-list');
+  var resultsCountEl = document.getElementById('results-count');
+  var routesActionsEl = document.getElementById('routes-actions');
+  var yuviaPanelEl = document.getElementById('yuvia-panel');
 
-  const cur=$('#currency').value; baseCur=cur;
-  const ad=+$('#adults').value || 1;
-  const ow = d2 ? 'no' : 'yes';
+  searchForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    searchBtn.disabled = true;
+    searchBtn.textContent = 'Подбираю варианты…';
 
-  // save + matrix + skeleton
-  saveRecent({origin_city:oriCity,dest_city:dstCity,origin_iata:originIATA,dest_iata:destIATA,depart:toISO(d1),ret:toISO(d2),currency:cur,adults:String(ad),oneway:ow});
-  pushMsg('Собираю варианты... учитываю ваши фильтры и подскажу самый спокойный маршрут.');
-  $('#results').innerHTML='<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>';
-  showMatrixSafe(originIATA,destIATA,cur,d1);
+    var params = {
+      from: document.getElementById('from-input').value || 'Город вылета',
+      to: document.getElementById('to-input').value || 'Город назначения',
+      departDate: document.getElementById('date-input').value,
+      flexibleDates: document.getElementById('flexible-input').checked,
+      passengers: Number(document.getElementById('passengers-input').value) || 1,
+      preferences: {
+        priority: state.preferences.priority,
+        avoidNightFlights: document.getElementById('pref-night').checked,
+        avoidShortConnections: document.getElementById('pref-short').checked,
+        avoidEarlyDepartures: false,
+        avoidLateArrivals: false,
+        afraidOfConnections: document.getElementById('pref-afraid').checked,
+        avoidAirportOvernights: document.getElementById('pref-overnight').checked
+      }
+    };
 
-  let data;
-  try{
-    data = await jget(searchURL({ori:originIATA,dst:destIATA,cur,ow,d1,d2,ad}));
-  }catch(e){
-    $('#results').innerHTML = `<div class="card" style="background:#fff; border-color:#fecaca; color:#b91c1c">Ошибка: ${e.message}. Попробуйте позже.</div>`;
-    pushMsg('Хм… Похоже, сеть нестабильна. Обновите страницу или повторите поиск.');
-    return;
+    state.searchParams = params;
+    state.compareIds = [];
+    state.selectedRouteId = null;
+
+    // имитируем "сетевой" запрос
+    setTimeout(function () {
+      state.routes = searchFlightsMock(params);
+      if (state.routes.length > 0) {
+        state.selectedRouteId = state.routes[0].id;
+      }
+      renderResults();
+      searchBtn.disabled = false;
+      searchBtn.textContent = 'Подобрать маршруты';
+    }, 500);
+  });
+
+  function renderResults() {
+    if (!state.routes.length) {
+      resultsBlock.style.display = 'none';
+      return;
+    }
+    resultsBlock.style.display = 'block';
+    resultsCountEl.textContent = 'Нашёл ' + state.routes.length + ' варианта под твой запрос.';
+    routesListEl.innerHTML = '';
+    state.routes.forEach(function (route) {
+      var card = document.createElement('div');
+      card.className = 'route-card' + (route.id === state.selectedRouteId ? ' selected' : '');
+      card.dataset.routeId = route.id;
+
+      var header = document.createElement('div');
+      header.className = 'route-card-header';
+
+      var left = document.createElement('div');
+      var title = document.createElement('div');
+      title.className = 'route-title';
+      title.textContent = route.title;
+      left.appendChild(title);
+      left.appendChild(createTimeline(route));
+
+      var right = document.createElement('div');
+      right.className = 'route-price-block';
+      var price = document.createElement('div');
+      price.className = 'route-price';
+      price.textContent = route.price.toLocaleString('ru-RU') + ' ' + route.currency;
+      right.appendChild(price);
+
+      var compareBtn = document.createElement('button');
+      compareBtn.type = 'button';
+      compareBtn.className = 'btn-ghost' + (state.compareIds.indexOf(route.id) !== -1 ? ' active' : '');
+      compareBtn.textContent = state.compareIds.indexOf(route.id) !== -1 ? 'В сравнении' : 'Сравнить';
+      compareBtn.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        toggleCompare(route.id);
+      });
+      right.appendChild(compareBtn);
+
+      header.appendChild(left);
+      header.appendChild(right);
+      card.appendChild(header);
+
+      var badges = document.createElement('div');
+      badges.style.display = 'flex';
+      badges.style.gap = '8px';
+      badges.style.flexWrap = 'wrap';
+      badges.style.alignItems = 'center';
+      badges.style.marginTop = '4px';
+
+      var stress = getStressLabel(route.stressScore);
+      var badgeBg = stress.tone === 'low' ? '#DCFCE7' : (stress.tone === 'medium' ? '#FEF3C7' : '#FEE2E2');
+      var badgeColor = stress.tone === 'low' ? '#166534' : (stress.tone === 'medium' ? '#92400E' : '#B91C1C');
+
+      var stressEl = document.createElement('span');
+      stressEl.className = 'pill';
+      stressEl.style.background = badgeBg;
+      stressEl.style.color = badgeColor;
+      stressEl.textContent = 'Стресс ' + route.stressScore + '/10 • ' + stress.label;
+      badges.appendChild(stressEl);
+
+      route.tags.slice(0, 4).forEach(function (tag) {
+        var t = document.createElement('span');
+        t.className = 'pill';
+        t.style.border = '1px solid #E2E8F0';
+        t.style.color = '#6B7280';
+        t.textContent = tag;
+        badges.appendChild(t);
+      });
+
+      card.appendChild(badges);
+
+      card.addEventListener('click', function () {
+        state.selectedRouteId = route.id;
+        renderResults();
+      });
+
+      routesListEl.appendChild(card);
+    });
+
+    routesActionsEl.style.display = state.routes.length ? 'block' : 'none';
+    renderYuviaPanel();
+    renderCompareDrawer();
   }
 
-  const raw=(data.data||[]).filter(x=>x.price>0 && x.origin===originIATA && x.destination===destIATA);
-  all = raw.map(x=>norm(x,{ori:originIATA,dst:destIATA,cur,d1,d2,ow,ad}));
-  updateAirlines();
-  applyFiltersAndSort();
-}
+  function createTimeline(route) {
+    var wrap = document.createElement('div');
+    var first = new Date(route.segments[0].departTime);
+    var last = new Date(route.segments[route.segments.length - 1].arriveTime);
+    var totalMinutes = minutesBetween(first, last);
 
-/* ========= Слушатели ========= */
-$('#swapBtn').addEventListener('click', ()=>{ const a=$('#origin').value, b=$('#destination').value; $('#origin').value=b; $('#destination').value=a; const ia=originIATA; originIATA=destIATA; destIATA=ia; pushMsg('Поменяла направления местами.'); });
+    var meta = document.createElement('div');
+    meta.className = 'timeline-meta';
+    meta.textContent =
+      route.segments[0].fromCode + ' ' + formatTime(route.segments[0].departTime) +
+      ' — ' +
+      route.segments[route.segments.length - 1].toCode + ' ' + formatTime(route.segments[route.segments.length - 1].arriveTime) +
+      ' • ' + Math.round(totalMinutes / 60) + ' ч';
+    wrap.appendChild(meta);
 
-['stops','durMax','pmin','pmax'].forEach(id=>{ const el=$('#'+id); if(el) el.addEventListener('input',applyFiltersAndSort); });
-document.querySelectorAll('.depWin').forEach(cb=>cb.addEventListener('change',applyFiltersAndSort));
-$('#airlines').addEventListener('change',applyFiltersAndSort);
-$('#sort').addEventListener('change',applyFiltersAndSort);
-$('#clearFilters').addEventListener('click',()=>{ document.querySelector('input[name="stops"][value="any"]').checked=true; document.querySelectorAll('.depWin').forEach(x=>x.checked=false); $('#durMax').value=''; $('#pmin').value=''; $('#pmax').value=''; Array.from($('#airlines').options).forEach(o=>o.selected=false); baggageMode='any'; applyFiltersAndSort(); });
+    var bar = document.createElement('div');
+    bar.className = 'timeline-bar';
 
-$('#searchBtn').addEventListener('click', (e)=>{ e.preventDefault(); doSearch(); });
+    route.segments.forEach(function (s, idx) {
+      var start = new Date(s.departTime);
+      var end = new Date(s.arriveTime);
+      var segMinutes = (end.getTime() - start.getTime()) / 60000;
+      var width = (segMinutes / totalMinutes) * 100;
 
-/* Пресеты-чипы */
-$('#togglePresets').addEventListener('click', ()=>{
-  const box=$('#presets'); const show=box.style.display==='none';
-  box.style.display=show?'flex':'none';
-});
-document.getElementById('presets').addEventListener('click', e=>{
-  const chip = e.target.closest('.chip'); if(!chip) return;
-  chip.classList.toggle('active');
-  const t = chip.dataset.type;
-  if(t==='route'){ document.querySelector('input[name="stops"][value="0"]').checked = chip.classList.contains('active'); if(!chip.classList.contains('active')) document.querySelector('input[name="stops"][value="any"]').checked=true; }
-  if(t==='duration'){ $('#durMax').value = chip.classList.contains('active') ? 3 : ''; }
-  if(t==='weekend'){
-    const now=new Date(); const wd=now.getDay(); let sat=new Date(now); sat.setDate(now.getDate()+((6-wd+7)%7)); let sun=new Date(sat); sun.setDate(sat.getDate()+1);
-    $('#dateFrom').value=toISO(sat); $('#dateTo').value=toISO(sun);
+      var prevEnd = idx === 0 ? first : new Date(route.segments[idx - 1].arriveTime);
+      var left = (minutesBetween(first, prevEnd) / totalMinutes) * 100;
+
+      var segEl = document.createElement('div');
+      segEl.className = 'timeline-segment';
+      segEl.style.left = left + '%';
+      segEl.style.width = width + '%';
+      segEl.style.background = idx % 2 === 0 ? '#11A26A' : '#F97316';
+      bar.appendChild(segEl);
+    });
+
+    wrap.appendChild(bar);
+    return wrap;
   }
-  if(t==='baggage'){ baggageMode = chip.classList.contains('active') ? 'with' : 'any'; }
-  if(t==='airports'){ pushMsg('После первого поиска появится список аэропортов в фильтрах — выберите любимые.'); }
-  applyFiltersAndSort();
-});
 
-/* Недавние при старте */
-renderRecent();
+  function formatTime(iso) {
+    var d = new Date(iso);
+    return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  // ===== ПАНЕЛЬ Yuvia =====
+  function renderYuviaPanel() {
+    var route = state.routes.find(function (r) { return r.id === state.selectedRouteId; });
+    yuviaPanelEl.innerHTML = '';
+
+    var title = document.createElement('div');
+    title.className = 'yuvia-panel-title';
+    title.textContent = 'Yuvia рядом';
+    yuviaPanelEl.appendChild(title);
+
+    if (!route) {
+      var p = document.createElement('p');
+      p.style.fontSize = '14px';
+      p.style.margin = '0';
+      p.textContent = 'Заполни бриф слева — я подберу маршруты под твой стиль, а затем честно расскажу, чего ждать от каждого варианта. Без маркетинговой мишуры.';
+      yuviaPanelEl.appendChild(p);
+
+      var footer = document.createElement('div');
+      footer.className = 'yuvia-footer';
+      footer.textContent = 'В будущем здесь появится «режим дня вылета» с чек-листами и напоминаниями, а также советы, что делать, если рейс задержат.';
+      yuviaPanelEl.appendChild(footer);
+      return;
+    }
+
+    var bubble = document.createElement('div');
+    bubble.className = 'yuvia-bubble';
+
+    var stress = getStressLabel(route.stressScore);
+    var durationHours = Math.round(route.totalDurationMinutes / 60);
+    var connectionsText = route.totalConnections === 0
+      ? 'без пересадок'
+      : (route.totalConnections === 1 ? 'с одной пересадкой' : ('с ' + route.totalConnections + ' пересадками'));
+
+    var intro;
+    if (stress.tone === 'low') {
+      intro = 'Это спокойный маршрут, без лишних приключений.';
+    } else if (stress.tone === 'medium') {
+      intro = 'Этот вариант балансирует между ценой и комфортом.';
+    } else {
+      intro = 'Этот вариант нервный, но иногда его выбирают ради цены или жёстких сроков.';
+    }
+
+    bubble.innerHTML =
+      '<div style="margin-bottom:6px;">' + intro + '</div>' +
+      '<div style="margin-bottom:6px;">В пути примерно <b>' + durationHours + ' ч</b>, ' + connectionsText +
+      '. Стресс <b>' + route.stressScore + '/10</b> — ' + stress.label.toLowerCase() + '.</div>';
+
+    if (route.hasAirportOvernight) {
+      var warn = document.createElement('div');
+      warn.style.color = '#92400E';
+      warn.textContent = 'Ночёвка в аэропорту — это испытание даже для опытных путешественников. Если важно выспаться и чувствовать себя спокойно, я бы посмотрел другие варианты.';
+      bubble.appendChild(warn);
+    } else if (route.hasNightSegments) {
+      var note = document.createElement('div');
+      note.textContent = 'Есть ночной перелёт. Для кого-то это удобно, если удаётся поспать в самолёте, но если ты не любишь ночные рейсы — лучше рассмотреть дневные.';
+      bubble.appendChild(note);
+    }
+
+    yuviaPanelEl.appendChild(bubble);
+
+    if (state.searchParams) {
+      var ctx = document.createElement('div');
+      ctx.style.fontSize = '13px';
+      ctx.innerHTML =
+        '<div style="margin-bottom:4px;">Маршруты под твой запрос: <b>' +
+        state.searchParams.from + ' → ' + state.searchParams.to +
+        '</b>, дата вылета <b>' + state.searchParams.departDate + '</b>.</div>' +
+        '<div style="color:#6B7280;">В настройках стиля ты сейчас акцентируешься на ' +
+        (state.searchParams.preferences.priority === 'price'
+          ? 'экономии'
+          : state.searchParams.preferences.priority === 'comfort'
+          ? 'комфорте и спокойствии'
+          : 'балансе цены и удобства') +
+        '. Это влияет на сортировку вариантов.</div>';
+      yuviaPanelEl.appendChild(ctx);
+    }
+
+    var footer = document.createElement('div');
+    footer.className = 'yuvia-footer';
+    footer.textContent = 'В будущем здесь появится «режим дня вылета» и подсказки по каждому шагу в аэропорту.';
+    yuviaPanelEl.appendChild(footer);
+  }
+
+  // ===== СРАВНЕНИЕ =====
+  var compareDrawerEl = document.getElementById('compare-drawer');
+  var compareListEl = document.getElementById('compare-list');
+  var compareTitleEl = document.getElementById('compare-title');
+  var compareCloseBtn = document.getElementById('compare-close-btn');
+
+  compareCloseBtn.addEventListener('click', function () {
+    state.compareIds = [];
+    renderResults();
+  });
+
+  function toggleCompare(id) {
+    var idx = state.compareIds.indexOf(id);
+    if (idx === -1) {
+      state.compareIds.push(id);
+    } else {
+      state.compareIds.splice(idx, 1);
+    }
+    renderResults();
+  }
+
+  function renderCompareDrawer() {
+    if (!state.compareIds.length) {
+      compareDrawerEl.classList.remove('active');
+      return;
+    }
+    compareDrawerEl.classList.add('active');
+    var routes = state.routes.filter(function (r) { return state.compareIds.indexOf(r.id) !== -1; });
+    compareTitleEl.textContent = 'Сравнение маршрутов (' + routes.length + ')';
+    compareListEl.innerHTML = '';
+    routes.forEach(function (r) {
+      var card = document.createElement('div');
+      card.className = 'compare-card';
+      card.innerHTML =
+        '<div style="font-weight:500;margin-bottom:4px;">' + r.title + '</div>' +
+        '<div style="font-size:12px;color:#6B7280;">' +
+        (r.totalConnections === 0 ? 'Без пересадок' : (r.totalConnections + ' пересад.')) +
+        ' • ' + Math.round(r.totalDurationMinutes / 60) + ' ч в пути</div>' +
+        '<div style="margin-top:6px;"><b>' + r.price.toLocaleString('ru-RU') + '</b> ' + r.currency + '</div>' +
+        '<div style="margin-top:4px;font-size:12px;">Стресс: <b>' + r.stressScore + '/10</b></div>';
+      compareListEl.appendChild(card);
+    });
+  }
+
+  // ===== СОХРАНЁННЫЙ TRIP =====
+  var tripBarEl = document.getElementById('trip-bar');
+  var tripTitleEl = document.getElementById('trip-title');
+  var tripSubEl = document.getElementById('trip-sub');
+  var tripPriceEl = document.getElementById('trip-price');
+
+  var TRIP_KEY = 'yuvia_last_trip_singlefile_v1';
+
+  function loadTrip() {
+    try {
+      var raw = localStorage.getItem(TRIP_KEY);
+      if (!raw) return;
+      state.savedTrip = JSON.parse(raw);
+      renderTripBar();
+    } catch (e) {}
+  }
+
+  function saveTrip(trip) {
+    state.savedTrip = trip;
+    try {
+      localStorage.setItem(TRIP_KEY, JSON.stringify(trip));
+    } catch (e) {}
+    renderTripBar();
+  }
+
+  function renderTripBar() {
+    if (!state.savedTrip) {
+      tripBarEl.classList.remove('active');
+      return;
+    }
+    var t = state.savedTrip;
+    var route = t.route;
+    tripBarEl.classList.add('active');
+    tripTitleEl.textContent = 'Сохранённый маршрут поездки • ' + t.searchParams.from + ' → ' + t.searchParams.to;
+    tripSubEl.textContent = route.title + ' • ' + Math.round(route.totalDurationMinutes / 60) + ' ч в пути • стресс ' + route.stressScore + '/10';
+    tripPriceEl.textContent = route.price.toLocaleString('ru-RU') + ' ' + route.currency;
+  }
+
+  loadTrip();
+
+  // кнопки «детали» и «сохранить»
+  document.getElementById('details-btn').addEventListener('click', function () {
+    var route = state.routes.find(function (r) { return r.id === state.selectedRouteId; });
+    if (!route) return;
+    openModal(route);
+  });
+
+  document.getElementById('save-trip-btn').addEventListener('click', function () {
+    if (!state.searchParams) return;
+    var route = state.routes.find(function (r) { return r.id === state.selectedRouteId; });
+    if (!route) return;
+    var trip = {
+      id: 'trip-' + Date.now(),
+      createdAt: new Date().toISOString(),
+      searchParams: state.searchParams,
+      route: route
+    };
+    saveTrip(trip);
+  });
+
+  // ===== МОДАЛЬНЫЕ ДЕТАЛИ =====
+  var modalBackdropEl = document.getElementById('modal-backdrop');
+  var modalSubtitleEl = document.getElementById('modal-subtitle');
+  var modalSegmentsEl = document.getElementById('modal-segments');
+  var modalCloseBtn = document.getElementById('modal-close-btn');
+
+  modalCloseBtn.addEventListener('click', closeModal);
+  modalBackdropEl.addEventListener('click', function (e) {
+    if (e.target === modalBackdropEl) closeModal();
+  });
+
+  function openModal(route) {
+    modalSubtitleEl.textContent = route.title;
+    modalSegmentsEl.innerHTML = '';
+    route.segments.forEach(function (s, idx) {
+      var card = document.createElement('div');
+      card.className = 'segment-card';
+      card.innerHTML =
+        '<div style="display:flex;justify-content:space-between;font-size:14px;font-weight:500;margin-bottom:4px;">' +
+        '<span>' + s.fromCode + ' → ' + s.toCode + '</span>' +
+        '<span>' + formatDate(s.departTime) + ' • ' + formatTime(s.departTime) + ' — ' + formatTime(s.arriveTime) + '</span>' +
+        '</div>' +
+        '<div style="font-size:13px;">' + s.airline + ' • рейс ' + s.flightNumber + '</div>' +
+        '<div style="font-size:12px;color:#6B7280;margin-top:4px;">' +
+        (s.baggageIncluded ? 'Багаж включён' : (s.handLuggageOnly ? 'Только ручная кладь' : 'Уточните условия багажа')) +
+        ' • В аэропорт рекомендую выезжать минимум за 2–2,5 часа до вылета.' +
+        (idx === 0 ? ' Онлайн-регистрация обычно открывается за 24 часа — можно будет выбрать места.' : '') +
+        '</div>';
+      modalSegmentsEl.appendChild(card);
+    });
+    modalBackdropEl.classList.add('active');
+  }
+
+  function closeModal() {
+    modalBackdropEl.classList.remove('active');
+  }
+
+  function formatDate(iso) {
+    var d = new Date(iso);
+    return d.toLocaleDateString('ru-RU', { day: '2-digit', month: 'short' });
+  }
 </script>
 </body>
 </html>
