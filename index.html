@@ -3367,10 +3367,33 @@
 
         function extractFlightsPayload(payload) {
           if (!payload) return [];
-          if (Array.isArray(payload)) return payload;
-          if (Array.isArray(payload.flights)) return payload.flights;
-          if (Array.isArray(payload.data)) return payload.data;
-          if (Array.isArray(payload.results)) return payload.results;
+
+          // FIX: для нашего API билеты лежат в payload.data (array),
+          // ранняя рабочая версия использовала (json.data || []).
+          if (Array.isArray(payload.data)) {
+            return payload.data;
+          }
+
+          // 2. Если вдруг сам payload — уже массив (на будущее)
+          if (Array.isArray(payload)) {
+            return payload;
+          }
+
+          // 3. Запасной путь: иногда билеты могут лежать в полях flights или tickets
+          if (Array.isArray(payload.flights)) {
+            return payload.flights;
+          }
+          if (Array.isArray(payload.tickets)) {
+            return payload.tickets;
+          }
+
+          // 4. Очень мягкий fallback: поиск первого массивного поля внутри payload.data
+          if (payload.data && typeof payload.data === "object") {
+            const values = Object.values(payload.data);
+            const arr = values.find((v) => Array.isArray(v));
+            if (Array.isArray(arr)) return arr;
+          }
+
           return [];
         }
 
