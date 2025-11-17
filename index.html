@@ -3170,17 +3170,21 @@ function isEarlyDeparture(flight) {
           if (!segment) return null;
           const departAt = safeDate(
             segment.departAt ||
+              segment.depart_at ||
               segment.departure ||
               segment.departure_at ||
               segment.date_from ||
+              segment.depart_date ||
               segment.time_from ||
               segment.begin_time
           );
           const arriveAt = safeDate(
             segment.arriveAt ||
+              segment.arrive_at ||
               segment.arrival ||
               segment.arrival_at ||
               segment.date_to ||
+              segment.arrival_date ||
               segment.time_to ||
               segment.end_time
           );
@@ -3277,7 +3281,10 @@ function isEarlyDeparture(flight) {
               addSegment(segment, isReturn ? "return" : "outbound");
             });
           }
-          if (!outboundSegments.length && (fallback.departAt || raw.departAt)) {
+          if (
+            !outboundSegments.length &&
+            (fallback.departAt || raw.departAt || raw.depart_at || raw.departure_at || raw.depart_date)
+          ) {
             addSegment(
               {
                 departAt: fallback.departAt || raw.departAt,
@@ -3293,7 +3300,7 @@ function isEarlyDeparture(flight) {
               "outbound"
             );
           }
-          if (!returnSegments.length && (fallback.returnDepartAt || raw.returnDepartAt)) {
+          if (!returnSegments.length && (fallback.returnDepartAt || raw.returnDepartAt || raw.return_at || raw.return_date)) {
             addSegment(
               {
                 departAt: fallback.returnDepartAt || raw.returnDepartAt,
@@ -3333,10 +3340,37 @@ function isEarlyDeparture(flight) {
 
         function normalizeFlight(raw, context = {}) {
           if (!raw) return null;
-          const departAt = safeDate(raw.departAt || raw.departure_at || raw.departure || raw.start_time);
-          const arriveAt = safeDate(raw.arriveAt || raw.arrival_at || raw.arrival || raw.end_time);
-          const returnDepartAt = safeDate(raw.returnDepartAt || raw.return_departure || raw.inbound?.depart_at);
-          const returnArriveAt = safeDate(raw.returnArriveAt || raw.return_arrival || raw.inbound?.arrive_at);
+          const departAt = safeDate(
+            raw.departAt ||
+              raw.depart_at ||
+              raw.departure_at ||
+              raw.departure ||
+              raw.start_time ||
+              raw.depart_date || // date-only поле, если есть
+              raw.date_from // ещё один возможный вариант
+          );
+          const arriveAt = safeDate(
+            raw.arriveAt ||
+              raw.arrive_at ||
+              raw.arrival_at ||
+              raw.arrival ||
+              raw.end_time ||
+              raw.arrival_date ||
+              raw.date_to ||
+              raw.return_at ||
+              raw.return_date
+          );
+          const returnDepartAt = safeDate(
+            raw.returnDepartAt ||
+              raw.return_departure ||
+              raw.return_at ||
+              raw.return_date ||
+              raw.inbound?.depart_at ||
+              raw.inbound?.departure_at
+          );
+          const returnArriveAt = safeDate(
+            raw.returnArriveAt || raw.return_arrival || raw.inbound?.arrive_at || raw.inbound?.arrival_at
+          );
           const fallback = {
             originCity: raw.originCity || raw.origin_city || context.originCity,
             destCity: raw.destCity || raw.dest_city || context.destCity,
