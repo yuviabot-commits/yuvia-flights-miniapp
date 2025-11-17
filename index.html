@@ -1184,22 +1184,44 @@
         border: 1px solid var(--line);
         background: #ffffff;
         box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
-        opacity: 1;
-        transform: translateY(0);
+        opacity: 0;
+        transform: translateY(8px);
         transition:
           opacity 0.18s ease,
           box-shadow 0.16s ease,
           transform 0.16s ease,
           border-color 0.16s ease;
       }
+      #results .result {
+        animation: resultFadeIn 0.18s ease-out both;
+      }
+      #results .result:nth-child(1) {
+        animation-delay: 0s;
+      }
+      #results .result:nth-child(2) {
+        animation-delay: 40ms;
+      }
+      #results .result:nth-child(3) {
+        animation-delay: 80ms;
+      }
       .result:hover {
         box-shadow: 0 18px 40px rgba(15, 23, 42, 0.14);
         transform: translateY(-1px);
         border-color: rgba(7, 94, 84, 0.22);
       }
-      .result.result-enter {
-        opacity: 0;
-        transform: translateY(4px);
+      .result.result-anim {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      @keyframes resultFadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
       .result.highlighted {
         box-shadow:
@@ -2962,21 +2984,19 @@ function isEarlyDeparture(flight) {
           return ` (+${diffDays} ${suffix})`;
         }
 
-        function renderSegmentBlock(group, label, flightNumbersText = "") {
+        function renderSegmentBlock(group, label) {
           if (!group || !group.start || !group.end) return "";
           const start = group.start;
           const end = group.end;
           const transfersText = formatTransfers(group.transfers);
-          const numbersRow = flightNumbersText
-            ? `<div class="segment-date">${flightNumbersText}</div>`
-            : "";
+          const arrivalOffset = formatArrivalOffset(start.departAt, end.arriveAt);
           return `
             <div class="segment">
               <div class="segment-label">${label}</div>
               <div class="segment-row">
                 <div>
                   <div class="segment-time">${formatTime(start.departAt)}</div>
-                  <div class="segment-city">${start.originCity || start.originAirport || ""}</div>
+                  <div class="segment-city">${start.originCity || ""}</div>
                   <div class="segment-airport">${(start.originAirport || "").toUpperCase()}</div>
                   <div class="segment-date">${start.departAt ? ddmmyyyy(start.departAt) : ""}</div>
                 </div>
@@ -2984,13 +3004,12 @@ function isEarlyDeparture(flight) {
                   <div class="segment-middle-top">${formatDuration(group.durationMinutes)}</div>
                   <div class="segment-line"></div>
                   <div class="segment-middle-bottom">${transfersText}</div>
-                  ${numbersRow}
                 </div>
                 <div>
                   <div class="segment-time">${formatTime(end.arriveAt)}</div>
-                  <div class="segment-city">${end.destCity || end.destAirport || ""}</div>
+                  <div class="segment-city">${end.destCity || ""}</div>
                   <div class="segment-airport">${(end.destAirport || "").toUpperCase()}</div>
-                  <div class="segment-date">${end.arriveAt ? ddmmyyyy(end.arriveAt) : ""}</div>
+                  <div class="segment-date">${end.arriveAt ? ddmmyyyy(end.arriveAt) : ""}${arrivalOffset}</div>
                 </div>
               </div>
             </div>
@@ -3010,35 +3029,37 @@ function isEarlyDeparture(flight) {
           }
           list.forEach((flight) => {
             const card = document.createElement("article");
-            card.className = "result result-enter";
+            card.className = "result";
             card.dataset.id = flight.id;
-            const outboundLine = flight.departAt
-              ? `${formatDateRu(flight.departAt)} · вылет в ${formatTime(flight.departAt)} · прилёт в ${formatTime(
-                  flight.arriveAt
-                )}${formatArrivalOffset(flight.departAt, flight.arriveAt)}`
+            const outboundStart = flight.outbound?.start?.departAt || flight.departAt;
+            const outboundEnd = flight.outbound?.end?.arriveAt || flight.arriveAt;
+            const returnStart = flight.return?.start?.departAt || flight.returnDepartAt;
+            const returnEnd = flight.return?.end?.arriveAt || flight.returnArriveAt;
+            const outboundLine = outboundStart
+              ? `${formatDateRu(outboundStart)} · вылет в ${formatTime(outboundStart)} · прилёт в ${formatTime(
+                  outboundEnd
+                )}${formatArrivalOffset(outboundStart, outboundEnd)}`
               : "";
-            const returnLine = flight.returnDepartAt
-              ? `${formatDateRu(flight.returnDepartAt)} · вылет в ${formatTime(flight.returnDepartAt)} · прилёт в ${formatTime(
-                  flight.returnArriveAt
-                )}${formatArrivalOffset(flight.returnDepartAt, flight.returnArriveAt)}`
+            const returnLine = returnStart
+              ? `${formatDateRu(returnStart)} · вылет в ${formatTime(returnStart)} · прилёт в ${formatTime(
+                  returnEnd
+                )}${formatArrivalOffset(returnStart, returnEnd)}`
               : "";
 
-            const routeFrom = [flight.originCity, flight.originAirport].filter(Boolean).join(" ").trim();
-            const routeTo = [flight.destCity, flight.destAirport].filter(Boolean).join(" ").trim();
-            const routeTitle = `${routeFrom || flight.originCity || flight.originAirport} ⇄ ${
-              routeTo || flight.destCity || flight.destAirport
-            }`;
+            const originCity = flight.outbound?.start?.originCity || flight.originCity || "";
+            const originCode = (flight.outbound?.start?.originAirport || flight.originAirport || "").toUpperCase();
+            const destCity = flight.outbound?.end?.destCity || flight.destCity || "";
+            const destCode = (flight.outbound?.end?.destAirport || flight.destAirport || "").toUpperCase();
+            const routeTitle = `${[originCity, originCode].filter(Boolean).join(" ") || "Маршрут"} ⇄ ${
+              [destCity, destCode].filter(Boolean).join(" ") || ""
+            }`.trim();
 
-            const outboundNumbersText = (flight.flightNumbers?.outbound || []).join(" / ");
-            const returnNumbersText = (flight.flightNumbers?.inbound || []).join(" / ");
             const segments = [];
             if (flight.outbound) {
-              segments.push(
-                renderSegmentBlock(flight.outbound, flight.return ? "Туда" : "Маршрут", outboundNumbersText)
-              );
+              segments.push(renderSegmentBlock(flight.outbound, flight.return ? "Туда" : "Маршрут"));
             }
             if (flight.return) {
-              segments.push(renderSegmentBlock(flight.return, "Обратно", returnNumbersText));
+              segments.push(renderSegmentBlock(flight.return, "Обратно"));
             }
             if (!segments.length && flight.departAt && flight.arriveAt) {
               segments.push(
@@ -3054,11 +3075,10 @@ function isEarlyDeparture(flight) {
                       destCity: flight.destCity,
                       destAirport: flight.destAirport,
                     },
-                    durationMinutes: flight.outbound?.durationMinutes || flight.durationMinutesTotal,
+                    durationMinutes: flight.outbound?.durationMinutes || flight.durationMinutes,
                     transfers: flight.transfers,
                   },
                   "Маршрут",
-                  outboundNumbersText
                 )
               );
             }
@@ -3078,10 +3098,13 @@ function isEarlyDeparture(flight) {
             const returnDuration = flight.return?.durationMinutes
               ? `<span class="badge badge-chip">обратно: ${formatDuration(flight.return.durationMinutes)}</span>`
               : "";
-            const airlineFlights = [...(flight.flightNumbers?.outbound || []), ...(flight.flightNumbers?.inbound || [])];
-            const airlineInfo = `${flight.airlineName || "Авиакомпания"}${
-              airlineFlights.length ? ` · ${airlineFlights.join(" / ")}` : ""
-            }`;
+            const topBadges = [];
+            if (flight.isTop) {
+              topBadges.push('<span class="badge badge-yuvia">Рекомендация Yuvia</span>');
+            }
+            if (flight.topLabel) {
+              topBadges.push(`<span class="badge badge-soft">${flight.topLabel}</span>`);
+            }
             card.innerHTML = `
               <div class="result-header">
                 <div>
@@ -3095,7 +3118,7 @@ function isEarlyDeparture(flight) {
                   <div class="price">${formatCurrency(flight.price, flight.currency || lastCurrency)}</div>
                   <div class="airline-logo-wrap">
                     <div class="airline-logo">${flight.airlineCode || ""}</div>
-                    <span>${airlineInfo}</span>
+                    <span>${flight.airlineName || ""}</span>
                   </div>
                   ${deeplinkButton}
                 </div>
@@ -3109,7 +3132,7 @@ function isEarlyDeparture(flight) {
                 <span class="badge badge-chip">${formatTransfers(flight.transfers)}</span>
                 ${outboundDuration}
                 ${returnDuration}
-                ${flight.isTop ? '<span class="badge badge-yuvia">Рекомендация Yuvia</span>' : ""}
+                ${topBadges.join("")}
               </div>
               <div class="result-footer">
                 <div class="result-footer-baggage">
@@ -3124,7 +3147,7 @@ function isEarlyDeparture(flight) {
               </div>
             `;
             resultsBlock.appendChild(card);
-            requestAnimationFrame(() => card.classList.remove("result-enter"));
+            requestAnimationFrame(() => card.classList.add("result-anim"));
           });
           updateSummaryChip(list);
         }
@@ -3227,28 +3250,22 @@ function isEarlyDeparture(flight) {
           const departAt = safeDate(
             segment.departAt ||
               segment.depart_at ||
-              segment.departure_at ||
               segment.departure ||
+              segment.departure_at ||
               segment.date_from ||
               segment.depart_date ||
               segment.time_from ||
-              segment.begin_time ||
-              segment.departure_time ||
-              segment.dt ||
-              fallback.departAt
+              segment.begin_time
           );
           const arriveAt = safeDate(
             segment.arriveAt ||
               segment.arrive_at ||
-              segment.arrival_at ||
               segment.arrival ||
+              segment.arrival_at ||
               segment.date_to ||
               segment.arrival_date ||
               segment.time_to ||
-              segment.end_time ||
-              segment.arrival_time ||
-              segment.at ||
-              fallback.arriveAt
+              segment.end_time
           );
           const originCity =
             segment.originCity ||
@@ -3265,7 +3282,6 @@ function isEarlyDeparture(flight) {
             segment.city_to ||
             segment.to_city ||
             segment.destination?.city ||
-            segment.destination_city ||
             fallback.destCity;
           const originAirport =
             segment.originAirport ||
@@ -3273,7 +3289,6 @@ function isEarlyDeparture(flight) {
             segment.flyFrom ||
             segment.from ||
             segment.origin ||
-            segment.departure_airport ||
             fallback.originAirport;
           const destAirport =
             segment.destAirport ||
@@ -3281,7 +3296,6 @@ function isEarlyDeparture(flight) {
             segment.flyTo ||
             segment.to ||
             segment.destination ||
-            segment.arrival_airport ||
             fallback.destAirport;
           const airlineCode =
             segment.airlineCode || segment.airline || segment.carrier || segment.marketing_carrier || fallback.airlineCode;
@@ -3325,25 +3339,8 @@ function isEarlyDeparture(flight) {
             }
           }
           const groups = [
-            {
-              list:
-                raw.outboundSegments ||
-                raw.outbound_segments ||
-                raw.go_segments ||
-                raw.outbound?.segments ||
-                raw.outbound,
-              type: "outbound",
-            },
-            {
-              list:
-                raw.returnSegments ||
-                raw.inbound_segments ||
-                raw.back_segments ||
-                raw.return_segments ||
-                raw.inbound?.segments ||
-                raw.inbound,
-              type: "return",
-            },
+            { list: raw.outboundSegments || raw.outbound_segments || raw.go_segments, type: "outbound" },
+            { list: raw.returnSegments || raw.inbound_segments || raw.back_segments || raw.return_segments, type: "return" },
           ];
           groups.forEach(({ list, type }) => {
             if (Array.isArray(list)) {
@@ -3356,80 +3353,46 @@ function isEarlyDeparture(flight) {
               const isReturn = Boolean(
                 segment?.isReturn ||
                   segment?.is_return ||
-                  segment?.is_return === 1 ||
                   segment?.direction === "return" ||
                   segment?.leg === "return" ||
                   segment?.segment_type === "back" ||
                   segment?.trip === "back" ||
-                  segment?.return === true ||
-                  segment?.return === 1 ||
-                  segment?.inbound === true
+                  segment?.return === true
               );
               addSegment(segment, isReturn ? "return" : "outbound");
             });
           }
-          if (!outboundSegments.length && (fallback.departAt || raw.departAt)) {
-            const departAt = fallback.departAt || raw.departAt;
-            const durationMinutes =
-              raw.duration_to ??
-              raw.durationTo ??
-              raw.forward_duration ??
-              raw.duration ??
-              raw.durationMinutes ??
-              raw.duration_min ??
-              0;
-            const arriveAt =
-              fallback.arriveAt ||
-              raw.arriveAt ||
-              (departAt && durationMinutes
-                ? new Date(departAt.getTime() + durationMinutes * 60000)
-                : null);
-
+          if (
+            !outboundSegments.length &&
+            (fallback.departAt || raw.departAt || raw.depart_at || raw.departure_at || raw.depart_date)
+          ) {
             addSegment(
               {
-                departAt,
-                arriveAt,
+                departAt: fallback.departAt || raw.departAt,
+                arriveAt: fallback.arriveAt || raw.arriveAt,
                 originCity: fallback.originCity || raw.originCity,
                 destCity: fallback.destCity || raw.destCity,
                 originAirport: fallback.originAirport || raw.originAirport || raw.origin,
                 destAirport: fallback.destAirport || raw.destAirport || raw.destination,
                 airline: fallback.airlineCode || raw.airline,
                 airline_name: fallback.airlineName || raw.airlineName,
-                durationMinutes,
+                durationMinutes: raw.durationMinutes,
               },
               "outbound"
             );
           }
-
-          if (
-            !returnSegments.length &&
-            (fallback.returnDepartAt || raw.returnDepartAt || raw.return_at || raw.return_date)
-          ) {
-            const departAt = fallback.returnDepartAt || raw.returnDepartAt || raw.return_at || raw.return_date;
-            const durationMinutes =
-              raw.duration_back ??
-              raw.durationBack ??
-              raw.return_duration ??
-              raw.returnDuration ??
-              0;
-            const arriveAt =
-              fallback.returnArriveAt ||
-              raw.returnArriveAt ||
-              (departAt && durationMinutes
-                ? new Date(departAt.getTime() + durationMinutes * 60000)
-                : null);
-
+          if (!returnSegments.length && (fallback.returnDepartAt || raw.returnDepartAt || raw.return_at || raw.return_date)) {
             addSegment(
               {
-                departAt,
-                arriveAt,
+                departAt: fallback.returnDepartAt || raw.returnDepartAt,
+                arriveAt: fallback.returnArriveAt || raw.returnArriveAt,
                 originCity: fallback.destCity || raw.destCity,
                 destCity: fallback.originCity || raw.originCity,
                 originAirport: fallback.destAirport || raw.destAirport,
                 destAirport: fallback.originAirport || raw.originAirport,
                 airline: fallback.airlineCode || raw.airline,
                 airline_name: fallback.airlineName || raw.airlineName,
-                durationMinutes,
+                durationMinutes: raw.returnDurationMinutes,
               },
               "return"
             );
@@ -3459,18 +3422,15 @@ function isEarlyDeparture(flight) {
 
         function normalizeFlight(raw, context = {}) {
           if (!raw) return null;
-          // Выделяем вылет туда, прилёт туда и отдельные даты для обратного рейса.
-          // ВАЖНО: не использовать return_at / return_date в arriveAt, это отдельный рейс.
           const departAt = safeDate(
             raw.departAt ||
               raw.depart_at ||
               raw.departure_at ||
               raw.departure ||
               raw.start_time ||
-              raw.depart_date ||
-              raw.date_from
+              raw.depart_date || // date-only поле, если есть
+              raw.date_from // ещё один возможный вариант
           );
-
           const arriveAt = safeDate(
             raw.arriveAt ||
               raw.arrive_at ||
@@ -3478,75 +3438,44 @@ function isEarlyDeparture(flight) {
               raw.arrival ||
               raw.end_time ||
               raw.arrival_date ||
-              raw.date_to
+              raw.date_to ||
+              raw.return_at ||
+              raw.return_date
           );
-
           const returnDepartAt = safeDate(
             raw.returnDepartAt ||
               raw.return_departure ||
               raw.return_at ||
               raw.return_date ||
               raw.inbound?.depart_at ||
-              raw.inbound?.departure_at ||
-              raw.inbound?.departure
+              raw.inbound?.departure_at
           );
-
           const returnArriveAt = safeDate(
-            raw.returnArriveAt ||
-              raw.return_arrival ||
-              raw.return_arrive_at ||
-              raw.inbound?.arrive_at ||
-              raw.inbound?.arrival_at ||
-              raw.inbound?.arrival
+            raw.returnArriveAt || raw.return_arrival || raw.inbound?.arrive_at || raw.inbound?.arrival_at
           );
-
           const fallback = {
-            originCity:
-              raw.originCity || raw.origin_city || raw.city_from || raw.origin_name || context.originCity,
-            destCity: raw.destCity || raw.dest_city || raw.city_to || raw.destination_name || context.destCity,
-            originAirport: raw.originAirport || raw.origin_airport || raw.origin || raw.origin_iata || context.origin,
-            destAirport:
-              raw.destAirport || raw.dest_airport || raw.destination || raw.destination_iata || context.destination,
-            airlineName: raw.airlineName || raw.airline_name || raw.carrier_name || raw.airline,
+            originCity: raw.originCity || raw.origin_city || context.originCity,
+            destCity: raw.destCity || raw.dest_city || context.destCity,
+            originAirport: raw.originAirport || raw.origin_airport || raw.origin || context.origin,
+            destAirport: raw.destAirport || raw.dest_airport || raw.destination || context.destination,
+            airlineName: raw.airlineName || raw.airline || raw.carrier_name,
             airlineCode: raw.airlineCode || raw.airline || raw.carrier,
             departAt,
             arriveAt,
             returnDepartAt,
             returnArriveAt,
           };
-          // Сырые длительности из API (Travelpayouts / Aviasales-обёртка)
-          const outboundDurationRaw =
-            raw.duration_to ??
-            raw.durationTo ??
-            raw.forward_duration ??
-            raw.duration_forward ??
-            raw.duration_outbound ??
-            raw.duration ??
-            raw.durationMinutes ??
-            raw.duration_min ??
-            0;
-
-          const returnDurationRaw =
-            raw.duration_back ??
-            raw.durationBack ??
-            raw.return_duration ??
-            raw.returnDuration ??
-            raw.duration_inbound ??
-            0;
-
           const { outboundSegments, returnSegments } = splitSegments(raw, fallback);
           const outboundSummary = summarizeSegments(outboundSegments);
           const returnSummary = summarizeSegments(returnSegments);
           const primarySegment = outboundSummary?.start || outboundSegments[0] || fallback;
-          const outboundDurationMinutes = outboundSummary?.durationMinutes || outboundDurationRaw || 0;
-          const returnDurationMinutes = returnSummary?.durationMinutes || returnDurationRaw || 0;
-          const durationMinutesTotal = outboundDurationMinutes + returnDurationMinutes;
-
-          const outboundTransfers =
-            outboundSummary?.transfers ?? raw.transfers_to ?? raw.transfers ?? raw.stops ?? 0;
+          const outboundDuration =
+            outboundSummary?.durationMinutes || raw.durationMinutes || raw.duration_min || raw.duration_to || 0;
+          const returnDuration = returnSummary?.durationMinutes || raw.returnDurationMinutes || raw.duration_back || 0;
+          const durationMinutes = outboundDuration + returnDuration;
+          const outboundTransfers = outboundSummary?.transfers ?? raw.transfers ?? raw.stops ?? 0;
           const returnTransfers = returnSummary?.transfers ?? raw.return_transfers ?? raw.transfers_back ?? 0;
-          const transfersTotal = (Number(outboundTransfers) || 0) + (Number(returnTransfers) || 0);
-
+          const transfers = (Number(outboundTransfers) || 0) + (Number(returnTransfers) || 0);
           const priceValue =
             raw.price?.value ??
             raw.price?.amount ??
@@ -3560,29 +3489,23 @@ function isEarlyDeparture(flight) {
           const hasCheckedBaggage = Boolean(raw.hasCheckedBaggage || raw.has_baggage || raw.baggage?.checked);
           const baggageText = raw.baggageText || raw.baggage?.checked || (hasCheckedBaggage ? "Включён" : "Не включён");
           const handBaggageText = raw.handBaggageText || raw.baggage?.hand || "По тарифу";
-
           const departPoint = outboundSummary?.start?.departAt || departAt;
           const arrivePoint = outboundSummary?.end?.arriveAt || arriveAt;
-          const returnDepartPoint = returnSummary?.start?.departAt || returnDepartAt;
-          const returnArrivePoint = returnSummary?.end?.arriveAt || returnArriveAt;
-
-          const outboundFlightNumbers = (outboundSummary?.segments || outboundSegments || [])
-            .map((segment) => [segment.airlineCode, segment.flightNumber].filter(Boolean).join(" ").trim())
-            .filter(Boolean);
-          const returnFlightNumbers = (returnSummary?.segments || returnSegments || [])
-            .map((segment) => [segment.airlineCode, segment.flightNumber].filter(Boolean).join(" ").trim())
-            .filter(Boolean);
-
           const departTimeStr = formatTime(departPoint);
           const arriveTimeStr = formatTime(arrivePoint);
           const depDateStr = ddmmyyyy(departPoint);
-
-          const durationHours = Number((durationMinutesTotal / 60 || 0).toFixed(1));
+          const durationHours = Number(((outboundDuration || raw.durationMinutes || 0) / 60).toFixed(1));
           const ratingBase = raw.rating ?? 7.2;
-          const rating = Number((ratingBase + (hasCheckedBaggage ? 0.4 : 0) - transfersTotal * 0.35).toFixed(1));
+          const rating = Number((ratingBase + (hasCheckedBaggage ? 0.4 : 0) - transfers * 0.35).toFixed(1));
           const stressLevel = rating >= 8.3 ? "low" : rating >= 6.5 ? "medium" : "high";
-          const yuviaScore = Math.round(rating * 20 + (hasCheckedBaggage ? 20 : 0) - transfersTotal * 12);
+          const yuviaScore = Math.round(rating * 20 + (hasCheckedBaggage ? 20 : 0) - transfers * 12);
           const departHour = departPoint instanceof Date ? departPoint.getHours() : null;
+          const outboundFlightNumbers = (outboundSegments || [])
+            .map((segment) => [segment.airlineCode, segment.flightNumber].filter(Boolean).join(" ").trim())
+            .filter(Boolean);
+          const returnFlightNumbers = (returnSegments || [])
+            .map((segment) => [segment.airlineCode, segment.flightNumber].filter(Boolean).join(" ").trim())
+            .filter(Boolean);
           return {
             id:
               String(
@@ -3599,20 +3522,19 @@ function isEarlyDeparture(flight) {
             destAirport: outboundSummary?.end?.destAirport || fallback.destAirport || context.destination || "",
             departAt: outboundSummary?.start?.departAt || departAt,
             arriveAt: outboundSummary?.end?.arriveAt || arriveAt,
-            returnDepartAt: returnDepartPoint,
-            returnArriveAt: returnArrivePoint,
+            returnDepartAt: returnSummary?.start?.departAt || returnDepartAt,
+            returnArriveAt: returnSummary?.end?.arriveAt || returnArriveAt,
             departTimeStr,
             arriveTimeStr,
             depDateStr,
-            durationMinutes: durationMinutesTotal,
-            durationMinutesTotal,
+            durationMinutes,
             durationHours,
             duration_to_hours: durationHours,
-            transfers: transfersTotal,
+            transfers,
             price,
             currency,
-            airlineName: primarySegment.airlineName || fallback.airlineName || "",
-            airlineCode: primarySegment.airlineCode || fallback.airlineCode || "",
+            airlineName: primarySegment.airlineName || "",
+            airlineCode: primarySegment.airlineCode || "",
             hasCheckedBaggage,
             baggageText,
             handBaggageText,
@@ -3622,10 +3544,10 @@ function isEarlyDeparture(flight) {
             airline: primarySegment.airlineCode || "",
             segments: outboundSegments,
             outbound: outboundSummary
-              ? { ...outboundSummary, durationMinutes: outboundDurationMinutes, transfers: outboundTransfers, flightNumbers: outboundFlightNumbers }
+              ? { ...outboundSummary, durationMinutes: outboundDuration, transfers: outboundTransfers }
               : null,
             return: returnSummary
-              ? { ...returnSummary, durationMinutes: returnDurationMinutes, transfers: returnTransfers, flightNumbers: returnFlightNumbers }
+              ? { ...returnSummary, durationMinutes: returnDuration, transfers: returnTransfers }
               : null,
             flightNumbers: { outbound: outboundFlightNumbers, inbound: returnFlightNumbers },
             departHour,
@@ -3633,7 +3555,7 @@ function isEarlyDeparture(flight) {
               origin: context.origin || fallback.originAirport,
               destination: context.destination || fallback.destAirport,
               departDate: outboundSummary?.start?.departAt || departAt,
-              returnDate: context.oneway ? null : context.returnDate || returnSummary?.start?.departAt,
+              returnDate: context.oneway ? null : context.returnDate || returnSummary?.start?.departAt || returnDepartAt,
               oneway: context.oneway,
               adults: context.passengers || context.adults || 1,
               currency,
