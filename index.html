@@ -3281,37 +3281,68 @@ function isEarlyDeparture(flight) {
               addSegment(segment, isReturn ? "return" : "outbound");
             });
           }
-          if (
-            !outboundSegments.length &&
-            (fallback.departAt || raw.departAt || raw.depart_at || raw.departure_at || raw.depart_date)
-          ) {
+          if (!outboundSegments.length && (fallback.departAt || raw.departAt)) {
+            const departAt = fallback.departAt || raw.departAt;
+            const durationMinutes =
+              raw.duration_to ??
+              raw.durationTo ??
+              raw.forward_duration ??
+              raw.duration ??
+              raw.durationMinutes ??
+              raw.duration_min ??
+              0;
+            const arriveAt =
+              fallback.arriveAt ||
+              raw.arriveAt ||
+              (departAt && durationMinutes
+                ? new Date(departAt.getTime() + durationMinutes * 60000)
+                : null);
+
             addSegment(
               {
-                departAt: fallback.departAt || raw.departAt,
-                arriveAt: fallback.arriveAt || raw.arriveAt,
+                departAt,
+                arriveAt,
                 originCity: fallback.originCity || raw.originCity,
                 destCity: fallback.destCity || raw.destCity,
                 originAirport: fallback.originAirport || raw.originAirport || raw.origin,
                 destAirport: fallback.destAirport || raw.destAirport || raw.destination,
                 airline: fallback.airlineCode || raw.airline,
                 airline_name: fallback.airlineName || raw.airlineName,
-                durationMinutes: raw.durationMinutes,
+                durationMinutes,
               },
               "outbound"
             );
           }
-          if (!returnSegments.length && (fallback.returnDepartAt || raw.returnDepartAt || raw.return_at || raw.return_date)) {
+
+          if (
+            !returnSegments.length &&
+            (fallback.returnDepartAt || raw.returnDepartAt || raw.return_at || raw.return_date)
+          ) {
+            const departAt = fallback.returnDepartAt || raw.returnDepartAt || raw.return_at || raw.return_date;
+            const durationMinutes =
+              raw.duration_back ??
+              raw.durationBack ??
+              raw.return_duration ??
+              raw.returnDuration ??
+              0;
+            const arriveAt =
+              fallback.returnArriveAt ||
+              raw.returnArriveAt ||
+              (departAt && durationMinutes
+                ? new Date(departAt.getTime() + durationMinutes * 60000)
+                : null);
+
             addSegment(
               {
-                departAt: fallback.returnDepartAt || raw.returnDepartAt,
-                arriveAt: fallback.returnArriveAt || raw.returnArriveAt,
+                departAt,
+                arriveAt,
                 originCity: fallback.destCity || raw.destCity,
                 destCity: fallback.originCity || raw.originCity,
                 originAirport: fallback.destAirport || raw.destAirport,
                 destAirport: fallback.originAirport || raw.originAirport,
                 airline: fallback.airlineCode || raw.airline,
                 airline_name: fallback.airlineName || raw.airlineName,
-                durationMinutes: raw.returnDurationMinutes,
+                durationMinutes,
               },
               "return"
             );
@@ -3340,43 +3371,43 @@ function isEarlyDeparture(flight) {
 
         function normalizeFlight(raw, context = {}) {
           if (!raw) return null;
-         // Выделяем вылет туда, прилёт туда и отдельные даты для обратного рейса.
-// ВАЖНО: не использовать return_at / return_date в arriveAt, это отдельный рейс.
-const departAt = safeDate(
-  raw.departAt ||
-  raw.depart_at ||
-  raw.departure_at ||
-  raw.departure ||
-  raw.start_time ||
-  raw.depart_date ||
-  raw.date_from
-);
+          // Выделяем вылет туда, прилёт туда и отдельные даты для обратного рейса.
+          // ВАЖНО: не использовать return_at / return_date в arriveAt, это отдельный рейс.
+          const departAt = safeDate(
+            raw.departAt ||
+              raw.depart_at ||
+              raw.departure_at ||
+              raw.departure ||
+              raw.start_time ||
+              raw.depart_date ||
+              raw.date_from
+          );
 
-const arriveAt = safeDate(
-  raw.arriveAt ||
-  raw.arrive_at ||
-  raw.arrival_at ||
-  raw.arrival ||
-  raw.end_time ||
-  raw.arrival_date ||
-  raw.date_to
-);
+          const arriveAt = safeDate(
+            raw.arriveAt ||
+              raw.arrive_at ||
+              raw.arrival_at ||
+              raw.arrival ||
+              raw.end_time ||
+              raw.arrival_date ||
+              raw.date_to
+          );
 
-const returnDepartAt = safeDate(
-  raw.returnDepartAt ||
-  raw.return_departure ||
-  raw.return_at ||
-  raw.return_date ||
-  raw.inbound?.depart_at ||
-  raw.inbound?.departure_at
-);
+          const returnDepartAt = safeDate(
+            raw.returnDepartAt ||
+              raw.return_departure ||
+              raw.return_at ||
+              raw.return_date ||
+              raw.inbound?.depart_at ||
+              raw.inbound?.departure_at
+          );
 
-const returnArriveAt = safeDate(
-  raw.returnArriveAt ||
-  raw.return_arrival ||
-  raw.inbound?.arrive_at ||
-  raw.inbound?.arrival_at
-);
+          const returnArriveAt = safeDate(
+            raw.returnArriveAt ||
+              raw.return_arrival ||
+              raw.inbound?.arrive_at ||
+              raw.inbound?.arrival_at
+          );
 
           const fallback = {
             originCity: raw.originCity || raw.origin_city || context.originCity,
@@ -3391,21 +3422,21 @@ const returnArriveAt = safeDate(
             returnArriveAt,
           };
           // Сырые длительности из API (Travelpayouts / Aviasales-обёртка)
-const outboundDurationRaw =
-  raw.duration_to ??
-  raw.durationTo ??
-  raw.forward_duration ??
-  raw.duration ??
-  raw.durationMinutes ??
-  raw.duration_min ??
-  0;
+          const outboundDurationRaw =
+            raw.duration_to ??
+            raw.durationTo ??
+            raw.forward_duration ??
+            raw.duration ??
+            raw.durationMinutes ??
+            raw.duration_min ??
+            0;
 
-const returnDurationRaw =
-  raw.duration_back ??
-  raw.durationBack ??
-  raw.return_duration ??
-  raw.returnDuration ??
-  0;
+          const returnDurationRaw =
+            raw.duration_back ??
+            raw.durationBack ??
+            raw.return_duration ??
+            raw.returnDuration ??
+            0;
 
           const { outboundSegments, returnSegments } = splitSegments(raw, fallback);
           const outboundSummary = summarizeSegments(outboundSegments);
@@ -3424,16 +3455,25 @@ const returnDurationRaw =
           const hasCheckedBaggage = Boolean(raw.hasCheckedBaggage || raw.has_baggage || raw.baggage?.checked);
           const baggageText = raw.baggageText || raw.baggage?.checked || (hasCheckedBaggage ? "Включён" : "Не включён");
           const handBaggageText = raw.handBaggageText || raw.baggage?.hand || "По тарифу";
-          const durationMinutes =
-            (outboundSummary?.durationMinutes || raw.durationMinutes || raw.duration_min || 0) +
-            (returnSummary?.durationMinutes || 0);
-          const transfers = outboundSummary?.transfers ?? raw.transfers ?? raw.stops ?? 0;
+          const outboundDurationMinutes = outboundSummary?.durationMinutes || outboundDurationRaw || 0;
+          const returnDurationMinutes = returnSummary?.durationMinutes || returnDurationRaw || 0;
+          const durationMinutes = outboundDurationMinutes + returnDurationMinutes;
+
+          const transfers =
+            outboundSummary?.transfers ??
+            raw.transfers_to ??
+            raw.transfers ??
+            raw.stops ??
+            0;
+
           const departPoint = outboundSummary?.start?.departAt || departAt;
           const arrivePoint = outboundSummary?.end?.arriveAt || arriveAt;
+
           const departTimeStr = formatTime(departPoint);
           const arriveTimeStr = formatTime(arrivePoint);
           const depDateStr = ddmmyyyy(departPoint);
-          const durationHours = Number(((outboundSummary?.durationMinutes || raw.durationMinutes || 0) / 60).toFixed(1));
+
+          const durationHours = Number((outboundDurationMinutes / 60).toFixed(1));
           const ratingBase = raw.rating ?? 7.2;
           const rating = Number((ratingBase + (hasCheckedBaggage ? 0.4 : 0) - transfers * 0.35).toFixed(1));
           const stressLevel = rating >= 8.3 ? "low" : rating >= 6.5 ? "medium" : "high";
