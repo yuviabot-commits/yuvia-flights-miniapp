@@ -2261,7 +2261,7 @@
         const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
         const todayLocal = new Date();
         todayLocal.setHours(0, 0, 0, 0);
-        const API_BASE = window.YUVIA_API_BASE || "https://yuvia-flights-api.vercel.app";
+        const API_BASE = "https://yuvia-flights-api.yuviabot.workers.dev";
         const API_SEARCH_PATH = "/api/search";
         const API_MATRIX_PATH = "/api/matrix";
 
@@ -2372,44 +2372,44 @@
           return Number.isNaN(date.getTime()) ? null : date;
         }
 
-        function callJSON(path, params = {}) {
-          const url = new URL(path, API_BASE);
-          Object.entries(params).forEach(([key, value]) => {
-            if (value === undefined || value === null || value === "") return;
-            url.searchParams.set(key, value);
-          });
-          return fetch(url.toString(), {
-            headers: { Accept: "application/json" },
-          }).then((response) => {
-            if (!response.ok) {
-              throw new Error(`API ${response.status}`);
-            }
-            return response.json();
-          });
+        function makeApiURL(path) {
+          if (path instanceof URL) return path.toString();
+          if (/^https?:/i.test(path)) return path;
+          return new URL(path, API_BASE).toString();
         }
 
-        function buildSearchQuery(params) {
-          return {
-            origin: params.origin,
-            destination: params.destination,
-            depart: params.depart,
-            ret: params.ret || "",
-            currency: params.currency || "RUB",
-            oneway: params.oneway ? "yes" : "no",
-            adults: params.adults || 1,
-            children: params.children || 0,
-            infants: params.infants || 0,
-            cabin: params.cabin || "eco",
-          };
+        async function callJSON(path) {
+          const url = makeApiURL(path);
+          console.log("[Yuvia] callJSON →", url);
+          const r = await fetch(url);
+          if (!r.ok) {
+            const text = await r.text().catch(() => "");
+            console.error("[Yuvia] API error", r.status, r.statusText, text);
+            throw new Error("HTTP " + r.status);
+          }
+          const json = await r.json();
+          console.log("[Yuvia] API response OK", json);
+          return json;
         }
 
-        function buildMatrixQuery(params) {
-          return {
-            origin: params.origin,
-            destination: params.destination,
-            currency: params.currency || "RUB",
-            center: params.center || params.depart,
-          };
+        function buildSearchQuery({
+          origin,
+          destination,
+          currency,
+          oneway,
+          departDate,
+          returnDate,
+          adults,
+        }) {
+          const params = new URLSearchParams();
+          params.set("origin", origin);
+          params.set("destination", destination);
+          params.set("currency", currency);
+          params.set("oneway", oneway === "yes" ? "1" : "0");
+          params.set("depart", toISO(departDate));
+          params.set("ret", oneway === "yes" || !returnDate ? "" : toISO(returnDate));
+          params.set("adults", String(adults || 1));
+          return params;
         }
 
         function formatDeeplinkDate(value) {
@@ -3579,6 +3579,7 @@
           const returnDate = normalizeReturnDate();
           const passengers = paxState.adults + paxState.children + paxState.infants;
           const oneway = !returnDate;
+          const onewayFlag = oneway ? "yes" : "no";
           setLoading(true);
           try {
             if (!originIATA) {
@@ -3595,18 +3596,41 @@
               throw new Error("iata missing");
             }
             lastCurrency = getCurrencyValue();
-            const searchQuery = buildSearchQuery({
+            const searchParams = buildSearchQuery({
               origin: originIATA,
               destination: destIATA,
-              depart: toISO(departDate),
-              ret: returnDate ? toISO(returnDate) : "",
               currency: lastCurrency,
-              oneway,
+              oneway: onewayFlag,
+              departDate: departDate,
+              returnDate: returnDate,
               adults: paxState.adults,
-              children: paxState.children,
-              infants: paxState.infants,
-              cabin: paxState.cabin,
             });
+            const searchURL = API_SEARCH_PATH + "?" + searchParams.toString();
+
+            let searchPayload;
+            try {
+              searchPayload = await callJSON(searchURL);
+            } catch (e) {
+              console.error("[Yuvia] doSearch error", e);
+              alert("Не получилось получить рейсы. Попробуй снова.");
+              setLoading(false);
+              return;
+            }
+
+            let matrixPayload = null;
+            try {
+              const matrixParams = new URLSearchParams({
+                origin: originIATA,
+                destination: destIATA,
+                currency: lastCurrency,
+                center: toISO(departDate),
+              });
+              const matrixURL = API_MATRIX_PATH + "?" + matrixParams.toString();
+              matrixPayload = await callJSON(matrixURL);
+            } catch (error) {
+              console.error("matrix error", error);
+            }
+
             const context = {
               origin: originIATA,
               destination: destIATA,
@@ -3618,21 +3642,6 @@
               passengers,
               oneway,
             };
-            const [searchPayload, matrixPayload] = await Promise.all([
-              callJSON(API_SEARCH_PATH, searchQuery),
-              callJSON(
-                API_MATRIX_PATH,
-                buildMatrixQuery({
-                  origin: originIATA,
-                  destination: destIATA,
-                  currency: lastCurrency,
-                  center: toISO(departDate),
-                })
-              ).catch((error) => {
-                console.error("matrix error", error);
-                return null;
-              }),
-            ]);
             const flightsRaw = extractFlightsPayload(searchPayload);
             allResults = flightsRaw
               .map((item, index) => normalizeFlight(item, { ...context, fallbackId: `${originIATA}-${destIATA}-${index}` }))
@@ -3652,7 +3661,7 @@
               destIata: destIATA,
             });
           } catch (error) {
-            console.error(error);
+            console.error("search error", error);
             alert("Не получилось получить рейсы. Попробуй снова.");
             matrixData = [];
             renderPriceMatrix(matrixData, toISO(departDate));
