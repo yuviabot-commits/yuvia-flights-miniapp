@@ -2392,24 +2392,26 @@
           return json;
         }
 
-        function buildSearchQuery({
-          origin,
-          destination,
-          currency,
-          oneway,
-          departDate,
-          returnDate,
-          adults,
-        }) {
-          const params = new URLSearchParams();
-          params.set("origin", origin);
-          params.set("destination", destination);
-          params.set("currency", currency);
-          params.set("oneway", oneway === "yes" ? "1" : "0");
-          params.set("depart", toISO(departDate));
-          params.set("ret", oneway === "yes" || !returnDate ? "" : toISO(returnDate));
-          params.set("adults", String(adults || 1));
-          return params;
+        function buildSearchQuery(params) {
+          const paramsObj = new URLSearchParams();
+          const oneway = params.oneway === true || params.oneway === "yes";
+          // FIX Yuvia search: API expects oneway=yes/no; numeric flags were returning empty results.
+          paramsObj.set("origin", params.origin);
+          paramsObj.set("destination", params.destination);
+          paramsObj.set("currency", params.currency || "RUB");
+          paramsObj.set("oneway", oneway ? "yes" : "no");
+          const departValue = params.departDate || params.depart || params.d1;
+          const departISO = typeof departValue === "string" ? departValue : toISO(departValue);
+          paramsObj.set("depart", departISO);
+          const returnValue = params.returnDate || params.ret || params.d2;
+          const returnISO =
+            !oneway && returnValue ? (typeof returnValue === "string" ? returnValue : toISO(returnValue)) : "";
+          paramsObj.set("ret", returnISO);
+          paramsObj.set("adults", String(params.adults || 1));
+          if (params.children !== undefined) paramsObj.set("children", String(params.children || 0));
+          if (params.infants !== undefined) paramsObj.set("infants", String(params.infants || 0));
+          if (params.cabin) paramsObj.set("cabin", params.cabin);
+          return paramsObj;
         }
 
         function formatDeeplinkDate(value) {
@@ -3579,7 +3581,6 @@
           const returnDate = normalizeReturnDate();
           const passengers = paxState.adults + paxState.children + paxState.infants;
           const oneway = !returnDate;
-          const onewayFlag = oneway ? "yes" : "no";
           setLoading(true);
           try {
             if (!originIATA) {
@@ -3600,10 +3601,13 @@
               origin: originIATA,
               destination: destIATA,
               currency: lastCurrency,
-              oneway: onewayFlag,
-              departDate: departDate,
-              returnDate: returnDate,
+              departDate,
+              returnDate,
+              oneway,
               adults: paxState.adults,
+              children: paxState.children,
+              infants: paxState.infants,
+              cabin: paxState.cabin,
             });
             const searchURL = API_SEARCH_PATH + "?" + searchParams.toString();
 
