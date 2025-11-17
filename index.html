@@ -2020,7 +2020,7 @@
           <div class="loading-text">Ищем лучшие варианты...</div>
         </div>
       </div>
-      <div class="version">версия 17.2</div>
+      <div class="version">версия 17.3</div>
       
     </section>
     <section id="collection-weekend" class="yuvia-screen hidden">
@@ -3340,37 +3340,44 @@ function isEarlyDeparture(flight) {
 
         function normalizeFlight(raw, context = {}) {
           if (!raw) return null;
-          const departAt = safeDate(
-            raw.departAt ||
-              raw.depart_at ||
-              raw.departure_at ||
-              raw.departure ||
-              raw.start_time ||
-              raw.depart_date || // date-only поле, если есть
-              raw.date_from // ещё один возможный вариант
-          );
-          const arriveAt = safeDate(
-            raw.arriveAt ||
-              raw.arrive_at ||
-              raw.arrival_at ||
-              raw.arrival ||
-              raw.end_time ||
-              raw.arrival_date ||
-              raw.date_to ||
-              raw.return_at ||
-              raw.return_date
-          );
-          const returnDepartAt = safeDate(
-            raw.returnDepartAt ||
-              raw.return_departure ||
-              raw.return_at ||
-              raw.return_date ||
-              raw.inbound?.depart_at ||
-              raw.inbound?.departure_at
-          );
-          const returnArriveAt = safeDate(
-            raw.returnArriveAt || raw.return_arrival || raw.inbound?.arrive_at || raw.inbound?.arrival_at
-          );
+         // Выделяем вылет туда, прилёт туда и отдельные даты для обратного рейса.
+// ВАЖНО: не использовать return_at / return_date в arriveAt, это отдельный рейс.
+const departAt = safeDate(
+  raw.departAt ||
+  raw.depart_at ||
+  raw.departure_at ||
+  raw.departure ||
+  raw.start_time ||
+  raw.depart_date ||
+  raw.date_from
+);
+
+const arriveAt = safeDate(
+  raw.arriveAt ||
+  raw.arrive_at ||
+  raw.arrival_at ||
+  raw.arrival ||
+  raw.end_time ||
+  raw.arrival_date ||
+  raw.date_to
+);
+
+const returnDepartAt = safeDate(
+  raw.returnDepartAt ||
+  raw.return_departure ||
+  raw.return_at ||
+  raw.return_date ||
+  raw.inbound?.depart_at ||
+  raw.inbound?.departure_at
+);
+
+const returnArriveAt = safeDate(
+  raw.returnArriveAt ||
+  raw.return_arrival ||
+  raw.inbound?.arrive_at ||
+  raw.inbound?.arrival_at
+);
+
           const fallback = {
             originCity: raw.originCity || raw.origin_city || context.originCity,
             destCity: raw.destCity || raw.dest_city || context.destCity,
@@ -3383,6 +3390,23 @@ function isEarlyDeparture(flight) {
             returnDepartAt,
             returnArriveAt,
           };
+          // Сырые длительности из API (Travelpayouts / Aviasales-обёртка)
+const outboundDurationRaw =
+  raw.duration_to ??
+  raw.durationTo ??
+  raw.forward_duration ??
+  raw.duration ??
+  raw.durationMinutes ??
+  raw.duration_min ??
+  0;
+
+const returnDurationRaw =
+  raw.duration_back ??
+  raw.durationBack ??
+  raw.return_duration ??
+  raw.returnDuration ??
+  0;
+
           const { outboundSegments, returnSegments } = splitSegments(raw, fallback);
           const outboundSummary = summarizeSegments(outboundSegments);
           const returnSummary = summarizeSegments(returnSegments);
