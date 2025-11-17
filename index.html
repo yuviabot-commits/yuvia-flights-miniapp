@@ -2020,7 +2020,7 @@
           <div class="loading-text">Ищем лучшие варианты...</div>
         </div>
       </div>
-      <div class="version">версия 17.1</div>
+      <div class="version">версия 17.2</div>
       
     </section>
     <section id="collection-weekend" class="yuvia-screen hidden">
@@ -2786,12 +2786,21 @@
         }
 
         function isNightDeparture(flight) {
-          return flight.departHour >= 22 || flight.departHour < 6;
-        }
+  if (flight.departHour == null || typeof flight.departHour !== "number") {
+    // если не знаем время вылета — не считаем его ночным
+    return false;
+  }
+  return flight.departHour >= 22 || flight.departHour < 6;
+}
 
-        function isEarlyDeparture(flight) {
-          return flight.departHour < 8;
-        }
+function isEarlyDeparture(flight) {
+  if (flight.departHour == null || typeof flight.departHour !== "number") {
+    // если не знаем время вылета — не считаем его слишком ранним
+    return false;
+  }
+  return flight.departHour < 8;
+}
+
 
         function applyTripTriggers(list) {
           let result = list;
@@ -2816,26 +2825,85 @@
         }
 
         function applyTripStyle(list) {
-          if (!list.length) return [];
-          const avgDuration = list.reduce((sum, flight) => sum + flight.durationMinutes, 0) / list.length;
-          const avgPrice = list.reduce((sum, flight) => sum + flight.price, 0) / list.length;
+  if (!list.length) return [];
 
-          let filtered = list;
-          if (tripState.style === "calm") {
-            filtered = filtered.filter(
-              (flight) => flight.durationMinutes <= avgDuration && flight.transfers <= 1 && !isNightDeparture(flight)
-            );
-            filtered.sort((a, b) => b.rating - a.rating);
-          } else if (tripState.style === "balanced") {
-            filtered = filtered.filter(
-              (flight) => flight.price <= avgPrice * 1.2 && flight.transfers <= 1 && !isNightDeparture(flight)
-            );
-            filtered.sort((a, b) => b.rating - a.rating);
-          } else {
-            filtered = filtered.slice().sort((a, b) => a.price - b.price);
-          }
-          return filtered;
-        }
+  const baseList = list.slice();
+
+  const avgDuration =
+    baseList.reduce(
+      (sum, flight) =>
+        sum + (typeof flight.durationMinutes === "number" ? flight.durationMinutes : 0),
+      0
+    ) / baseList.length || 0;
+
+  const avgPrice =
+    baseList.reduce(
+      (sum, flight) => sum + (typeof flight.price === "number" ? flight.price : 0),
+      0
+    ) / baseList.length || 0;
+
+  let filtered = baseList.slice();
+
+  if (tripState.style === "calm") {
+    // Тише едешь: короче среднего, не более 1 пересадки, без ночных вылетов
+    filtered = filtered.filter((flight) => {
+      const hasDuration =
+        typeof flight.durationMinutes === "number" && flight.durationMinutes > 0;
+      const durationOK = !hasDuration || flight.durationMinutes <= avgDuration;
+      const transfersOK =
+        typeof flight.transfers === "number" ? flight.transfers <= 1 : true;
+      const nightOK = !isNightDeparture(flight);
+      return durationOK && transfersOK && nightOK;
+    });
+
+    filtered.sort(
+      (a, b) => (b.rating || 0) - (a.rating || 0)
+    );
+  } else if (tripState.style === "balanced") {
+    // Баланс: цена не сильно выше средней, максимум 1 пересадка, без ночи
+    filtered = filtered.filter((flight) => {
+      const priceOK =
+        !avgPrice ||
+        typeof flight.price !== "number" ||
+        flight.price <= avgPrice * 1.2;
+      const transfersOK =
+        typeof flight.transfers === "number" ? flight.transfers <= 1 : true;
+      const nightOK = !isNightDeparture(flight);
+      return priceOK && transfersOK && nightOK;
+    });
+
+    filtered.sort(
+      (a, b) =>
+        (b.rating || 0) - (a.rating || 0) ||
+        (a.price || 0) - (b.price || 0)
+    );
+  } else if (tripState.style === "cheap") {
+    // Экономлю: просто самые дешёвые, без доп. ограничений
+    filtered.sort(
+      (a, b) => (a.price || 0) - (b.price || 0)
+    );
+  }
+
+  // Если после всех условий ничего не осталось — не гасим выдачу,
+  // а просто возвращаем базовый список с подходящей сортировкой
+  if (!filtered.length) {
+    if (tripState.style === "calm" || tripState.style === "balanced") {
+      return baseList.slice().sort(
+        (a, b) =>
+          (b.rating || 0) - (a.rating || 0) ||
+          (a.price || 0) - (b.price || 0)
+      );
+    }
+    if (tripState.style === "cheap") {
+      return baseList.slice().sort(
+        (a, b) => (a.price || 0) - (b.price || 0)
+      );
+    }
+  }
+
+  return filtered;
+}
+
 
         function sortBySelection(list) {
           const sortValue = $("#sortBy")?.value || "yuvia_score";
@@ -3312,7 +3380,7 @@
           const rating = Number((ratingBase + (hasCheckedBaggage ? 0.4 : 0) - transfers * 0.35).toFixed(1));
           const stressLevel = rating >= 8.3 ? "low" : rating >= 6.5 ? "medium" : "high";
           const yuviaScore = Math.round(rating * 20 + (hasCheckedBaggage ? 20 : 0) - transfers * 12);
-          const departHour = departPoint ? departPoint.getHours() : 0;
+          const departHour = departPoint instanceof Date ? departPoint.getHours() : null;
           return {
             id:
               String(
