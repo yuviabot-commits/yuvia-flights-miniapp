@@ -2020,7 +2020,7 @@
           <div class="loading-text">Ищем лучшие варианты...</div>
         </div>
       </div>
-      <div class="version">версия 17.0</div>
+      <div class="version">версия 17.1</div>
       
     </section>
     <section id="collection-weekend" class="yuvia-screen hidden">
@@ -3365,38 +3365,6 @@
           };
         }
 
-        function extractFlightsPayload(payload) {
-          if (!payload) return [];
-
-          // FIX: для нашего API билеты лежат в payload.data (array),
-          // ранняя рабочая версия использовала (json.data || []).
-          if (Array.isArray(payload.data)) {
-            return payload.data;
-          }
-
-          // 2. Если вдруг сам payload — уже массив (на будущее)
-          if (Array.isArray(payload)) {
-            return payload;
-          }
-
-          // 3. Запасной путь: иногда билеты могут лежать в полях flights или tickets
-          if (Array.isArray(payload.flights)) {
-            return payload.flights;
-          }
-          if (Array.isArray(payload.tickets)) {
-            return payload.tickets;
-          }
-
-          // 4. Очень мягкий fallback: поиск первого массивного поля внутри payload.data
-          if (payload.data && typeof payload.data === "object") {
-            const values = Object.values(payload.data);
-            const arr = values.find((v) => Array.isArray(v));
-            if (Array.isArray(arr)) return arr;
-          }
-
-          return [];
-        }
-
         function normalizeMatrixResponse(payload) {
           if (!payload) return [];
           let source = [];
@@ -3659,20 +3627,34 @@
             }
 
             const context = {
-              origin: originIATA,
-              destination: destIATA,
-              originCity,
-              destCity,
-              departDate,
-              returnDate,
-              currency: lastCurrency,
-              passengers,
-              oneway,
-            };
-            const flightsRaw = extractFlightsPayload(searchPayload);
-            allResults = flightsRaw
-              .map((item, index) => normalizeFlight(item, { ...context, fallbackId: `${originIATA}-${destIATA}-${index}` }))
-              .filter((flight) => flight && flight.price);
+  origin: originIATA,
+  destination: destIATA,
+  originCity,
+  destCity,
+  departDate,
+  returnDate,
+  currency: lastCurrency,
+  passengers,
+  oneway,
+};
+
+// ВАЖНО: используем ту же схему, что работала раньше — json.data это массив рейсов
+const flightsRaw = Array.isArray(searchPayload && searchPayload.data)
+  ? searchPayload.data
+  : [];
+
+// Если хочешь один-единственный лог, чтобы увидеть, что API вообще что-то прислал:
+console.log("[Yuvia] flightsRaw length =", flightsRaw.length);
+
+allResults = flightsRaw
+  .map((item, index) =>
+    normalizeFlight(item, {
+      ...context,
+      fallbackId: `${originIATA}-${destIATA}-${index}`,
+    })
+  )
+  .filter((flight) => flight && flight.price > 0);
+
             updateFilterOptions();
             matrixData = normalizeMatrixResponse(matrixPayload);
             renderPriceMatrix(matrixData, toISO(departDate));
