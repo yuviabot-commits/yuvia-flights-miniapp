@@ -439,7 +439,7 @@
         grid-template-columns: 1.25fr 52px 1.25fr 0.9fr 0.9fr 1.05fr;
         grid-auto-rows: auto;
         column-gap: 14px;
-        row-gap: 4px;
+        row-gap: 6px;
         align-items: start;
       }
       .search-grid .label {
@@ -451,12 +451,25 @@
         align-self: start;
         font-size: 12px;
       }
+      #originIataHint {
+        grid-column: 1;
+      }
+      #destIataHint {
+        grid-column: 3;
+      }
+      #departHint {
+        grid-column: 4;
+      }
+      #retHint {
+        grid-column: 5;
+      }
       .oneway-row {
         grid-column: 4 / span 2;
         display: flex;
         align-items: center;
         gap: 10px;
-        margin-top: 2px;
+        justify-content: flex-start;
+        margin-top: 6px;
       }
       .oneway-toggle {
         display: inline-flex;
@@ -500,6 +513,7 @@
         min-height: 16px;
         font-size: 12px;
         align-self: start;
+        grid-column: 6;
       }
       .swap-cell {
         display: flex;
@@ -794,6 +808,13 @@
           justify-content: flex-start;
           margin-top: 0;
         }
+        #originIataHint,
+        #destIataHint,
+        #departHint,
+        #retHint,
+        .pax-hint-placeholder {
+          grid-column: 1 / -1;
+        }
         .search-actions-row {
           justify-content: flex-start;
           flex-wrap: wrap;
@@ -947,9 +968,6 @@
           grid-template-columns: repeat(2, 1fr);
         }
       }
-    </style>
-    <!-- НОВЫЕ СТИЛИ карточки (перекрывают старые) -->
-    <style>
       .result {
         display: flex;
         flex-direction: column;
@@ -2009,6 +2027,15 @@
         const API_SEARCH_PATH = "/api/search";
         const API_MATRIX_PATH = "/api/matrix";
 
+        const AIRLINE_NAMES = {
+          SU: "Аэрофлот",
+          S7: "S7 Airlines",
+          DP: "Победа",
+          U6: "Уральские авиалинии",
+          FV: "Россия",
+          "3U": "Sichuan Airlines",
+        };
+
         const AIRPORT_NAMES = {
           SVO: "Шереметьево",
           DME: "Домодедово",
@@ -2061,6 +2088,14 @@
           const upper = code.toUpperCase();
           const name = AIRPORT_NAMES[upper];
           return name ? `${name} (${upper})` : upper;
+        }
+
+        function resolveAirlineName(code, primaryName = "", fallbackName = "") {
+          const upper = String(code || "").toUpperCase();
+          if (primaryName) return primaryName;
+          if (AIRLINE_NAMES[upper]) return AIRLINE_NAMES[upper];
+          if (fallbackName) return fallbackName;
+          return upper;
         }
 
         let originIATA = "";
@@ -2639,11 +2674,11 @@
             const metaList = Array.isArray(flight.airlinesMetaAll)
               ? flight.airlinesMetaAll
               : Array.isArray(flight.airlinesAll)
-              ? flight.airlinesAll.map((code) => ({ code, name: flight.airlineName || code }))
+              ? flight.airlinesAll.map((code) => ({ code, name: resolveAirlineName(code, flight.airlineName) }))
               : [];
             metaList.forEach(({ code, name }) => {
               if (!code || airlineMap.has(code)) return;
-              airlineMap.set(code, name || code);
+              airlineMap.set(code, resolveAirlineName(code, name));
             });
           });
 
@@ -2659,7 +2694,8 @@
                 input.name = "airlines";
                 input.value = code;
                 label.appendChild(input);
-                const text = name ? `${name} (${code})` : code;
+                const resolvedName = resolveAirlineName(code, name);
+                const text = resolvedName ? `${resolvedName} (${code})` : code;
                 label.appendChild(document.createTextNode(` ${text}`));
                 airlineFilter.appendChild(label);
               });
@@ -2749,7 +2785,21 @@
               !segments.some((segment) => destinationAirportValues.includes(segment.destAirport))
             )
               return false;
-            if (durMax && flight.durationMinutes && flight.durationMinutes > durMax * 60) return false;
+            if (durMax) {
+              const limit = durMax * 60;
+              const outboundDuration = flight?.outbound?.durationMinutes;
+              if (Number.isFinite(outboundDuration) && outboundDuration > limit) return false;
+              const returnDuration = flight?.return?.durationMinutes;
+              if (flight.return && Number.isFinite(returnDuration) && returnDuration > limit) return false;
+              if (
+                !Number.isFinite(outboundDuration) &&
+                !Number.isFinite(returnDuration) &&
+                Number.isFinite(flight.durationMinutes) &&
+                flight.durationMinutes > limit
+              ) {
+                return false;
+              }
+            }
             const outboundDepart = flight?.outbound?.start?.departAt;
             const returnDepart = flight?.return?.start?.departAt;
             if (outboundWindows.length && outboundDepart instanceof Date) {
@@ -2892,8 +2942,12 @@
           } else if (sortValue === "duration_asc") {
             sorted.sort((a, b) => a.durationMinutes - b.durationMinutes);
           } else if (sortValue === "depart_asc") {
-            const getTimeSafe = (flight) =>
-              flight?.departAt instanceof Date ? flight.departAt.getTime() : Infinity;
+            const getTimeSafe = (flight) => {
+              const t = flight?.outbound?.start?.departAt;
+              if (t instanceof Date) return t.getTime();
+              if (flight?.departAt instanceof Date) return flight.departAt.getTime();
+              return Infinity;
+            };
             sorted.sort((a, b) => getTimeSafe(a) - getTimeSafe(b));
           } else {
             sorted.sort((a, b) => b.yuviaScore - a.yuviaScore);
@@ -2903,12 +2957,25 @@
 
         function updateSummaryChip(list) {
           if (!summaryChip) return;
-          if (!list.length) {
+          const workingFlights = list.filter(
+            (flight) => (flight.currency || lastCurrency) === lastCurrency,
+          );
+          const prices = workingFlights
+            .map((flight) => Number(flight.price))
+            .filter((price) => Number.isFinite(price) && price > 0);
+          if (!prices.length) {
             summaryChip.textContent = "—";
             return;
           }
-          const min = Math.min(...list.map((flight) => flight.price));
-          const avg = list.reduce((sum, flight) => sum + flight.price, 0) / list.length;
+          const median = getMedianPrice(workingFlights);
+          const filteredPrices =
+            median > 0 ? prices.filter((price) => price <= median * 5) : prices;
+          if (!filteredPrices.length) {
+            summaryChip.textContent = "—";
+            return;
+          }
+          const min = Math.min(...filteredPrices);
+          const avg = filteredPrices.reduce((sum, price) => sum + price, 0) / filteredPrices.length;
           summaryChip.textContent = `от ${formatCurrency(min, lastCurrency)} · ср. ${formatCurrency(avg, lastCurrency)}`;
         }
 
@@ -2992,12 +3059,24 @@
             const destCode = formatAirport(outbound?.end?.destAirport || flight.destAirport);
 
             const airlinesAll = Array.isArray(flight.airlinesAll) ? flight.airlinesAll : [];
-            let airlineInfoLine = flight.airlineName || "";
+            const airlineMetaMap = new Map(
+              (Array.isArray(flight.airlinesMetaAll) ? flight.airlinesMetaAll : []).map(({ code, name }) => {
+                const upperCode = String(code || "").toUpperCase();
+                return [upperCode, resolveAirlineName(upperCode, name, flight.airlineName)];
+              }),
+            );
+            const primaryAirlineCode = String(flight.airlineCode || airlinesAll[0] || "").toUpperCase();
+            const primaryAirlineName = resolveAirlineName(
+              primaryAirlineCode,
+              flight.airlineName,
+              airlineMetaMap.get(primaryAirlineCode),
+            );
+            let airlineInfoLine = primaryAirlineName;
             if (airlinesAll.length === 1) {
-              airlineInfoLine = `${flight.airlineName || airlinesAll[0]} (${airlinesAll[0]})`;
+              airlineInfoLine = `${primaryAirlineName} (${airlinesAll[0]})`;
             } else if (airlinesAll.length > 1) {
               const sampleCode = airlinesAll[0];
-              const sampleName = flight.airlineName || sampleCode;
+              const sampleName = airlineMetaMap.get(sampleCode) || primaryAirlineName || sampleCode;
               airlineInfoLine = `Несколько авиакомпаний`;
               airlineInfoLine += `<div style="font-size: 11px; color: var(--muted);">например, ${sampleName} (${sampleCode})</div>`;
             }
@@ -3067,7 +3146,7 @@
                 <div class="result-price-block">
                   <div class="price">${formatCurrency(flight.price, flight.currency || lastCurrency)}</div>
                   <div class="airline-logo-wrap">
-                    <div class="airline-logo">${flight.airlineCode || airlinesAll[0] || ""}</div>
+                  <div class="airline-logo">${primaryAirlineCode}</div>
                     <div class="airline-info">
                       <div>${airlineInfoLine}</div>
                       ${flightNumberLine}
@@ -3273,14 +3352,20 @@
             segment.destination ||
             fallback.destAirport;
           const airlineCode =
-            segment.airlineCode || segment.airline || segment.carrier || segment.marketing_carrier || fallback.airlineCode;
-          const airlineName =
+            segment.airlineCode ||
+            segment.airline ||
+            segment.carrier ||
+            segment.marketing_carrier ||
+            fallback.airlineCode ||
+            "";
+          const airlineName = resolveAirlineName(
+            airlineCode,
             segment.airlineName ||
-            segment.airline_name ||
-            segment.carrier_name ||
-            segment.marketing_carrier_name ||
-            fallback.airlineName ||
-            airlineCode;
+              segment.airline_name ||
+              segment.carrier_name ||
+              segment.marketing_carrier_name,
+            fallback.airlineName || fallback.airlineCode,
+          );
           const flightNumber = segment.flight_number || segment.flight_no || segment.flightNum || segment.flight || "";
           const durationMinutes =
             segment.durationMinutes ||
@@ -3294,8 +3379,8 @@
             destCity: destCity || fallback.destCity || "",
             originAirport: originAirport || fallback.originAirport || "",
             destAirport: destAirport || fallback.destAirport || "",
-            airlineName: airlineName || fallback.airlineName || "",
-            airlineCode: airlineCode || fallback.airlineCode || "",
+            airlineName: airlineName || "",
+            airlineCode: airlineCode || "",
             flightNumber,
             durationMinutes,
           };
@@ -3308,11 +3393,11 @@
             const code = seg.airlineCode || seg.airline || "";
             const name = seg.airlineName || seg.airline_name || seg.carrier_name || "";
             if (code) {
-              map.set(code, name || code);
+              map.set(code, resolveAirlineName(code, name, fallbackName));
             }
           });
           if (fallbackCode) {
-            map.set(fallbackCode, fallbackName || fallbackCode);
+            map.set(fallbackCode, resolveAirlineName(fallbackCode, fallbackName));
           }
           const airlinesAll = Array.from(map.keys());
           const airlinesMetaAll = airlinesAll.map((code) => ({ code, name: map.get(code) || code }));
@@ -3484,8 +3569,11 @@
 
             const currency = raw.currency || context.currency || lastCurrency;
             const price = Number(raw.price ?? raw.value ?? raw.total_price ?? 0) || 0;
-            const airlineName = raw.airline_name || raw.airlineName || raw.carrier_name || raw.airline || "";
-            const airlineCode = raw.airline || raw.airlineCode || "";
+            const airlineCode = (raw.airline || raw.airlineCode || "").toString();
+            const airlineName = resolveAirlineName(
+              airlineCode,
+              raw.airline_name || raw.airlineName || raw.carrier_name,
+            );
             const flightNumber = raw.flight_number || raw.flightNumber || "";
             const transfersTotal = (outboundSummary?.transfers || 0) + (returnSummary?.transfers || 0);
             const ratingBase = raw.rating ?? 7.2;
@@ -3577,13 +3665,18 @@
           const returnArriveAt = safeDate(
             raw.returnArriveAt || raw.return_arrival || raw.inbound?.arrive_at || raw.inbound?.arrival_at
           );
+          const fallbackAirlineCode = (raw.airlineCode || raw.airline || raw.carrier || "").toString();
+          const fallbackAirlineName = resolveAirlineName(
+            fallbackAirlineCode,
+            raw.airlineName || raw.airline || raw.carrier_name,
+          );
           const fallback = {
             originCity: raw.originCity || raw.origin_city || context.originCity,
             destCity: raw.destCity || raw.dest_city || context.destCity,
             originAirport: raw.originAirport || raw.origin_airport || raw.origin || context.origin,
             destAirport: raw.destAirport || raw.dest_airport || raw.destination || context.destination,
-            airlineName: raw.airlineName || raw.airline || raw.carrier_name,
-            airlineCode: raw.airlineCode || raw.airline || raw.carrier,
+            airlineName: fallbackAirlineName,
+            airlineCode: fallbackAirlineCode,
             departAt,
             arriveAt,
             returnDepartAt,
@@ -3898,9 +3991,17 @@
           flights.forEach((flight) => {
             const airlinesLine = Array.isArray(flight.airlinesMetaAll)
               ? flight.airlinesMetaAll
-                  .map(({ code, name }) => (name && name !== code ? `${name} (${code})` : code))
+                  .map(({ code, name }) => {
+                    const resolved = resolveAirlineName(code, name, flight.airlineName);
+                    return resolved ? `${resolved} (${code})` : code;
+                  })
                   .join(", ")
-              : (flight.airlinesAll || []).join(", ");
+              : (flight.airlinesAll || [])
+                  .map((code) => {
+                    const resolved = resolveAirlineName(code, "", flight.airlineName);
+                    return resolved ? `${resolved} (${code})` : code;
+                  })
+                  .join(", ");
             const row = document.createElement("tr");
             row.innerHTML = `
               <td>${flight.originCity || ""} → ${flight.destCity || ""}</td>
