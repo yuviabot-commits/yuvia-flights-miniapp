@@ -2704,10 +2704,18 @@
           const originAirports = new Set();
           const destinationAirports = new Set();
           allResults.forEach((flight) => {
-            getFilterableSegments(flight).forEach((segment) => {
-              if (segment.originAirport) originAirports.add(segment.originAirport);
-              if (segment.destAirport) destinationAirports.add(segment.destAirport);
-            });
+            if (flight?.outbound?.start?.originAirport) {
+              originAirports.add(flight.outbound.start.originAirport);
+            }
+            if (flight?.return?.start?.originAirport) {
+              originAirports.add(flight.return.start.originAirport);
+            }
+            if (flight?.outbound?.end?.destAirport) {
+              destinationAirports.add(flight.outbound.end.destAirport);
+            }
+            if (flight?.return?.end?.destAirport) {
+              destinationAirports.add(flight.return.end.destAirport);
+            }
           });
 
           function fillAirportSelect(select, codesArray) {
@@ -2774,15 +2782,19 @@
               !(Array.isArray(flight.airlinesAll) && flight.airlinesAll.some((code) => airlineValues.includes(code)))
             )
               return false;
-            const segments = getFilterableSegments(flight);
-            if (
-              originAirportValues.length &&
-              !segments.some((segment) => originAirportValues.includes(segment.originAirport))
-            )
+            const oAirports = [
+              flight.outbound?.start?.originAirport,
+              flight.return?.start?.originAirport,
+            ].filter(Boolean);
+            const dAirports = [
+              flight.outbound?.end?.destAirport,
+              flight.return?.end?.destAirport,
+            ].filter(Boolean);
+            if (originAirportValues.length && !oAirports.some((code) => originAirportValues.includes(code)))
               return false;
             if (
               destinationAirportValues.length &&
-              !segments.some((segment) => destinationAirportValues.includes(segment.destAirport))
+              !dAirports.some((code) => destinationAirportValues.includes(code))
             )
               return false;
             if (durMax) {
@@ -2881,18 +2893,20 @@
 
             const outboundSegments = Array.isArray(flight.outbound?.segments)
               ? flight.outbound.segments
-              : getAllSegmentsSafe(flight);
+              : [];
             const returnSegments = Array.isArray(flight.return?.segments) ? flight.return.segments : [];
             const connectionGroups = [outboundSegments, returnSegments].filter(
               (group) => Array.isArray(group) && group.length,
             );
             if (
               tripState.triggers.no_short_connections &&
+              connectionGroups.length &&
               connectionGroups.some((group) => hasShortConnections(group))
             )
               return false;
             if (
               tripState.triggers.no_overnight &&
+              connectionGroups.length &&
               connectionGroups.some((group) => hasOvernightLayover(group))
             )
               return false;
@@ -3289,10 +3303,9 @@
           let list = withinListAfterFilters(allResults);
           list = applyTripTriggers(list);
           if (tripState.style) {
-            filteredResults = applyTripStyle(list);
-          } else {
-            filteredResults = sortBySelection(list);
+            list = applyTripStyle(list);
           }
+          filteredResults = sortBySelection(list);
           const topFlights = getYuviaTop3(filteredResults);
           markTopFlights(filteredResults, topFlights);
           renderResults(filteredResults);
@@ -3393,11 +3406,13 @@
             const code = seg.airlineCode || seg.airline || "";
             const name = seg.airlineName || seg.airline_name || seg.carrier_name || "";
             if (code) {
-              map.set(code, resolveAirlineName(code, name, fallbackName));
+              const upperCode = String(code).toUpperCase();
+              map.set(upperCode, resolveAirlineName(upperCode, name, fallbackName));
             }
           });
           if (fallbackCode) {
-            map.set(fallbackCode, resolveAirlineName(fallbackCode, fallbackName));
+            const upperFallback = String(fallbackCode).toUpperCase();
+            map.set(upperFallback, resolveAirlineName(upperFallback, fallbackName));
           }
           const airlinesAll = Array.from(map.keys());
           const airlinesMetaAll = airlinesAll.map((code) => ({ code, name: map.get(code) || code }));
@@ -3482,13 +3497,18 @@
           if (!segmentList.length) return null;
           const start = segmentList[0];
           const end = segmentList[segmentList.length - 1];
-          const durationMinutes = segmentList.reduce((sum, segment) => {
-            if (segment.durationMinutes) return sum + segment.durationMinutes;
-            if (segment.departAt && segment.arriveAt) {
-              return sum + Math.max(0, Math.round((segment.arriveAt - segment.departAt) / 60000));
-            }
-            return sum;
-          }, 0);
+          let durationMinutes = 0;
+          if (start.departAt && end.arriveAt) {
+            durationMinutes = Math.max(0, Math.round((end.arriveAt - start.departAt) / 60000));
+          } else {
+            durationMinutes = segmentList.reduce((sum, segment) => {
+              if (segment.durationMinutes) return sum + segment.durationMinutes;
+              if (segment.departAt && segment.arriveAt) {
+                return sum + Math.max(0, Math.round((segment.arriveAt - segment.departAt) / 60000));
+              }
+              return sum;
+            }, 0);
+          }
           return {
             start,
             end,
@@ -3514,7 +3534,7 @@
 
             if ((!durationTo || !durationBack) && raw.duration != null && returnDepartAt) {
               durationTo = durationTo || Math.floor(Number(raw.duration) / 2) || 0;
-              durationBack = durationBack || Math.max(0, Number(raw.duration) || 0 - durationTo);
+              durationBack = durationBack || Math.max(0, (Number(raw.duration) || 0) - durationTo);
             }
 
             const outboundDepart = departAt;
@@ -3668,7 +3688,7 @@
           const fallbackAirlineCode = (raw.airlineCode || raw.airline || raw.carrier || "").toString();
           const fallbackAirlineName = resolveAirlineName(
             fallbackAirlineCode,
-            raw.airlineName || raw.airline || raw.carrier_name,
+            raw.airlineName || raw.carrier_name || "",
           );
           const fallback = {
             originCity: raw.originCity || raw.origin_city || context.originCity,
@@ -4132,6 +4152,10 @@
           const onewayControl = document.getElementById("onewayToggle");
           const isOneway = !!(onewayControl && onewayControl.checked);
           const returnDate = isOneway ? null : normalizeReturnDate();
+          if (!isOneway && !returnDate) {
+            alert("Укажи дату возвращения или включи one-way");
+            return;
+          }
           const passengers = paxState.adults + paxState.children + paxState.infants;
           const oneway = isOneway;
           setLoading(true);
