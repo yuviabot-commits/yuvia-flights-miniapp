@@ -2026,20 +2026,64 @@
         const API_BASE = "https://yuvia-flights-api.yuviabot.workers.dev";
         const API_SEARCH_PATH = "/api/search";
         const API_MATRIX_PATH = "/api/matrix";
+        const DICTS_STORAGE_KEY = "yuviaDicts";
+        const DEFAULT_DICT_TTL_SECONDS = 3600;
 
         let AIRLINE_NAMES = {};
         let AIRPORT_NAMES = {};
         let CITY_NAMES = {};
 
+        function applyDicts(dicts = {}) {
+          AIRLINE_NAMES = dicts.airlines || {};
+          AIRPORT_NAMES = dicts.airports || {};
+          CITY_NAMES = dicts.cities || {};
+        }
+
+        function persistDicts(dicts, ttlSeconds) {
+          if (!dicts || typeof localStorage === "undefined") return;
+          const ttl = Number(ttlSeconds);
+          const safeTtl = Number.isFinite(ttl) && ttl > 0 ? ttl : DEFAULT_DICT_TTL_SECONDS;
+          const expireAt = Date.now() + safeTtl * 1000;
+          const payload = { data: dicts, expireAt };
+          try {
+            localStorage.setItem(DICTS_STORAGE_KEY, JSON.stringify(payload));
+          } catch (error) {
+            console.warn("[Yuvia] Failed to persist dictionaries", error);
+          }
+        }
+
+        function getStoredDicts({ allowExpired = false } = {}) {
+          if (typeof localStorage === "undefined") return null;
+          const raw = localStorage.getItem(DICTS_STORAGE_KEY);
+          if (!raw) return null;
+          try {
+            const parsed = JSON.parse(raw);
+            if (!parsed?.data) return null;
+            if (!allowExpired && parsed.expireAt && Date.now() > parsed.expireAt) return null;
+            return parsed;
+          } catch (error) {
+            console.warn("[Yuvia] Failed to parse cached dictionaries", error);
+            return null;
+          }
+        }
+
         async function loadDicts() {
+          const cached = getStoredDicts();
+          if (cached?.data) {
+            applyDicts(cached.data);
+            return;
+          }
+          const stale = getStoredDicts({ allowExpired: true });
           try {
             const payload = await callJSON("/api/dicts");
             const dicts = payload?.data || {};
-            AIRLINE_NAMES = dicts.airlines || {};
-            AIRPORT_NAMES = dicts.airports || {};
-            CITY_NAMES = dicts.cities || {};
+            applyDicts(dicts);
+            persistDicts(dicts, dicts.ttlSeconds);
           } catch (error) {
             console.error("[Yuvia] Failed to load dictionaries", error);
+            if (stale?.data) {
+              applyDicts(stale.data);
+            }
           }
         }
 
