@@ -2027,61 +2027,21 @@
         const API_SEARCH_PATH = "/api/search";
         const API_MATRIX_PATH = "/api/matrix";
 
-        const AIRLINE_NAMES = {
-          SU: "Аэрофлот",
-          S7: "S7 Airlines",
-          DP: "Победа",
-          U6: "Уральские авиалинии",
-          FV: "Россия",
-          "3U": "Sichuan Airlines",
-        };
+        let AIRLINE_NAMES = {};
+        let AIRPORT_NAMES = {};
+        let CITY_NAMES = {};
 
-        const AIRPORT_NAMES = {
-          SVO: "Шереметьево",
-          DME: "Домодедово",
-          VKO: "Внуково",
-          LED: "Пулково",
-          KZN: "Казань",
-          AER: "Адлер",
-          KRR: "Пашковский",
-          MRV: "Минеральные Воды",
-          UFA: "Уфа",
-          SVX: "Кольцово",
-          OVB: "Толмачево",
-          KJA: "Емельяново",
-          KHV: "Хабаровск-Новый",
-          VVO: "Кневичи",
-          UUS: "Хомутово",
-          IKT: "Байкал",
-          NRT: "Нарита",
-          HND: "Ханэда",
-          IST: "Истанбул",
-          AYT: "Анталья",
-          DXB: "Дубай",
-          DOH: "Хамад",
-          FRA: "Франкфурт",
-          MUC: "Мюнхен",
-          CDG: "Шарль де Голль",
-          AMS: "Схипхол",
-          LHR: "Хитроу",
-          BCN: "Эль-Прат",
-          FCO: "Фьюмичино",
-          MAD: "Барахас",
-          LAX: "Лос-Анджелес",
-          JFK: "Кеннеди",
-          LGA: "Ла-Гуардия",
-          ORD: "О'Хара",
-          SFO: "Сан-Франциско",
-          SEA: "Такома",
-          BKK: "Суварнабхуми",
-          HKT: "Пхукет",
-          ICN: "Инчхон",
-          TPE: "Таоюань",
-          SIN: "Чанги",
-          DEL: "Индиры Ганди",
-          BOM: "Чатрапати Шиваджи",
-          JNB: "Оливер Тамбо",
-        };
+        async function loadDicts() {
+          try {
+            const payload = await callJSON("/api/dicts");
+            const dicts = payload?.data || {};
+            AIRLINE_NAMES = dicts.airlines || {};
+            AIRPORT_NAMES = dicts.airports || {};
+            CITY_NAMES = dicts.cities || {};
+          } catch (error) {
+            console.error("[Yuvia] Failed to load dictionaries", error);
+          }
+        }
 
         function formatAirport(code) {
           if (!code) return "";
@@ -4384,11 +4344,12 @@ allResults = flightsRaw
           showScreen("flights-hub");
         }
 
-        function init() {
+        async function init() {
           initNavigation();
           initMinDateHints();
           initPaxFromAdultsSelect();
           handlePaxButtons();
+          await loadDicts();
           initSuggests();
           initTripPreferenceChips();
           attachFiltersHandlers();
