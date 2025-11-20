@@ -1446,14 +1446,6 @@
         color: var(--muted);
         flex-wrap: wrap;
       }
-      .result-footer-baggage {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
-      }
-      .result-footer-baggage strong {
-        color: var(--ink);
-      }
       .result-footer-actions {
         display: flex;
         flex-wrap: wrap;
@@ -1792,20 +1784,6 @@
                 <button
                   type="button"
                   class="chip-toggle"
-                  data-trigger="with_baggage"
-                >
-                  Лечу с багажом
-                </button>
-                <button
-                  type="button"
-                  class="chip-toggle"
-                  data-trigger="hand_luggage_only"
-                >
-                  Только ручная кладь
-                </button>
-                <button
-                  type="button"
-                  class="chip-toggle"
                   data-trigger="no_early_dep"
                 >
                   Не люблю ранние вылеты
@@ -1845,9 +1823,6 @@
               </button>
               <button type="button" class="chip chip-filter" id="chipAirports">
                 Аэропорты: любые
-              </button>
-              <button type="button" class="chip chip-filter" id="chipBaggage">
-                Багаж: не важно
               </button>
             </div>
             <div class="hint" id="weekendHint"></div>
@@ -1997,9 +1972,16 @@
               size="6"
               style="width: 100%"
             ></select>
-            <div class="label" style="margin-top: 10px">Аэропорты</div>
+            <div class="label" style="margin-top: 10px">Аэропорты вылета</div>
             <select
-              id="airportFilter"
+              id="originAirportFilter"
+              multiple
+              size="6"
+              style="width: 100%"
+            ></select>
+            <div class="label" style="margin-top: 10px">Аэропорты прилёта</div>
+            <select
+              id="destinationAirportFilter"
               multiple
               size="6"
               style="width: 100%"
@@ -2064,7 +2046,7 @@
           <div class="loading-text">Ищем лучшие варианты...</div>
         </div>
       </div>
-      <div class="version">версия 17.3</div>
+      <div class="version">версия 17.4</div>
       
     </section>
     <section id="collection-weekend" class="yuvia-screen hidden">
@@ -2309,6 +2291,60 @@
         const API_SEARCH_PATH = "/api/search";
         const API_MATRIX_PATH = "/api/matrix";
 
+        const AIRPORT_NAMES = {
+          SVO: "Шереметьево",
+          DME: "Домодедово",
+          VKO: "Внуково",
+          LED: "Пулково",
+          KZN: "Казань",
+          AER: "Адлер",
+          KRR: "Пашковский",
+          MRV: "Минеральные Воды",
+          UFA: "Уфа",
+          SVX: "Кольцово",
+          OVB: "Толмачево",
+          KJA: "Емельяново",
+          KHV: "Хабаровск-Новый",
+          VVO: "Кневичи",
+          UUS: "Хомутово",
+          IKT: "Байкал",
+          NRT: "Нарита",
+          HND: "Ханэда",
+          IST: "Истанбул",
+          AYT: "Анталья",
+          DXB: "Дубай",
+          DOH: "Хамад",
+          FRA: "Франкфурт",
+          MUC: "Мюнхен",
+          CDG: "Шарль де Голль",
+          AMS: "Схипхол",
+          LHR: "Хитроу",
+          BCN: "Эль-Прат",
+          FCO: "Фьюмичино",
+          MAD: "Барахас",
+          LAX: "Лос-Анджелес",
+          JFK: "Кеннеди",
+          LGA: "Ла-Гуардия",
+          ORD: "О'Хара",
+          SFO: "Сан-Франциско",
+          SEA: "Такома",
+          BKK: "Суварнабхуми",
+          HKT: "Пхукет",
+          ICN: "Инчхон",
+          TPE: "Таоюань",
+          SIN: "Чанги",
+          DEL: "Индиры Ганди",
+          BOM: "Чатрапати Шиваджи",
+          JNB: "Оливер Тамбо",
+        };
+
+        function formatAirport(code) {
+          if (!code) return "";
+          const upper = code.toUpperCase();
+          const name = AIRPORT_NAMES[upper];
+          return name ? `${name} (${upper})` : upper;
+        }
+
         let originIATA = "";
         let destIATA = "";
         let allResults = [];
@@ -2331,8 +2367,6 @@
             direct_only: false,
             no_short_connections: false,
             no_overnight: false,
-            with_baggage: false,
-            hand_luggage_only: false,
             no_early_dep: false,
           },
         };
@@ -2356,7 +2390,8 @@
         const priceMinInput = $("#priceMin");
         const priceMaxInput = $("#priceMax");
         const airlineFilter = $("#airlineFilter");
-        const airportFilter = $("#airportFilter");
+        const originAirportFilter = $("#originAirportFilter");
+        const destinationAirportFilter = $("#destinationAirportFilter");
         const advAirportFilter = $("#advAirportFilter");
         const toggleAdvancedBtn = $("#toggleAdvanced");
         const advancedBlock = $("#advancedBlock");
@@ -2786,22 +2821,33 @@
             });
           }
 
-          const airports = [...new Set(allResults.flatMap((flight) => [flight.originAirport, flight.destAirport]))].filter(Boolean);
-          [airportFilter, advAirportFilter]
-            .filter(Boolean)
-            .forEach((select) => {
-              select.innerHTML = "";
+          const originAirports = new Set(
+            allResults.map((flight) => flight.originAirport).filter(Boolean)
+          );
+          const destinationAirports = new Set(
+            allResults.map((flight) => flight.destAirport).filter(Boolean)
+          );
+
+          function fillAirportSelect(select, codesArray) {
+            if (!select) return;
+            select.innerHTML = "";
+            codesArray.forEach((code) => {
+              const option = document.createElement("option");
+              option.value = code;
+              option.textContent = formatAirport(code);
+              select.appendChild(option);
             });
-          airports.forEach((code) => {
-            [airportFilter, advAirportFilter]
-              .filter(Boolean)
-              .forEach((select) => {
-                const option = document.createElement("option");
-                option.value = code;
-                option.textContent = code;
-                select.appendChild(option);
-              });
-          });
+          }
+
+          fillAirportSelect(originAirportFilter, Array.from(originAirports).sort());
+          fillAirportSelect(
+            destinationAirportFilter,
+            Array.from(destinationAirports).sort()
+          );
+          fillAirportSelect(
+            advAirportFilter,
+            Array.from(new Set([...originAirports, ...destinationAirports])).sort()
+          );
         }
 
         function getSelectedValues(select) {
@@ -2812,19 +2858,15 @@
           const min = Number(priceMinInput.value) || null;
           const max = Number(priceMaxInput.value) || null;
           const airlineValues = getSelectedValues(airlineFilter);
-          const airportValues = getSelectedValues(airportFilter);
+          const originAirportValues = getSelectedValues(originAirportFilter);
+          const destinationAirportValues = getSelectedValues(destinationAirportFilter);
 
           return list.filter((flight) => {
             if (min && flight.price < min) return false;
             if (max && flight.price > max) return false;
             if (airlineValues.length && !airlineValues.includes(flight.airlineName)) return false;
-            if (
-              airportValues.length &&
-              !airportValues.includes(flight.originAirport) &&
-              !airportValues.includes(flight.destAirport)
-            ) {
-              return false;
-            }
+            if (originAirportValues.length && !originAirportValues.includes(flight.originAirport)) return false;
+            if (destinationAirportValues.length && !destinationAirportValues.includes(flight.destAirport)) return false;
             return true;
           });
         }
@@ -2856,14 +2898,6 @@ function isEarlyDeparture(flight) {
           }
           if (tripState.triggers.no_early_dep) {
             result = result.filter((flight) => !isEarlyDeparture(flight));
-          }
-          const hasBaggageInfo = result.some((flight) => flight.hasCheckedBaggage);
-          const hasHandOnly = result.some((flight) => !flight.hasCheckedBaggage);
-          if (tripState.triggers.with_baggage && hasBaggageInfo) {
-            result = result.filter((flight) => flight.hasCheckedBaggage);
-          }
-          if (tripState.triggers.hand_luggage_only && hasHandOnly) {
-            result = result.filter((flight) => !flight.hasCheckedBaggage);
           }
           return result;
         }
@@ -3012,7 +3046,7 @@ function isEarlyDeparture(flight) {
                 <div>
                   <div class="segment-time">${formatTime(start.departAt)}</div>
                   <div class="segment-city">${start.originCity || ""}</div>
-                  <div class="segment-airport">${(start.originAirport || "").toUpperCase()}</div>
+                  <div class="segment-airport">${formatAirport(start.originAirport)}</div>
                   <div class="segment-date">${start.departAt ? ddmmyyyy(start.departAt) : ""}</div>
                 </div>
                 <div class="segment-col-middle">
@@ -3023,7 +3057,7 @@ function isEarlyDeparture(flight) {
                 <div>
                   <div class="segment-time">${formatTime(end.arriveAt)}</div>
                   <div class="segment-city">${end.destCity || ""}</div>
-                  <div class="segment-airport">${(end.destAirport || "").toUpperCase()}</div>
+                  <div class="segment-airport">${formatAirport(end.destAirport)}</div>
                   <div class="segment-date">${end.arriveAt ? ddmmyyyy(end.arriveAt) : ""}${arrivalOffset}</div>
                 </div>
               </div>
@@ -3070,9 +3104,9 @@ function isEarlyDeparture(flight) {
               : "";
 
             const originCity = outbound?.start?.originCity || flight.originCity || "";
-            const originCode = (outbound?.start?.originAirport || flight.originAirport || "").toUpperCase();
+            const originCode = formatAirport(outbound?.start?.originAirport || flight.originAirport);
             const destCity = outbound?.end?.destCity || flight.destCity || "";
-            const destCode = (outbound?.end?.destAirport || flight.destAirport || "").toUpperCase();
+            const destCode = formatAirport(outbound?.end?.destAirport || flight.destAirport);
 
             const segments = [];
             if (outbound) {
@@ -3166,10 +3200,6 @@ function isEarlyDeparture(flight) {
                 ${topBadges.join("")}
               </div>
               <div class="result-footer">
-                <div class="result-footer-baggage">
-                  <div><strong>Багаж:</strong> ${flight.baggageText || "Неизвестно"}</div>
-                  <div><strong>Ручная кладь:</strong> ${flight.handBaggageText || "Неизвестно"}</div>
-                </div>
                 <div class="result-footer-actions">
                   <button type="button" class="btn-ghost btn-sm btn-fav" data-id="${flight.id}">☆ В избранное</button>
                   <button type="button" class="btn-ghost btn-sm btn-compare" data-id="${flight.id}">⇄ Добавить в сравнение</button>
@@ -3247,7 +3277,8 @@ function isEarlyDeparture(flight) {
           priceMinInput.value = "";
           priceMaxInput.value = "";
           airlineFilter.selectedIndex = -1;
-          airportFilter.selectedIndex = -1;
+          originAirportFilter.selectedIndex = -1;
+          destinationAirportFilter.selectedIndex = -1;
           advAirportFilter.selectedIndex = -1;
           applyFiltersAndSort();
         }
@@ -3525,14 +3556,10 @@ function isEarlyDeparture(flight) {
             const airlineCode = raw.airline || raw.airlineCode || "";
             const flightNumber = raw.flight_number || raw.flightNumber || "";
             const transfersTotal = (outboundSummary?.transfers || 0) + (returnSummary?.transfers || 0);
-
-            const hasCheckedBaggage = Boolean(raw.hasCheckedBaggage || raw.has_baggage || raw.baggage?.checked);
-            const baggageText = raw.baggageText || raw.baggage?.checked || (hasCheckedBaggage ? "Включён" : "Не включён");
-            const handBaggageText = raw.handBaggageText || raw.baggage?.hand || "По тарифу";
             const ratingBase = raw.rating ?? 7.2;
-            const rating = Number((ratingBase + (hasCheckedBaggage ? 0.4 : 0) - transfersTotal * 0.35).toFixed(1));
+            const rating = Number((ratingBase - transfersTotal * 0.35).toFixed(1));
             const stressLevel = rating >= 8.3 ? "low" : rating >= 6.5 ? "medium" : "high";
-            const yuviaScore = Math.round(rating * 20 + (hasCheckedBaggage ? 20 : 0) - transfersTotal * 12);
+            const yuviaScore = Math.round(rating * 20 - transfersTotal * 12);
 
             const deeplink = buildDeeplink({
               origin: context.origin || outboundSummary.start.originAirport,
@@ -3571,9 +3598,6 @@ function isEarlyDeparture(flight) {
               airlineName,
               airlineCode,
               flightNumber,
-              hasCheckedBaggage,
-              baggageText,
-              handBaggageText,
               rating,
               stressLevel,
               yuviaScore,
@@ -3650,9 +3674,6 @@ function isEarlyDeparture(flight) {
             0;
           const price = Number(priceValue) || 0;
           const currency = raw.currency || raw.price?.currency || context.currency || lastCurrency;
-          const hasCheckedBaggage = Boolean(raw.hasCheckedBaggage || raw.has_baggage || raw.baggage?.checked);
-          const baggageText = raw.baggageText || raw.baggage?.checked || (hasCheckedBaggage ? "Включён" : "Не включён");
-          const handBaggageText = raw.handBaggageText || raw.baggage?.hand || "По тарифу";
           const departPoint = outboundSummary?.start?.departAt || departAt;
           const arrivePoint = outboundSummary?.end?.arriveAt || arriveAt;
           const departTimeStr = formatTime(departPoint);
@@ -3660,9 +3681,9 @@ function isEarlyDeparture(flight) {
           const depDateStr = ddmmyyyy(departPoint);
           const durationHours = Number(((outboundDuration || raw.durationMinutes || 0) / 60).toFixed(1));
           const ratingBase = raw.rating ?? 7.2;
-          const rating = Number((ratingBase + (hasCheckedBaggage ? 0.4 : 0) - transfers * 0.35).toFixed(1));
+          const rating = Number((ratingBase - transfers * 0.35).toFixed(1));
           const stressLevel = rating >= 8.3 ? "low" : rating >= 6.5 ? "medium" : "high";
-          const yuviaScore = Math.round(rating * 20 + (hasCheckedBaggage ? 20 : 0) - transfers * 12);
+          const yuviaScore = Math.round(rating * 20 - transfers * 12);
           const departHour = departPoint instanceof Date ? departPoint.getHours() : null;
           const outboundFlightNumbers = (outboundSegments || [])
             .map((segment) => [segment.airlineCode, segment.flightNumber].filter(Boolean).join(" ").trim())
@@ -3699,9 +3720,6 @@ function isEarlyDeparture(flight) {
             currency,
             airlineName: primarySegment.airlineName || "",
             airlineCode: primarySegment.airlineCode || "",
-            hasCheckedBaggage,
-            baggageText,
-            handBaggageText,
             rating,
             stressLevel,
             yuviaScore,
@@ -4087,7 +4105,12 @@ allResults = flightsRaw
               applyFiltersAndSort();
             });
           });
-          [airlineFilter, airportFilter, advAirportFilter].forEach((select) => {
+          [
+            airlineFilter,
+            originAirportFilter,
+            destinationAirportFilter,
+            advAirportFilter,
+          ].forEach((select) => {
             select?.addEventListener("change", () => {
               applyFiltersAndSort();
             });
