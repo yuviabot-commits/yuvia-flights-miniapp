@@ -427,74 +427,7 @@
         font-size: 14px;
         box-shadow: 0 10px 24px rgba(7, 94, 84, 0.08);
       }
-      .advanced-header {
-        margin: 4px 0 10px;
-      }
-      .advanced-title {
-        font-size: 15px;
-        font-weight: 600;
-      }
-      .advanced-subtitle {
-        font-size: 12px;
-        color: var(--muted);
-        margin-top: 2px;
-      }
-      .advanced-chips {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px 10px;
-        margin: 8px 0 6px;
-      }
-      .chip-filter {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        border-radius: var(--radius-pill);
-        padding: 6px 12px;
-        border: 1px solid rgba(148, 163, 184, 0.6);
-        background: #ffffff;
-        font-size: 13px;
-        cursor: pointer;
-        transition:
-          box-shadow 0.18s ease,
-          border-color 0.18s ease,
-          background 0.18s ease,
-          color 0.18s ease;
-      }
-      .chip-filter:hover {
-        border-color: rgba(7, 94, 84, 0.4);
-        box-shadow: 0 8px 20px rgba(7, 94, 84, 0.12);
-      }
-      .chip-active {
-        background: var(--accent-soft);
-        border-color: rgba(45, 212, 191, 0.7);
-        color: var(--accent);
-        box-shadow: 0 10px 22px rgba(13, 148, 136, 0.18);
-      }
-      .advanced-airports-panel {
-        margin-top: 10px;
-        padding: 10px 12px;
-        border-radius: 14px;
-        border: 1px dashed var(--line);
-        background: #f9fafb;
-      }
-      .advanced-airports-panel select {
-        width: 100%;
-      }
-      .advanced-footer {
-        margin-top: 10px;
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-      }
-      .advanced-hint {
-        font-size: 13px;
-        color: var(--muted);
-        margin-top: 6px;
-      }
-      .advanced.hidden {
-        display: none;
-      } /* ------- Форма поиска ------- */
+      /* ------- Форма поиска ------- */
       .search-grid input,
       .pax-trigger {
         height: 48px;
@@ -517,6 +450,51 @@
         margin: 0;
         align-self: start;
         font-size: 12px;
+      }
+      .oneway-row {
+        grid-column: 4 / span 2;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 2px;
+      }
+      .oneway-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        color: var(--ink);
+        font-size: 14px;
+      }
+      .oneway-toggle input {
+        appearance: none;
+        width: 38px;
+        height: 22px;
+        border-radius: 999px;
+        background: #e5e7eb;
+        border: 1px solid #cbd5e1;
+        position: relative;
+        transition: all 0.18s ease;
+      }
+      .oneway-toggle input::after {
+        content: "";
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #ffffff;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.25);
+        transition: transform 0.18s ease;
+      }
+      .oneway-toggle input:checked {
+        background: var(--accent);
+        border-color: var(--accent);
+        box-shadow: 0 8px 18px rgba(7, 94, 84, 0.25);
+      }
+      .oneway-toggle input:checked::after {
+        transform: translateX(14px);
       }
       .pax-hint-placeholder {
         min-height: 16px;
@@ -811,6 +789,11 @@
         .swap-cell {
           justify-content: flex-start;
         }
+        .oneway-row {
+          grid-column: 1 / -1;
+          justify-content: flex-start;
+          margin-top: 0;
+        }
         .search-actions-row {
           justify-content: flex-start;
           flex-wrap: wrap;
@@ -818,21 +801,6 @@
         .pax-panel {
           right: auto;
           left: 0;
-        }
-        .result-main {
-          grid-template-columns: 1fr;
-          align-items: flex-start;
-        }
-        .result-main-right {
-          align-items: flex-start;
-          text-align: left;
-        }
-        .result-footer {
-          flex-direction: column;
-          align-items: flex-start;
-        }
-        .result-footer-actions {
-          justify-content: flex-start;
         }
         .compare-modal {
           margin: 0 10px;
@@ -1523,13 +1491,16 @@
               </div>
             </div>
             <div class="hint" id="originIataHint"></div>
-            <label class="pill" for="onewayToggle">
-              <input type="checkbox" id="onewayToggle" />
-              Только в одну сторону
-            </label>
             <div class="hint" id="destIataHint"></div>
             <div class="hint" id="departHint"></div>
             <div class="hint" id="retHint"></div>
+            <div class="oneway-row">
+              <label class="oneway-toggle" for="onewayToggle">
+                <input type="checkbox" id="onewayToggle" />
+                <span class="oneway-switch" aria-hidden="true"></span>
+                <span class="oneway-text">Только в одну сторону</span>
+              </label>
+            </div>
             <div class="pax-hint-placeholder"></div>
           </div>
           <div class="trip-preferences">
@@ -1637,46 +1608,49 @@
                 ><input type="radio" name="stops" value="1" /> не более 1</label
               >
             </div>
-            <div class="label" style="margin-top: 10px">Время вылета</div>
+            <div class="label" style="margin-top: 10px">
+              Время рейса в <span id="timeOutboundLabel">город назначения</span> /
+              Отправление
+            </div>
             <div style="display: flex; flex-wrap: wrap; gap: 6px">
               <label class="pill"
-                ><input type="checkbox" class="depwin" value="night" disabled />
+                ><input type="checkbox" class="depwin depwin-outbound" value="night" />
                 ночь (00–06)</label
               >
               <label class="pill"
-                ><input type="checkbox" class="depwin" value="morning" disabled />
+                ><input type="checkbox" class="depwin depwin-outbound" value="morning" />
                 утро (06–12)</label
               >
               <label class="pill"
-                ><input type="checkbox" class="depwin" value="day" disabled /> день
+                ><input type="checkbox" class="depwin depwin-outbound" value="day" /> день
                 (12–18)</label
               >
               <label class="pill"
-                ><input type="checkbox" class="depwin" value="evening" disabled />
+                ><input type="checkbox" class="depwin depwin-outbound" value="evening" />
                 вечер (18–24)</label
               >
             </div>
-            <div class="label" style="margin-top: 10px">Время прилёта</div>
+            <div class="label" style="margin-top: 10px">
+              Время рейса в <span id="timeReturnLabel">город вылета</span> /
+              Отправление
+            </div>
             <div style="display: flex; flex-wrap: wrap; gap: 6px">
               <label class="pill"
-                ><input type="checkbox" class="arrwin" value="night" disabled />
-                ночь</label
+                ><input type="checkbox" class="depwin depwin-return" value="night" /> ночь
+                (00–06)</label
               >
               <label class="pill"
-                ><input type="checkbox" class="arrwin" value="morning" disabled />
-                утро</label
+                ><input type="checkbox" class="depwin depwin-return" value="morning" /> утро
+                (06–12)</label
               >
               <label class="pill"
-                ><input type="checkbox" class="arrwin" value="day" disabled /> день</label
+                ><input type="checkbox" class="depwin depwin-return" value="day" /> день
+                (12–18)</label
               >
               <label class="pill"
-                ><input type="checkbox" class="arrwin" value="evening" disabled />
-                вечер</label
+                ><input type="checkbox" class="depwin depwin-return" value="evening" />
+                вечер (18–24)</label
               >
-            </div>
-            <div class="hint">
-              Фильтр по времени появится позже, когда партнёр будет отдавать точное
-              время вылета
             </div>
             <div class="label" style="margin-top: 10px">
               Длительность (часы, максимум)
@@ -1761,6 +1735,15 @@
             <div id="results" class="grid"></div>
             <div class="section-title">Соседние даты</div>
             <div id="matrix"></div>
+          </div>
+        </div>
+      </div>
+      <div id="compareModal" class="compare-modal-backdrop hidden" role="dialog" aria-modal="true">
+        <div class="compare-modal">
+          <h3>Сравнение рейсов</h3>
+          <table class="compare-table" id="compareTable"></table>
+          <div class="compare-close">
+            <button type="button" class="btn-ghost btn-sm" id="compareClose">Закрыть</button>
           </div>
         </div>
       </div>
@@ -2105,6 +2088,12 @@
             no_early_dep: false,
           },
         };
+        const favoritesIds = new Set(
+          JSON.parse(localStorage.getItem("favoritesIds") || "[]").filter(Boolean)
+        );
+        const compareIds = new Set(
+          JSON.parse(localStorage.getItem("compareIds") || "[]").filter(Boolean)
+        );
 
         const suggestCache = new Map();
         const recentKey = "yuviaRecentSearches";
@@ -2134,6 +2123,13 @@
         const yuviaTopBlock = $("#yuviaTopBlock");
         const yuviaTopList = $("#yuviaTopList");
         const yuviaTopSubtitle = $("#yuviaTopSubtitle");
+        const favoritesBlock = $("#favoritesBlock");
+        const compareBlock = $("#compareBlock");
+        const compareModal = $("#compareModal");
+        const compareTable = $("#compareTable");
+        const compareClose = $("#compareClose");
+        const timeOutboundLabel = $("#timeOutboundLabel");
+        const timeReturnLabel = $("#timeReturnLabel");
 
         function formatCurrency(value, currency = "RUB") {
           const safeCurrency = (currency || "RUB").toUpperCase();
@@ -2187,6 +2183,31 @@
           if (path instanceof URL) return path.toString();
           if (/^https?:/i.test(path)) return path;
           return new URL(path, API_BASE).toString();
+        }
+
+        function pickDeeplink(raw = {}) {
+          const candidates = [
+            raw.deeplink,
+            raw.deep_link,
+            raw.aviasales_deeplink,
+            raw.ticket_link,
+            raw.offer_link,
+            raw.link,
+          ].filter(Boolean);
+          const allowedDomains = ["aviasales", "travelpayouts", "tp.st", "jetradar", "tp.media"];
+          for (const link of candidates) {
+            try {
+              const url = new URL(link);
+              const host = url.hostname.toLowerCase();
+              if (host.includes("yuvia")) continue;
+              if (allowedDomains.some((domain) => host.includes(domain))) {
+                return url.toString();
+              }
+            } catch (e) {
+              continue;
+            }
+          }
+          return null;
         }
 
         async function callJSON(path) {
@@ -2271,6 +2292,13 @@
           const isOneway = !!(onewayControl && onewayControl.checked);
           const returnDate = isOneway ? null : parseDateValue(returnInput.value);
           const passengers = paxState.adults + paxState.children + paxState.infants;
+
+          if (timeOutboundLabel) {
+            timeOutboundLabel.textContent = dest || "город назначения";
+          }
+          if (timeReturnLabel) {
+            timeReturnLabel.textContent = origin || "город вылета";
+          }
 
           if (!origin && !dest) {
             searchSummary?.classList.add("hidden");
@@ -2566,12 +2594,54 @@
           loadingOverlay.classList.toggle("hidden", !active);
         }
 
+        function getAllSegmentsSafe(flight) {
+          if (!flight) return [];
+          const segments = [];
+          if (Array.isArray(flight.segments) && flight.segments.length) {
+            segments.push(...flight.segments);
+          } else {
+            if (Array.isArray(flight.outbound?.segments)) {
+              segments.push(...flight.outbound.segments);
+            }
+            if (Array.isArray(flight.return?.segments)) {
+              segments.push(...flight.return.segments);
+            }
+          }
+          return segments;
+        }
+
+        function getFilterableSegments(flight) {
+          const segments = getAllSegmentsSafe(flight);
+          if (segments.length) return segments;
+          const fallbackSegments = [];
+          if (flight?.outbound?.start && flight?.outbound?.end) {
+            fallbackSegments.push({
+              originAirport: flight.outbound.start.originAirport,
+              destAirport: flight.outbound.end.destAirport,
+              departAt: flight.outbound.start.departAt,
+              arriveAt: flight.outbound.end.arriveAt,
+            });
+          }
+          if (flight?.return?.start && flight?.return?.end) {
+            fallbackSegments.push({
+              originAirport: flight.return.start.originAirport,
+              destAirport: flight.return.end.destAirport,
+              departAt: flight.return.start.departAt,
+              arriveAt: flight.return.end.arriveAt,
+            });
+          }
+          return fallbackSegments;
+        }
+
         function updateFilterOptions() {
           const airlineMap = new Map();
           allResults.forEach((flight) => {
-            const codes = Array.isArray(flight.airlinesAll) ? flight.airlinesAll : [];
-            const name = flight.airlineName;
-            codes.forEach((code) => {
+            const metaList = Array.isArray(flight.airlinesMetaAll)
+              ? flight.airlinesMetaAll
+              : Array.isArray(flight.airlinesAll)
+              ? flight.airlinesAll.map((code) => ({ code, name: flight.airlineName || code }))
+              : [];
+            metaList.forEach(({ code, name }) => {
               if (!code || airlineMap.has(code)) return;
               airlineMap.set(code, name || code);
             });
@@ -2589,19 +2659,20 @@
                 input.name = "airlines";
                 input.value = code;
                 label.appendChild(input);
-                label.appendChild(
-                  document.createTextNode(` ${name || code} (${code})`)
-                );
+                const text = name ? `${name} (${code})` : code;
+                label.appendChild(document.createTextNode(` ${text}`));
                 airlineFilter.appendChild(label);
               });
           }
 
-          const originAirports = new Set(
-            allResults.map((flight) => flight.originAirport).filter(Boolean)
-          );
-          const destinationAirports = new Set(
-            allResults.map((flight) => flight.destAirport).filter(Boolean)
-          );
+          const originAirports = new Set();
+          const destinationAirports = new Set();
+          allResults.forEach((flight) => {
+            getFilterableSegments(flight).forEach((segment) => {
+              if (segment.originAirport) originAirports.add(segment.originAirport);
+              if (segment.destAirport) destinationAirports.add(segment.destAirport);
+            });
+          });
 
           function fillAirportSelect(select, codesArray) {
             if (!select) return;
@@ -2625,6 +2696,21 @@
           return Array.from(select?.selectedOptions || []).map((option) => option.value);
         }
 
+        function getSelectedCheckboxValues(selector) {
+          return $$(selector)
+            .filter((el) => el instanceof HTMLInputElement && el.checked)
+            .map((el) => el.value);
+        }
+
+        function getTimeWindow(date) {
+          if (!(date instanceof Date)) return null;
+          const hour = date.getHours();
+          if (hour >= 0 && hour < 6) return "night";
+          if (hour < 12) return "morning";
+          if (hour < 18) return "day";
+          return "evening";
+        }
+
         function withinListAfterFilters(list) {
           const min = Number(priceMinInput.value) || null;
           const max = Number(priceMaxInput.value) || null;
@@ -2635,6 +2721,9 @@
           ).map((el) => el.value);
           const stopsInput = document.querySelector('input[name="stops"]:checked');
           const stops = stopsInput ? stopsInput.value : "any";
+          const durMax = Number(document.getElementById("durMax")?.value) || null;
+          const outboundWindows = getSelectedCheckboxValues(".depwin-outbound");
+          const returnWindows = getSelectedCheckboxValues(".depwin-return");
 
           return list.filter((flight) => {
             const transfersCount = Number.isFinite(Number(flight.transfers))
@@ -2649,35 +2738,117 @@
               !(Array.isArray(flight.airlinesAll) && flight.airlinesAll.some((code) => airlineValues.includes(code)))
             )
               return false;
-            if (originAirportValues.length && !originAirportValues.includes(flight.originAirport)) return false;
-            if (destinationAirportValues.length && !destinationAirportValues.includes(flight.destAirport)) return false;
+            const segments = getFilterableSegments(flight);
+            if (
+              originAirportValues.length &&
+              !segments.some((segment) => originAirportValues.includes(segment.originAirport))
+            )
+              return false;
+            if (
+              destinationAirportValues.length &&
+              !segments.some((segment) => destinationAirportValues.includes(segment.destAirport))
+            )
+              return false;
+            if (durMax && flight.durationMinutes && flight.durationMinutes > durMax * 60) return false;
+            const outboundDepart = flight?.outbound?.start?.departAt;
+            const returnDepart = flight?.return?.start?.departAt;
+            if (outboundWindows.length && outboundDepart instanceof Date) {
+              const window = getTimeWindow(outboundDepart);
+              if (window && !outboundWindows.includes(window)) return false;
+            }
+            if (returnWindows.length && returnDepart instanceof Date) {
+              const window = getTimeWindow(returnDepart);
+              if (window && !returnWindows.includes(window)) return false;
+            }
             return true;
           });
         }
 
-        function isNightDeparture(flight) {
-          const hour = typeof flight?.departHour === "number" ? flight.departHour : null;
-          if (hour == null) return false;
+        function isNightTime(date) {
+          if (!(date instanceof Date)) return false;
+          const hour = date.getHours();
           return hour >= 22 || hour < 6;
         }
 
-        function isEarlyDeparture(flight) {
-          const hour = typeof flight?.departHour === "number" ? flight.departHour : null;
-          if (hour == null) return false;
-          return hour < 8;
+        function isEarlyTime(date) {
+          if (!(date instanceof Date)) return false;
+          return date.getHours() < 8;
+        }
+
+        function hasShortConnections(segments = []) {
+          const ordered = segments
+            .filter((seg) => seg?.departAt instanceof Date || seg?.arriveAt instanceof Date)
+            .sort((a, b) => (a.departAt?.getTime?.() || 0) - (b.departAt?.getTime?.() || 0));
+          for (let i = 1; i < ordered.length; i++) {
+            const prev = ordered[i - 1];
+            const next = ordered[i];
+            if (prev?.arriveAt instanceof Date && next?.departAt instanceof Date) {
+              const diff = next.departAt - prev.arriveAt;
+              if (diff > 0 && diff < 60 * 60000) return true;
+            }
+          }
+          return false;
+        }
+
+        function hasOvernightLayover(segments = []) {
+          const ordered = segments
+            .filter((seg) => seg?.departAt instanceof Date || seg?.arriveAt instanceof Date)
+            .sort((a, b) => (a.departAt?.getTime?.() || 0) - (b.departAt?.getTime?.() || 0));
+          for (let i = 1; i < ordered.length; i++) {
+            const prev = ordered[i - 1];
+            const next = ordered[i];
+            if (prev?.arriveAt instanceof Date && next?.departAt instanceof Date) {
+              const diffMinutes = (next.departAt - prev.arriveAt) / 60000;
+              const crossesMidnight = next.departAt.getDate() !== prev.arriveAt.getDate();
+              if (crossesMidnight && diffMinutes >= 240) {
+                return true;
+              }
+            }
+          }
+          return false;
         }
 
         function applyTripTriggers(list) {
-          let result = list;
-          if (tripState.triggers.direct_only) {
-            result = result.filter((flight) => {
-              const transfersCount = Number.isFinite(Number(flight.transfers))
-                ? Number(flight.transfers)
-                : null;
-              return transfersCount === 0;
-            });
-          }
-          return result;
+          return list.filter((flight) => {
+            const transfersCount = Number.isFinite(Number(flight.transfers))
+              ? Number(flight.transfers)
+              : null;
+            if (tripState.triggers.direct_only && transfersCount !== 0) return false;
+
+            const outboundDepart = flight?.outbound?.start?.departAt || flight?.departAt;
+            const returnDepart = flight?.return?.start?.departAt || flight?.returnDepartAt;
+
+            if (tripState.triggers.no_night_dep) {
+              if ((outboundDepart && isNightTime(outboundDepart)) || (returnDepart && isNightTime(returnDepart))) {
+                return false;
+              }
+            }
+            if (tripState.triggers.no_early_dep) {
+              if ((outboundDepart && isEarlyTime(outboundDepart)) || (returnDepart && isEarlyTime(returnDepart))) {
+                return false;
+              }
+            }
+
+            const outboundSegments = Array.isArray(flight.outbound?.segments)
+              ? flight.outbound.segments
+              : getAllSegmentsSafe(flight);
+            const returnSegments = Array.isArray(flight.return?.segments) ? flight.return.segments : [];
+            const connectionGroups = [outboundSegments, returnSegments].filter(
+              (group) => Array.isArray(group) && group.length,
+            );
+            if (
+              tripState.triggers.no_short_connections &&
+              connectionGroups.some((group) => hasShortConnections(group))
+            )
+              return false;
+            if (
+              tripState.triggers.no_overnight &&
+              connectionGroups.some((group) => hasOvernightLayover(group))
+            )
+              return false;
+
+            return true;
+          });
         }
 
         function applyTripStyle(list) {
@@ -2721,7 +2892,9 @@
           } else if (sortValue === "duration_asc") {
             sorted.sort((a, b) => a.durationMinutes - b.durationMinutes);
           } else if (sortValue === "depart_asc") {
-            sorted.sort((a, b) => a.departAt - b.departAt);
+            const getTimeSafe = (flight) =>
+              flight?.departAt instanceof Date ? flight.departAt.getTime() : Infinity;
+            sorted.sort((a, b) => getTimeSafe(a) - getTimeSafe(b));
           } else {
             sorted.sort((a, b) => b.yuviaScore - a.yuviaScore);
           }
@@ -2912,10 +3085,50 @@
                 <span class="badge badge-chip">${formatTransfers(flight.transfers)}</span>
                 ${topBadges.join("")}
               </div>
+              <div class="result-footer">
+                <div class="result-footer-actions">
+                  <button type="button" class="btn-ghost btn-sm btn-fav" data-id="${flight.id}">
+                    ${favoritesIds.has(flight.id) ? "Убрать из избранного" : "В избранное"}
+                  </button>
+                  <button type="button" class="btn-secondary btn-sm btn-compare" data-id="${flight.id}">
+                    ${compareIds.has(flight.id) ? "Убрать из сравнения" : "Сравнить"}
+                  </button>
+                </div>
+              </div>
             `;
+            const favBtn = card.querySelector(".btn-fav");
+            updateFavButtonState(favBtn, flight.id);
+            favBtn?.addEventListener("click", () => {
+              if (favoritesIds.has(flight.id)) {
+                favoritesIds.delete(flight.id);
+              } else {
+                favoritesIds.add(flight.id);
+              }
+              persistFavorites();
+              updateFavButtonState(favBtn, flight.id);
+              renderFavoritesBlock();
+            });
+
+            const compareBtn = card.querySelector(".btn-compare");
+            updateCompareButtonState(compareBtn, flight.id);
+            compareBtn?.addEventListener("click", () => {
+              if (compareIds.has(flight.id)) {
+                compareIds.delete(flight.id);
+              } else {
+                compareIds.add(flight.id);
+              }
+              persistCompare();
+              updateCompareButtonState(compareBtn, flight.id);
+              renderCompareBlock();
+              if (compareIds.size >= 2) {
+                openCompareModal();
+              }
+            });
             resultsBlock.appendChild(card);
           });
           updateSummaryChip(list);
+          renderFavoritesBlock();
+          renderCompareBlock();
         }
 
         function saveRecent(state) {
@@ -2967,6 +3180,11 @@
             .forEach((input) => {
               input.checked = false;
             });
+          document.querySelectorAll(".depwin").forEach((checkbox) => {
+            checkbox.checked = false;
+          });
+          const durMaxInput = document.getElementById("durMax");
+          if (durMaxInput) durMaxInput.value = "";
           const stopsAny = document.querySelector('input[name="stops"][value="any"]');
           if (stopsAny) {
             stopsAny.checked = true;
@@ -2985,12 +3203,17 @@
             if (yuviaTopBlock) {
               yuviaTopBlock.classList.add("hidden");
             }
+            renderFavoritesBlock();
+            renderCompareBlock();
             return;
           }
           let list = withinListAfterFilters(allResults);
           list = applyTripTriggers(list);
-          list = applyTripStyle(list);
-          filteredResults = sortBySelection(list);
+          if (tripState.style) {
+            filteredResults = applyTripStyle(list);
+          } else {
+            filteredResults = sortBySelection(list);
+          }
           const topFlights = getYuviaTop3(filteredResults);
           markTopFlights(filteredResults, topFlights);
           renderResults(filteredResults);
@@ -3076,6 +3299,24 @@
             flightNumber,
             durationMinutes,
           };
+        }
+
+        function collectAirlinesMeta(segments = [], fallbackCode = "", fallbackName = "") {
+          const map = new Map();
+          segments.forEach((seg) => {
+            if (!seg) return;
+            const code = seg.airlineCode || seg.airline || "";
+            const name = seg.airlineName || seg.airline_name || seg.carrier_name || "";
+            if (code) {
+              map.set(code, name || code);
+            }
+          });
+          if (fallbackCode) {
+            map.set(fallbackCode, fallbackName || fallbackCode);
+          }
+          const airlinesAll = Array.from(map.keys());
+          const airlinesMetaAll = airlinesAll.map((code) => ({ code, name: map.get(code) || code }));
+          return { airlinesAll, airlinesMetaAll };
         }
 
         function splitSegments(raw, fallback = {}) {
@@ -3251,10 +3492,10 @@
             const rating = Number((ratingBase - transfersTotal * 0.35).toFixed(1));
             const stressLevel = rating >= 8.3 ? "low" : rating >= 6.5 ? "medium" : "high";
             const yuviaScore = Math.round(rating * 20 - transfersTotal * 12);
-            const rawDeeplink = raw.deeplink || raw.deep_link || raw.link;
+            const deeplinkCandidate = pickDeeplink(raw);
 
             const deeplink =
-              rawDeeplink ||
+              deeplinkCandidate ||
               buildDeeplink({
                 origin: context.origin || outboundSummary.start.originAirport,
                 destination: context.destination || outboundSummary.end.destAirport,
@@ -3291,7 +3532,7 @@
               currency,
               airlineName,
               airlineCode,
-              airlinesAll: airlineCode ? [airlineCode] : [],
+              ...collectAirlinesMeta([], airlineCode, airlineName),
               flightNumber,
               rating,
               stressLevel,
@@ -3387,16 +3628,12 @@
             .map((segment) => [segment.airlineCode, segment.flightNumber].filter(Boolean).join(" ").trim())
             .filter(Boolean);
           const allSegments = [...outboundSegments, ...returnSegments];
-          const airlinesAll = [
-            ...new Set(
-              (() => {
-                const codes = allSegments.map((seg) => seg.airlineCode).filter(Boolean);
-                if (codes.length) return codes;
-                return [primarySegment.airlineCode].filter(Boolean);
-              })(),
-            ),
-          ];
-          const rawDeeplink = raw.deeplink || raw.deep_link || raw.link;
+          const { airlinesAll, airlinesMetaAll } = collectAirlinesMeta(
+            allSegments,
+            primarySegment.airlineCode,
+            primarySegment.airlineName,
+          );
+          const deeplinkCandidate = pickDeeplink(raw);
           return {
             id:
               String(
@@ -3427,11 +3664,12 @@
             airlineName: primarySegment.airlineName || "",
             airlineCode: primarySegment.airlineCode || "",
             airlinesAll,
+            airlinesMetaAll,
             rating,
             stressLevel,
             yuviaScore,
             airline: primarySegment.airlineCode || "",
-            segments: outboundSegments,
+            segments: allSegments,
             outbound: outboundSummary
               ? { ...outboundSummary, durationMinutes: outboundDuration, transfers: outboundTransfers }
               : null,
@@ -3441,7 +3679,7 @@
             flightNumbers: { outbound: outboundFlightNumbers, inbound: returnFlightNumbers },
             departHour,
             deeplink:
-              rawDeeplink ||
+              deeplinkCandidate ||
               buildDeeplink({
                 origin: context.origin || fallback.originAirport,
                 destination: context.destination || fallback.destAirport,
@@ -3583,6 +3821,138 @@
           if (level === "medium") return "стресс: средний";
           if (level === "high") return "стресс: высокий";
           return "стресс: неизвестно";
+        }
+
+        function findFlightById(id) {
+          if (!id) return null;
+          return allResults.find((flight) => flight.id === id) || null;
+        }
+
+        function persistFavorites() {
+          localStorage.setItem("favoritesIds", JSON.stringify(Array.from(favoritesIds)));
+        }
+
+        function persistCompare() {
+          localStorage.setItem("compareIds", JSON.stringify(Array.from(compareIds)));
+        }
+
+        function updateFavButtonState(button, flightId) {
+          if (!button) return;
+          const isFav = favoritesIds.has(flightId);
+          button.classList.toggle("btn-primary", isFav);
+          button.classList.toggle("btn-ghost", !isFav);
+          button.textContent = isFav ? "Убрать из избранного" : "В избранное";
+        }
+
+        function updateCompareButtonState(button, flightId) {
+          if (!button) return;
+          const inCompare = compareIds.has(flightId);
+          button.classList.toggle("btn-primary", inCompare);
+          button.classList.toggle("btn-secondary", !inCompare);
+          button.textContent = inCompare ? "Убрать из сравнения" : "Сравнить";
+        }
+
+        function renderMiniCard(container, flight) {
+          const card = document.createElement("div");
+          card.className = "mini-flight";
+          card.innerHTML = `
+            <div class="mini-flight-title">${flight.originCity || ""} → ${flight.destCity || ""}</div>
+            <div class="mini-flight-meta">${formatCurrency(flight.price, flight.currency || lastCurrency)}</div>
+          `;
+          card.addEventListener("click", () => highlightResultCard(flight.id));
+          container.appendChild(card);
+        }
+
+        function renderFavoritesBlock() {
+          if (!favoritesBlock) return;
+          const flights = Array.from(favoritesIds)
+            .map((id) => findFlightById(id))
+            .filter(Boolean);
+          if (!flights.length) {
+            favoritesBlock.classList.add("hidden");
+            favoritesBlock.innerHTML = "";
+            return;
+          }
+          favoritesBlock.classList.remove("hidden");
+          favoritesBlock.innerHTML = `<div class="section-title" style="margin-top:0">Избранное</div>`;
+          const list = document.createElement("div");
+          list.className = "favorites-list";
+          flights.forEach((flight) => renderMiniCard(list, flight));
+          favoritesBlock.appendChild(list);
+        }
+
+        function buildCompareTableRows(flights) {
+          if (!compareTable) return;
+          compareTable.innerHTML = "";
+          const header = document.createElement("tr");
+          header.innerHTML = `
+            <th>Маршрут</th>
+            <th>Цена</th>
+            <th>Длительность</th>
+            <th>Пересадки</th>
+            <th>Вылет туда</th>
+            <th>Вылет обратно</th>
+            <th>Авиакомпании</th>
+          `;
+          compareTable.appendChild(header);
+          flights.forEach((flight) => {
+            const airlinesLine = Array.isArray(flight.airlinesMetaAll)
+              ? flight.airlinesMetaAll
+                  .map(({ code, name }) => (name && name !== code ? `${name} (${code})` : code))
+                  .join(", ")
+              : (flight.airlinesAll || []).join(", ");
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td>${flight.originCity || ""} → ${flight.destCity || ""}</td>
+              <td>${formatCurrency(flight.price, flight.currency || lastCurrency)}</td>
+              <td>${formatDuration(flight.durationMinutes)}</td>
+              <td>${formatTransfers(flight.transfers)}</td>
+              <td>${formatTime(flight.outbound?.start?.departAt)}</td>
+              <td>${formatTime(flight.return?.start?.departAt)}</td>
+              <td>${airlinesLine || ""}</td>
+            `;
+            compareTable.appendChild(row);
+          });
+        }
+
+        function openCompareModal() {
+          if (!compareModal || !compareTable) return;
+          const flights = Array.from(compareIds)
+            .map((id) => findFlightById(id))
+            .filter(Boolean);
+          if (flights.length < 2) return;
+          buildCompareTableRows(flights);
+          compareModal.classList.remove("hidden");
+        }
+
+        function closeCompareModal() {
+          compareModal?.classList.add("hidden");
+        }
+
+        function renderCompareBlock() {
+          if (!compareBlock) return;
+          const flights = Array.from(compareIds)
+            .map((id) => findFlightById(id))
+            .filter(Boolean);
+          if (!flights.length) {
+            compareBlock.classList.add("hidden");
+            compareBlock.innerHTML = "";
+            return;
+          }
+          compareBlock.classList.remove("hidden");
+          compareBlock.innerHTML = `<div class="section-title" style="margin-top:0">Сравнение</div>`;
+          const list = document.createElement("div");
+          list.className = "compare-list";
+          flights.forEach((flight) => renderMiniCard(list, flight));
+          compareBlock.appendChild(list);
+          if (flights.length >= 2) {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "btn-primary btn-sm";
+            btn.textContent = "Сравнить выбранные";
+            btn.addEventListener("click", openCompareModal);
+            compareBlock.appendChild(btn);
+          }
         }
 
         function highlightResultCard(flightId) {
@@ -3809,6 +4179,10 @@ allResults = flightsRaw
               applyFiltersAndSort();
             });
           });
+          document.getElementById("durMax")?.addEventListener("input", applyFiltersAndSort);
+          document.querySelectorAll(".depwin").forEach((checkbox) => {
+            checkbox.addEventListener("change", applyFiltersAndSort);
+          });
           airlineFilter?.addEventListener("change", applyFiltersAndSort);
           document.querySelectorAll('input[name="stops"]').forEach((radio) => {
             radio.addEventListener("change", applyFiltersAndSort);
@@ -3854,6 +4228,12 @@ allResults = flightsRaw
             updateSearchSummary();
           });
           $("#doSearch")?.addEventListener("click", doSearch);
+          compareClose?.addEventListener("click", closeCompareModal);
+          compareModal?.addEventListener("click", (event) => {
+            if (event.target === compareModal) {
+              closeCompareModal();
+            }
+          });
         }
 
         function initSuggests() {
