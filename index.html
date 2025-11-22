@@ -2026,6 +2026,7 @@
         const API_BASE = "https://yuvia-flights-api.yuviabot.workers.dev";
         const API_SEARCH_PATH = "/api/search";
         const API_MATRIX_PATH = "/api/matrix";
+        const AVIA_BASE_URL = "https://www.aviasales.ru";
         const DICTS_STORAGE_KEY = "yuviaDicts";
         const DEFAULT_DICT_TTL_SECONDS = 3600;
 
@@ -2282,6 +2283,18 @@
             }
           }
           return null;
+        }
+
+        function buildAviasalesTicketUrl(raw = {}) {
+          if (!raw || !raw.link) return null;
+          const link = String(raw.link).trim();
+          if (!link) return null;
+
+          if (/^https?:\/\//i.test(link)) return link;
+
+          const base = AVIA_BASE_URL.replace(/\/+$/, "");
+          const path = link.replace(/^\/+/, "");
+          return `${base}/${path}`;
         }
 
         async function callJSON(path) {
@@ -3170,9 +3183,37 @@
                 : flight.stressLevel === "high"
                 ? "badge-stress-high"
                 : "badge-stress-medium";
-            const deeplinkButton = flight.deeplink
-              ? `<a href="${flight.deeplink}" target="_blank" rel="noopener"><button class="btn-primary btn-sm">Открыть поиск на Aviasales</button></a>`
-              : `<button class="btn-primary btn-sm" disabled>Нет ссылки</button>`;
+            // ticketUrl — ссылка на конкретный билет (если есть от Aviasales/TP)
+            const ticketUrl = flight.aviasalesTicketUrl || null;
+            // searchUrl — ссылка на общий поиск по маршруту
+            const searchUrl =
+              flight.deeplink ||
+              flight.aviasalesSearchUrl ||
+              null;
+            let aviasalesButtons = "";
+            if (ticketUrl) {
+              aviasalesButtons += `
+                <a href="${ticketUrl}"
+                   class="btn btn-primary btn-sm aviasales-btn-ticket"
+                   target="_blank"
+                   rel="noopener noreferrer">
+                  Купить на Aviasales
+                </a>
+              `;
+            }
+            if (searchUrl && (!ticketUrl || searchUrl !== ticketUrl)) {
+              aviasalesButtons += `
+                <a href="${searchUrl}"
+                   class="btn btn-secondary btn-sm aviasales-btn-search"
+                   target="_blank"
+                   rel="noopener noreferrer">
+                  Все варианты на Aviasales
+                </a>
+              `;
+            }
+            if (!aviasalesButtons) {
+              aviasalesButtons = `<button class="btn-primary btn-sm" disabled>Нет ссылки</button>`;
+            }
             const topBadges = [];
             if (flight.isTop) {
               topBadges.push('<span class="badge badge-yuvia">Рекомендация Yuvia</span>');
@@ -3205,7 +3246,7 @@
                       ${flightNumberLine}
                     </div>
                   </div>
-                  ${deeplinkButton}
+                  ${aviasalesButtons}
                 </div>
               </div>
               <div class="result-segments">
@@ -3690,6 +3731,9 @@
                 currency,
               });
 
+            const aviasalesTicketUrl = buildAviasalesTicketUrl(raw);
+            const aviasalesSearchUrl = deeplinkCandidate || aviasalesTicketUrl || null;
+
             return {
               id: String(
                 raw.id ||
@@ -3729,6 +3773,8 @@
               },
               departHour: outboundSummary.start.departAt ? outboundSummary.start.departAt.getHours() : 0,
               deeplink,
+              aviasalesTicketUrl,
+              aviasalesSearchUrl,
             };
           }
 
@@ -3823,6 +3869,8 @@
             primarySegment.airlineName,
           );
           const deeplinkCandidate = pickDeeplink(raw);
+          const aviasalesTicketUrl = buildAviasalesTicketUrl(raw);
+          const aviasalesSearchUrl = deeplinkCandidate || aviasalesTicketUrl || null;
           return {
             id:
               String(
@@ -3890,6 +3938,8 @@
                 adults: context.passengers || context.adults || 1,
                 currency,
               }),
+            aviasalesTicketUrl,
+            aviasalesSearchUrl,
           };
         }
 
