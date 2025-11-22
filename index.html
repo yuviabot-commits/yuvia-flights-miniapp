@@ -2032,6 +2032,8 @@
         let AIRLINE_NAMES = {};
         let AIRPORT_NAMES = {};
         let CITY_NAMES = {};
+        let DICTS_LOADING = false;
+        let DICTS_ERROR = null;
 
         function applyDicts(dicts = {}) {
           AIRLINE_NAMES = dicts.airlines || {};
@@ -2067,30 +2069,57 @@
           }
         }
 
+        function getCityName(code) {
+          if (!code) return "";
+          const upper = String(code).toUpperCase();
+          return CITY_NAMES[upper] || AIRPORT_NAMES[upper] || upper;
+        }
+
+        function getAirportName(code) {
+          if (!code) return "";
+          const upper = String(code).toUpperCase();
+          return AIRPORT_NAMES[upper] || upper;
+        }
+
+        function getAirlineName(code) {
+          if (!code) return "";
+          const upper = String(code).toUpperCase();
+          return AIRLINE_NAMES[upper] || upper;
+        }
+
         async function loadDicts() {
+          DICTS_LOADING = true;
+          DICTS_ERROR = null;
           const cached = getStoredDicts();
           if (cached?.data) {
             applyDicts(cached.data);
+            DICTS_LOADING = false;
             return;
           }
           const stale = getStoredDicts({ allowExpired: true });
           try {
-            const payload = await callJSON("/api/dicts");
+            const resp = await fetch("/api/dicts");
+            if (!resp.ok) {
+              throw new Error("Failed to load dicts: " + resp.status);
+            }
+            const payload = await resp.json();
             const dicts = payload?.data || {};
             applyDicts(dicts);
             persistDicts(dicts, dicts.ttlSeconds);
           } catch (error) {
             console.error("[Yuvia] Failed to load dictionaries", error);
+            DICTS_ERROR = error?.message || "Dicts load error";
             if (stale?.data) {
               applyDicts(stale.data);
             }
           }
+          DICTS_LOADING = false;
         }
 
         function formatAirport(code) {
           if (!code) return "";
           const upper = code.toUpperCase();
-          const name = AIRPORT_NAMES[upper];
+          const name = getAirportName(upper);
           return name ? `${name} (${upper})` : upper;
         }
 
@@ -3321,8 +3350,8 @@
           const departAt = safeDate(
             segment.departAt ||
               segment.depart_at ||
-              segment.departure ||
               segment.departure_at ||
+              segment.departure ||
               segment.date_from ||
               segment.depart_date ||
               segment.time_from ||
@@ -3331,14 +3360,45 @@
           const arriveAt = safeDate(
             segment.arriveAt ||
               segment.arrive_at ||
-              segment.arrival ||
               segment.arrival_at ||
+              segment.arrival ||
               segment.date_to ||
               segment.arrival_date ||
               segment.time_to ||
               segment.end_time
           );
+          const originAirport =
+            segment.originAirport ||
+            segment.origin_airport ||
+            segment.flyFrom ||
+            segment.from ||
+            segment.origin ||
+            segment.origin_code ||
+            fallback.originAirport;
+          const destAirport =
+            segment.destAirport ||
+            segment.dest_airport ||
+            segment.flyTo ||
+            segment.to ||
+            segment.destination ||
+            segment.destination_code ||
+            fallback.destAirport;
+          const originCityCode =
+            segment.originCityCode ||
+            segment.origin_city_code ||
+            segment.cityFromCode ||
+            segment.city_from_code ||
+            originAirport ||
+            fallback.originAirport;
+          const destCityCode =
+            segment.destCityCode ||
+            segment.dest_city_code ||
+            segment.cityToCode ||
+            segment.city_to_code ||
+            destAirport ||
+            fallback.destAirport;
           const originCity =
+            getCityName(originCityCode) ||
             segment.originCity ||
             segment.origin_city ||
             segment.cityFrom ||
@@ -3347,6 +3407,7 @@
             segment.origin?.city ||
             fallback.originCity;
           const destCity =
+            getCityName(destCityCode) ||
             segment.destCity ||
             segment.dest_city ||
             segment.cityTo ||
@@ -3354,20 +3415,6 @@
             segment.to_city ||
             segment.destination?.city ||
             fallback.destCity;
-          const originAirport =
-            segment.originAirport ||
-            segment.origin_airport ||
-            segment.flyFrom ||
-            segment.from ||
-            segment.origin ||
-            fallback.originAirport;
-          const destAirport =
-            segment.destAirport ||
-            segment.dest_airport ||
-            segment.flyTo ||
-            segment.to ||
-            segment.destination ||
-            fallback.destAirport;
           const airlineCode =
             segment.airlineCode ||
             segment.airline ||
@@ -3529,6 +3576,25 @@
             (raw.departure_at || raw.return_at) &&
             (raw.duration_to != null || raw.duration_back != null || raw.duration != null);
 
+          const originAirportCode =
+            raw.originAirport || raw.origin_airport || raw.origin || context.origin || "";
+          const destAirportCode =
+            raw.destAirport || raw.destination_airport || raw.destination || context.destination || "";
+          const originCityResolved =
+            getCityName(originAirportCode) ||
+            context.originCity ||
+            raw.origin_name ||
+            raw.originCity ||
+            raw.origin_city ||
+            "";
+          const destCityResolved =
+            getCityName(destAirportCode) ||
+            context.destCity ||
+            raw.destination_name ||
+            raw.destCity ||
+            raw.dest_city ||
+            "";
+
           if (hasCompactAviasalesFields) {
             const departAt = safeDate(raw.departure_at || raw.departAt);
             const returnDepartAt = safeDate(raw.return_at || raw.returnDepartAt);
@@ -3549,12 +3615,12 @@
             const outboundSummary = {
               start: {
                 departAt: outboundDepart,
-                originCity: context.originCity || raw.origin_name || context.origin || "",
+                originCity: originCityResolved,
                 originAirport: raw.origin_airport || context.origin || "",
               },
               end: {
                 arriveAt: outboundArrive,
-                destCity: context.destCity || raw.destination_name || context.destination || "",
+                destCity: destCityResolved,
                 destAirport: raw.destination_airport || context.destination || "",
               },
               durationMinutes:
@@ -3695,10 +3761,10 @@
             raw.airlineName || raw.carrier_name || "",
           );
           const fallback = {
-            originCity: raw.originCity || raw.origin_city || context.originCity,
-            destCity: raw.destCity || raw.dest_city || context.destCity,
-            originAirport: raw.originAirport || raw.origin_airport || raw.origin || context.origin,
-            destAirport: raw.destAirport || raw.dest_airport || raw.destination || context.destination,
+            originCity: originCityResolved,
+            destCity: destCityResolved,
+            originAirport: originAirportCode,
+            destAirport: destAirportCode,
             airlineName: fallbackAirlineName,
             airlineCode: fallbackAirlineCode,
             departAt,
@@ -3761,8 +3827,20 @@
                   context.fallbackId ||
                   `${context.origin || ""}-${context.destination || ""}-${Math.random().toString(16).slice(2)}`
               ),
-            originCity: outboundSummary?.start?.originCity || fallback.originCity || context.originCity || "",
-            destCity: outboundSummary?.end?.destCity || fallback.destCity || context.destCity || "",
+            originCity:
+              getCityName(outboundSummary?.start?.originAirport) ||
+              outboundSummary?.start?.originCity ||
+              originCityResolved ||
+              fallback.originCity ||
+              context.originCity ||
+              "",
+            destCity:
+              getCityName(outboundSummary?.end?.destAirport) ||
+              outboundSummary?.end?.destCity ||
+              destCityResolved ||
+              fallback.destCity ||
+              context.destCity ||
+              "",
             originAirport: outboundSummary?.start?.originAirport || fallback.originAirport || context.origin || "",
             destAirport: outboundSummary?.end?.destAirport || fallback.destAirport || context.destination || "",
             departAt: outboundSummary?.start?.departAt || departAt,
