@@ -3101,6 +3101,40 @@
 
         function renderResults(list) {
           if (!resultsBlock) return;
+          const container = resultsBlock;
+          let aviasalesAllWrap = document.querySelector(".aviasales-all-wrap");
+          if (!aviasalesAllWrap && container?.parentNode) {
+            aviasalesAllWrap = document.createElement("div");
+            aviasalesAllWrap.className = "aviasales-all-wrap";
+            container.parentNode.appendChild(aviasalesAllWrap);
+          }
+          const updateAviasalesAllWrap = (flightsWithLinks) => {
+            if (!aviasalesAllWrap) return;
+            const firstWithLink = (flightsWithLinks || []).find(
+              (flight) =>
+                flight.aviasalesSearchUrl || flight.deeplink || flight.aviasalesTicketUrl,
+            );
+
+            if (firstWithLink) {
+              const searchUrl =
+                firstWithLink.aviasalesSearchUrl ||
+                firstWithLink.deeplink ||
+                firstWithLink.aviasalesTicketUrl;
+
+              aviasalesAllWrap.innerHTML = `
+                <a href="${searchUrl}"
+                   class="btn btn-secondary aviasales-btn-all"
+                   target="_blank"
+                   rel="noopener noreferrer">
+                  Все варианты на Aviasales
+                </a>
+              `;
+              aviasalesAllWrap.style.display = "";
+            } else {
+              aviasalesAllWrap.innerHTML = "";
+              aviasalesAllWrap.style.display = "none";
+            }
+          };
           resultsBlock.innerHTML = "";
           if (!list.length) {
             const empty = document.createElement("div");
@@ -3108,6 +3142,7 @@
             empty.textContent = "Нет рейсов по текущим фильтрам.";
             resultsBlock.appendChild(empty);
             updateSummaryChip(list);
+            updateAviasalesAllWrap([]);
             return;
           }
           list.forEach((flight, index) => {
@@ -3183,32 +3218,21 @@
                 : flight.stressLevel === "high"
                 ? "badge-stress-high"
                 : "badge-stress-medium";
-            const ticketUrl = flight.aviasalesTicketUrl || flight.deeplink || null;
-            const searchUrl = flight.aviasalesSearchUrl || flight.deeplink || null;
-            let aviasalesButtons = "";
-            if (ticketUrl) {
-              aviasalesButtons += `
+            const ticketUrl =
+              flight.aviasalesTicketUrl ||
+              flight.aviasalesSearchUrl ||
+              flight.deeplink ||
+              null;
+            const aviasalesButtons = ticketUrl
+              ? `
                 <a href="${ticketUrl}"
                    class="btn btn-primary btn-sm aviasales-btn-ticket"
                    target="_blank"
                    rel="noopener noreferrer">
-                  Этот билет на Aviasales
+                  Купить на Aviasales
                 </a>
-              `;
-            }
-            if (searchUrl && searchUrl !== ticketUrl) {
-              aviasalesButtons += `
-                <a href="${searchUrl}"
-                   class="btn btn-secondary btn-sm aviasales-btn-search"
-                   target="_blank"
-                   rel="noopener noreferrer">
-                  Все варианты на Aviasales
-                </a>
-              `;
-            }
-            if (!aviasalesButtons) {
-              aviasalesButtons = `<button class="btn-primary btn-sm" disabled>Нет ссылки</button>`;
-            }
+              `
+              : `<button class="btn-primary btn-sm" disabled>Нет ссылки</button>`;
             const topBadges = [];
             if (flight.isTop) {
               topBadges.push('<span class="badge badge-yuvia">Рекомендация Yuvia</span>');
@@ -3294,6 +3318,8 @@
             });
             resultsBlock.appendChild(card);
           });
+          const flightsWithLinks = list || filteredResults || [];
+          updateAviasalesAllWrap(flightsWithLinks);
           updateSummaryChip(list);
           renderFavoritesBlock();
           renderCompareBlock();
@@ -4241,6 +4267,11 @@
           top.forEach((flight) => {
             const card = document.createElement("div");
             card.className = "topcard";
+            const ticketUrl =
+              flight.aviasalesTicketUrl ||
+              flight.aviasalesSearchUrl ||
+              flight.deeplink ||
+              null;
             card.innerHTML = `
               <div class="topcard-label">${flight.topLabel || "Рекомендация"}</div>
               <div class="topcard-main">
@@ -4251,19 +4282,20 @@
               <div class="topcard-meta">${getStressText(flight.stressLevel)}</div>
               <div class="topcard-actions">
                 <button type="button" class="btn-secondary btn-sm" data-action="open">Открыть в выдаче</button>
-                <button type="button" class="btn-primary btn-sm" data-action="deeplink">Открыть поиск на Aviasales</button>
+                ${ticketUrl ? `
+                  <a href="${ticketUrl}"
+                     class="btn btn-primary btn-sm aviasales-btn-ticket"
+                     target="_blank"
+                     rel="noopener noreferrer">
+                    Купить на Aviasales
+                  </a>
+                ` : `
+                  <button class="btn-primary btn-sm" disabled>Нет ссылки</button>
+                `}
               </div>
             `;
             const openBtn = card.querySelector('[data-action="open"]');
             openBtn?.addEventListener("click", () => highlightResultCard(flight.id));
-            const deeplinkBtn = card.querySelector('[data-action="deeplink"]');
-            if (flight.deeplink) {
-              deeplinkBtn?.addEventListener("click", () => {
-                window.open(flight.deeplink, "_blank", "noopener");
-              });
-            } else if (deeplinkBtn) {
-              deeplinkBtn.disabled = true;
-            }
             yuviaTopList.appendChild(card);
           });
         }
