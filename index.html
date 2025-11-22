@@ -2090,15 +2090,20 @@
         async function loadDicts() {
           DICTS_LOADING = true;
           DICTS_ERROR = null;
-          const cached = getStoredDicts();
+
+          // 1) Берём любые словари из localStorage (даже "протухшие") и сразу их применяем,
+          //    чтобы хоть что-то показать пользователю.
+          const cached = getStoredDicts({ allowExpired: true });
           if (cached?.data) {
             applyDicts(cached.data);
-            DICTS_LOADING = false;
-            return;
           }
-          const stale = getStoredDicts({ allowExpired: true });
+
+          // Используем те же данные как "stale" на случай, если сеть упадёт
+          const stale = cached;
+
           try {
-            const resp = await fetch("/api/dicts");
+            // 2) ВСЕГДА ходим в настоящий API воркера и просим свежие словари
+            const resp = await fetch(API_BASE + "/api/dicts?refresh=1");
             if (!resp.ok) {
               throw new Error("Failed to load dicts: " + resp.status);
             }
@@ -2113,6 +2118,7 @@
               applyDicts(stale.data);
             }
           }
+
           DICTS_LOADING = false;
         }
 
