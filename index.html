@@ -165,6 +165,20 @@
         font-size: 13px;
         border-radius: 999px;
       }
+      .aviasales-all-wrap {
+        margin: 24px auto 0;
+        text-align: center;
+      }
+      .aviasales-btn-all {
+        min-width: 260px;
+        max-width: 320px;
+        padding: 12px 24px;
+        font-size: 15px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
       .hint {
         font-size: 12px;
         color: var(--muted);
@@ -2145,6 +2159,7 @@
         let matrixData = [];
         let currentTopFlights = [];
         let lastCurrency = "RUB";
+        let lastSearchContext = null;
 
         const paxState = {
           adults: 1,
@@ -3103,32 +3118,42 @@
           if (!resultsBlock) return;
           const container = resultsBlock;
           let aviasalesAllWrap = document.querySelector(".aviasales-all-wrap");
-          if (!aviasalesAllWrap && container?.parentNode) {
+          if (!aviasalesAllWrap && container) {
             aviasalesAllWrap = document.createElement("div");
             aviasalesAllWrap.className = "aviasales-all-wrap";
-            container.parentNode.appendChild(aviasalesAllWrap);
+            container.after(aviasalesAllWrap);
           }
-          const updateAviasalesAllWrap = (flightsWithLinks) => {
+          const updateAviasalesAllWrap = (flightsList) => {
             if (!aviasalesAllWrap) return;
-            const firstWithLink = (flightsWithLinks || []).find(
-              (flight) =>
-                flight.aviasalesSearchUrl || flight.deeplink || flight.aviasalesTicketUrl,
-            );
+            const hasFlights = Array.isArray(flightsList) && flightsList.length > 0;
+            if (!lastSearchContext || !hasFlights) {
+              aviasalesAllWrap.innerHTML = "";
+              aviasalesAllWrap.style.display = "none";
+              return;
+            }
 
-            if (firstWithLink) {
-              const searchUrl =
-                firstWithLink.aviasalesSearchUrl ||
-                firstWithLink.deeplink ||
-                firstWithLink.aviasalesTicketUrl;
+            const ctx = lastSearchContext;
+            const searchUrl = ctx
+              ? buildDeeplink({
+                  origin: ctx.origin,
+                  destination: ctx.destination,
+                  departDate: ctx.departDate,
+                  returnDate: ctx.oneway ? null : ctx.returnDate,
+                  oneway: ctx.oneway,
+                  adults: ctx.adults || 1,
+                  currency: ctx.currency || lastCurrency,
+                })
+              : null;
 
+            if (searchUrl) {
               aviasalesAllWrap.innerHTML = `
-                <a href="${searchUrl}"
-                   class="btn btn-secondary aviasales-btn-all"
-                   target="_blank"
-                   rel="noopener noreferrer">
+                <button type="button"
+                        class="btn-primary aviasales-btn-all">
                   Все варианты на Aviasales
-                </a>
+                </button>
               `;
+              const button = aviasalesAllWrap.querySelector(".aviasales-btn-all");
+              button?.addEventListener("click", () => window.open(searchUrl, "_blank", "noopener"));
               aviasalesAllWrap.style.display = "";
             } else {
               aviasalesAllWrap.innerHTML = "";
@@ -4339,6 +4364,15 @@
               throw new Error("iata missing");
             }
             lastCurrency = getCurrencyValue();
+            lastSearchContext = {
+              origin: originIATA,
+              destination: destIATA,
+              departDate,
+              returnDate,
+              oneway: isOneway,
+              adults: paxState.adults || 1,
+              currency: lastCurrency,
+            };
             const searchParams = buildSearchQuery({
               origin: originIATA,
               destination: destIATA,
