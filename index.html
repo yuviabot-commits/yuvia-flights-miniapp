@@ -3183,13 +3183,8 @@
                 : flight.stressLevel === "high"
                 ? "badge-stress-high"
                 : "badge-stress-medium";
-            // ticketUrl — ссылка на конкретный билет (если есть от Aviasales/TP)
-            const ticketUrl = flight.aviasalesTicketUrl || null;
-            // searchUrl — ссылка на общий поиск по маршруту
-            const searchUrl =
-              flight.deeplink ||
-              flight.aviasalesSearchUrl ||
-              null;
+            const ticketUrl = flight.aviasalesTicketUrl || flight.deeplink || null;
+            const searchUrl = flight.aviasalesSearchUrl || flight.deeplink || null;
             let aviasalesButtons = "";
             if (ticketUrl) {
               aviasalesButtons += `
@@ -3197,11 +3192,11 @@
                    class="btn btn-primary btn-sm aviasales-btn-ticket"
                    target="_blank"
                    rel="noopener noreferrer">
-                  Купить на Aviasales
+                  Этот билет на Aviasales
                 </a>
               `;
             }
-            if (searchUrl && (!ticketUrl || searchUrl !== ticketUrl)) {
+            if (searchUrl && searchUrl !== ticketUrl) {
               aviasalesButtons += `
                 <a href="${searchUrl}"
                    class="btn btn-secondary btn-sm aviasales-btn-search"
