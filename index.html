@@ -1229,6 +1229,27 @@
         border-color: #e5e7eb;
         color: #4b5563;
       }
+      .badge-transfers {
+        cursor: pointer;
+      }
+      .result-layovers {
+        margin-top: 8px;
+        padding: 10px 12px;
+        background: #f8fafc;
+        border: 1px dashed #e5e7eb;
+        border-radius: 12px;
+        color: #111827;
+      }
+      .result-layovers .layover-heading {
+        font-weight: 600;
+        margin-bottom: 6px;
+        font-size: 13px;
+      }
+      .result-layovers .layover-line {
+        font-size: 13px;
+        margin-bottom: 4px;
+        color: #374151;
+      }
       .badge-yuvia {
         background: linear-gradient(
           135deg,
@@ -2263,6 +2284,10 @@
           return parts.join(" ");
         }
 
+        function clamp(value, min, max) {
+          return Math.min(Math.max(value, min), max);
+        }
+
         function safeDate(value) {
           if (!value) return null;
           const date = value instanceof Date ? value : new Date(value);
@@ -2937,6 +2962,40 @@
           return false;
         }
 
+        function crossesNight(start, end) {
+          if (!(start instanceof Date) || !(end instanceof Date)) return false;
+          if (end <= start) return false;
+          let cursor = new Date(start.getTime());
+          while (cursor < end) {
+            const hour = cursor.getHours();
+            if (hour >= 23 || hour < 6) return true;
+            cursor = new Date(cursor.getTime() + 30 * 60000);
+          }
+          return false;
+        }
+
+        function getConnectionDiffsFromSegments(segments = []) {
+          const ordered = segments
+            .filter((seg) => seg?.departAt instanceof Date || seg?.arriveAt instanceof Date)
+            .sort((a, b) => (a.departAt?.getTime?.() || 0) - (b.departAt?.getTime?.() || 0));
+          const list = [];
+          for (let i = 1; i < ordered.length; i++) {
+            const prev = ordered[i - 1];
+            const next = ordered[i];
+            if (prev?.arriveAt instanceof Date && next?.departAt instanceof Date) {
+              const diffMinutes = (next.departAt - prev.arriveAt) / 60000;
+              if (diffMinutes > 0) {
+                list.push({
+                  minutes: diffMinutes,
+                  crossesNight: crossesNight(prev.arriveAt, next.departAt),
+                  airport: prev.destAirport || next.originAirport || "",
+                });
+              }
+            }
+          }
+          return list;
+        }
+
         function applyTripTriggers(list) {
           return list.filter((flight) => {
             const transfersCount = Number.isFinite(Number(flight.transfers))
@@ -2982,16 +3041,64 @@
           });
         }
 
+        function getCalmScore(flight, context = {}) {
+          const minDurationMinutes = context.minDurationMinutes || 0;
+          let score = 50;
+
+          const transfers = Number(flight.transfers) || 0;
+          if (transfers === 0) score += 30;
+          else if (transfers === 1) score += 18;
+          else if (transfers === 2) score += 8;
+          else score += 2;
+
+          const departTimes = [flight?.outbound?.start?.departAt || flight?.departAt, flight?.return?.start?.departAt];
+          const arriveTimes = [flight?.outbound?.end?.arriveAt || flight?.arriveAt, flight?.return?.end?.arriveAt];
+
+          departTimes.forEach((time) => {
+            if (!(time instanceof Date)) return;
+            if (isNightTime(time)) score -= 8;
+            else if (isEarlyTime(time)) score -= 4;
+          });
+          arriveTimes.forEach((time) => {
+            if (!(time instanceof Date)) return;
+            if (isNightTime(time)) score -= 6;
+          });
+
+          const connections = collectConnectionDiffs(flight);
+          connections.forEach((conn) => {
+            if (conn.minutes < 60) score -= 12;
+            if (conn.minutes < 45) score -= 6;
+            if (conn.minutes > 240) score -= 8;
+            if (conn.crossesNight && conn.minutes > 240) score -= 14;
+          });
+
+          if (minDurationMinutes) {
+            const diff = (flight.durationMinutes || minDurationMinutes) - minDurationMinutes;
+            if (diff <= 0) score += 4;
+            else if (diff <= 60) score -= 2;
+            else if (diff <= 180) score -= 6;
+            else score -= 12;
+          }
+
+          if (typeof flight.rating === "number") {
+            score += (flight.rating - 6) * 1.1;
+          }
+
+          return score;
+        }
+
         function applyTripStyle(list) {
           if (!tripState.style) return list;
           const baseList = list.slice();
           if (tripState.style === "calm") {
-            return baseList.sort(
-              (a, b) =>
-                (b.rating || 0) - (a.rating || 0) ||
-                (a.durationMinutes || 0) - (b.durationMinutes || 0) ||
-                (a.price || 0) - (b.price || 0)
-            );
+            const durations = baseList
+              .map((flight) => flight.durationMinutes)
+              .filter((value) => typeof value === "number" && value > 0);
+            const minDuration = durations.length ? Math.min(...durations) : 0;
+            return baseList
+              .map((f) => ({ flight: f, calmScore: getCalmScore(f, { minDurationMinutes: minDuration }) }))
+              .sort((a, b) => b.calmScore - a.calmScore || a.flight.price - b.flight.price)
+              .map((x) => x.flight);
           }
           if (tripState.style === "balanced") {
             return baseList
@@ -3112,6 +3219,62 @@
               </div>
             </div>
           `;
+        }
+
+        function renderLayoversBlock(flight) {
+          const groups = [];
+          if (Array.isArray(flight.outbound?.segments) && flight.outbound.segments.length) {
+            groups.push({ label: flight.return ? "Туда" : "Маршрут", segments: flight.outbound.segments });
+          }
+          if (Array.isArray(flight.return?.segments) && flight.return.segments.length) {
+            groups.push({ label: "Обратно", segments: flight.return.segments });
+          }
+          if (!groups.length) {
+            return `<div class="result-layovers hidden" data-id="${flight.id}"><div class="layover-line">Нет детальной информации о пересадках</div></div>`;
+          }
+
+          const renderSegments = (segments) => {
+            const ordered = [...segments].sort(
+              (a, b) => (a.departAt?.getTime?.() || 0) - (b.departAt?.getTime?.() || 0)
+            );
+            const lines = [];
+            ordered.forEach((seg, idx) => {
+              const segmentDuration =
+                seg.durationMinutes ||
+                (seg.departAt instanceof Date && seg.arriveAt instanceof Date
+                  ? Math.max(0, Math.round((seg.arriveAt - seg.departAt) / 60000))
+                  : 0);
+              const from = [seg.originCity, formatAirport(seg.originAirport)].filter(Boolean).join(" ");
+              const to = [seg.destCity, formatAirport(seg.destAirport)].filter(Boolean).join(" ");
+              lines.push(
+                `<div class="layover-line">${from || "—"} → ${to || "—"}, ${formatDuration(segmentDuration)}</div>`
+              );
+              if (idx > 0) {
+                const prev = ordered[idx - 1];
+                const layoverMinutes =
+                  prev.arriveAt instanceof Date && seg.departAt instanceof Date
+                    ? (seg.departAt - prev.arriveAt) / 60000
+                    : 0;
+                if (layoverMinutes > 0) {
+                  const crosses = crossesNight(prev.arriveAt, seg.departAt);
+                  const airport = formatAirport(prev.destAirport || seg.originAirport);
+                  const nightText = crosses ? ", ночь" : "";
+                  lines.push(
+                    `<div class="layover-line">Стыковка: ${formatDuration(layoverMinutes)} в ${airport || "—"}${nightText}</div>`
+                  );
+                }
+              }
+            });
+            return lines.join("");
+          };
+
+          const content = groups
+            .map(({ label, segments }) => {
+              return `<div class="layover-heading">${label}</div>${renderSegments(segments)}`;
+            })
+            .join("");
+
+          return `<div class="result-layovers hidden" data-id="${flight.id}">${content}</div>`;
         }
 
         function renderResults(list) {
@@ -3237,12 +3400,15 @@
             }
 
             const ratingText = typeof flight.rating === "number" ? flight.rating.toFixed(1) : flight.rating || "—";
+            const ratingTooltip =
+              "Оценка маршрута по цене, времени в пути, пересадкам и уровню стресса по сравнению с другими вариантами.";
             const stressClass =
               flight.stressLevel === "low"
                 ? "badge-stress-low"
                 : flight.stressLevel === "high"
                 ? "badge-stress-high"
                 : "badge-stress-medium";
+            const stressTooltip = getStressTooltip(flight.stressLevel);
             const ticketUrl =
               flight.aviasalesTicketUrl ||
               flight.aviasalesSearchUrl ||
@@ -3272,6 +3438,7 @@
             const flightNumberLine = flightNumbersAll.length
               ? `<div class="result-flight-number">Рейсы: ${flightNumbersAll.join(", ")}</div>`
               : "";
+            const layoversBlock = renderLayoversBlock(flight);
 
             card.innerHTML = `
               <div class="result-header">
@@ -3297,11 +3464,14 @@
                 ${segments.join("")}
               </div>
               <div class="result-chips">
-                <span class="badge badge-rating">Оценка маршрута ${ratingText}</span>
-                <span class="badge ${stressClass}">${getStressText(flight.stressLevel)}</span>
-                <span class="badge badge-chip">${formatTransfers(flight.transfers)}</span>
+                <span class="badge badge-rating" title="${ratingTooltip}">Оценка маршрута ${ratingText}</span>
+                <span class="badge ${stressClass}" title="${stressTooltip}">${getStressText(flight.stressLevel)}</span>
+                <button type="button" class="badge badge-chip badge-transfers" data-id="${flight.id}">${formatTransfers(
+                  flight.transfers
+                )}</button>
                 ${topBadges.join("")}
               </div>
+              ${layoversBlock}
               <div class="result-footer">
                 <div class="result-footer-actions">
                   <button type="button" class="btn-ghost btn-sm btn-fav" data-id="${flight.id}">
@@ -3430,8 +3600,10 @@
           list = applyTripTriggers(list);
           if (tripState.style) {
             list = applyTripStyle(list);
+            filteredResults = list;
+          } else {
+            filteredResults = sortBySelection(list);
           }
-          filteredResults = sortBySelection(list);
           const topFlights = getYuviaTop3(filteredResults);
           markTopFlights(filteredResults, topFlights);
           renderResults(filteredResults);
@@ -3759,10 +3931,6 @@
             );
             const flightNumber = raw.flight_number || raw.flightNumber || "";
             const transfersTotal = (outboundSummary?.transfers || 0) + (returnSummary?.transfers || 0);
-            const ratingBase = raw.rating ?? 7.2;
-            const rating = Number((ratingBase - transfersTotal * 0.35).toFixed(1));
-            const stressLevel = rating >= 8.3 ? "low" : rating >= 6.5 ? "medium" : "high";
-            const yuviaScore = Math.round(rating * 20 - transfersTotal * 12);
             const deeplinkCandidate = pickDeeplink(raw);
 
             const deeplink =
@@ -3808,9 +3976,6 @@
               airlineCode,
               ...collectAirlinesMeta([], airlineCode, airlineName),
               flightNumber,
-              rating,
-              stressLevel,
-              yuviaScore,
               airline: airlineCode,
               segments: [],
               flightNumbers: {
@@ -3897,10 +4062,6 @@
           const arriveTimeStr = formatTime(arrivePoint);
           const depDateStr = ddmmyyyy(departPoint);
           const durationHours = Number(((outboundDuration || raw.durationMinutes || 0) / 60).toFixed(1));
-          const ratingBase = raw.rating ?? 7.2;
-          const rating = Number((ratingBase - transfers * 0.35).toFixed(1));
-          const stressLevel = rating >= 8.3 ? "low" : rating >= 6.5 ? "medium" : "high";
-          const yuviaScore = Math.round(rating * 20 - transfers * 12);
           const departHour = departPoint instanceof Date ? departPoint.getHours() : null;
           const outboundFlightNumbers = (outboundSegments || [])
             .map((segment) => [segment.airlineCode, segment.flightNumber].filter(Boolean).join(" ").trim())
@@ -3960,9 +4121,6 @@
             airlineCode: primarySegment.airlineCode || "",
             airlinesAll,
             airlinesMetaAll,
-            rating,
-            stressLevel,
-            yuviaScore,
             airline: primarySegment.airlineCode || "",
             segments: allSegments,
             outbound: outboundSummary
@@ -4074,6 +4232,104 @@
           return prices.length % 2 ? prices[mid] : (prices[mid - 1] + prices[mid]) / 2;
         }
 
+        function collectConnectionDiffs(flight) {
+          const groups = [];
+          if (Array.isArray(flight.outbound?.segments) && flight.outbound.segments.length) {
+            groups.push(flight.outbound.segments);
+          }
+          if (Array.isArray(flight.return?.segments) && flight.return.segments.length) {
+            groups.push(flight.return.segments);
+          }
+          return groups.flatMap((group) => getConnectionDiffsFromSegments(group));
+        }
+
+        function computeStress(flight, context = {}) {
+          const minDurationMinutes = context.minDurationMinutes || 0;
+          let stressPoints = 0;
+          const transfers = Number(flight.transfers) || 0;
+          if (transfers >= 1) {
+            stressPoints += 2 + Math.max(0, transfers - 1);
+          }
+
+          const connections = collectConnectionDiffs(flight);
+          connections.forEach((conn) => {
+            if (conn.minutes < 60) stressPoints += 3;
+            if (conn.minutes < 45) stressPoints += 1;
+            if (conn.minutes > 240) stressPoints += 2;
+            if (conn.crossesNight && conn.minutes > 240) stressPoints += 3;
+          });
+
+          const outboundDepart = flight?.outbound?.start?.departAt || flight?.departAt;
+          const outboundArrive = flight?.outbound?.end?.arriveAt || flight?.arriveAt;
+          const returnDepart = flight?.return?.start?.departAt || flight?.returnDepartAt;
+          const returnArrive = flight?.return?.end?.arriveAt || flight?.returnArriveAt;
+
+          const nightDepartures = [outboundDepart, returnDepart].filter((d) => d instanceof Date && isNightTime(d));
+          const nightArrivals = [outboundArrive, returnArrive].filter((d) => d instanceof Date && isNightTime(d));
+          stressPoints += nightDepartures.length;
+          stressPoints += nightArrivals.length;
+
+          [outboundDepart, returnDepart].forEach((dep) => {
+            if (dep instanceof Date && !isNightTime(dep) && isEarlyTime(dep)) {
+              stressPoints += 1;
+            }
+          });
+
+          if (minDurationMinutes > 0) {
+            const durationDiffMinutes = Math.max(0, (flight.durationMinutes || 0) - minDurationMinutes);
+            const diffHours = durationDiffMinutes / 60;
+            if (diffHours > 2 && diffHours <= 4) stressPoints += 1;
+            else if (diffHours > 4 && diffHours <= 6) stressPoints += 2;
+            else if (diffHours > 6) stressPoints += 3;
+          }
+
+          const level = stressPoints <= 2 ? "low" : stressPoints <= 5 ? "medium" : "high";
+          return { level, points: stressPoints };
+        }
+
+        function recalculateScores(list) {
+          if (!Array.isArray(list) || !list.length) return;
+          const durations = list
+            .map((flight) => flight.durationMinutes)
+            .filter((value) => typeof value === "number" && value > 0);
+          const minDurationMinutes = durations.length ? Math.min(...durations) : 0;
+          const medianPrice = getMedianPrice(list) || 1;
+
+          list.forEach((flight) => {
+            const { level, points } = computeStress(flight, { minDurationMinutes });
+            flight.stressLevel = level;
+            flight.stressPoints = points;
+
+            const priceRatio = medianPrice ? (flight.price || 0) / medianPrice : 1;
+            const normPrice = clamp(priceRatio || 1, 0.6, 1.8);
+            const priceScore = (2 - normPrice) * 3;
+
+            const durationRatio = minDurationMinutes ? (flight.durationMinutes || minDurationMinutes) / minDurationMinutes : 1;
+            const normDuration = clamp(durationRatio || 1, 1, 2.2);
+            const durationScore = (2.3 - normDuration) * 3;
+
+            let transferScore = 0;
+            if (flight.transfers === 0) transferScore = 3;
+            else if (flight.transfers === 1) transferScore = 2;
+            else if (flight.transfers === 2) transferScore = 1;
+
+            let stressScore = 0;
+            if (flight.stressLevel === "low") stressScore = 2;
+            else if (flight.stressLevel === "medium") stressScore = 1;
+
+            let timeScore = 0;
+            const depart = flight?.outbound?.start?.departAt || flight?.departAt;
+            const arrive = flight?.outbound?.end?.arriveAt || flight?.arriveAt;
+            if (depart instanceof Date && !isNightTime(depart) && !isEarlyTime(depart)) timeScore += 0.4;
+            if (arrive instanceof Date && !isNightTime(arrive)) timeScore += 0.2;
+
+            const ratingRaw = 1 + priceScore + durationScore + transferScore + stressScore + timeScore;
+            const rating = clamp(ratingRaw, 6.0, 9.7);
+            flight.rating = Number(rating.toFixed(1));
+            flight.yuviaScore = Math.round(flight.rating * 10);
+          });
+        }
+
         function getYuviaTop3(list) {
           if (!list.length) return [];
           const working = list.filter((flight) => typeof flight.price === "number" && flight.price > 0);
@@ -4118,6 +4374,14 @@
           if (level === "medium") return "стресс: средний";
           if (level === "high") return "стресс: высокий";
           return "стресс: неизвестно";
+        }
+
+        function getStressTooltip(level) {
+          if (level === "low")
+            return "Низкий стресс: без ночных и экстремальных стыковок, без опасно коротких пересадок и без сильно растянутого маршрута.";
+          if (level === "high")
+            return "Высокий стресс: несколько пересадок, короткие или ночные стыковки, либо маршрут сильно длиннее большинства вариантов.";
+          return "Средний стресс: есть отдельные неудобства (пересадки, ночной или ранний вылет, чуть более долгий путь), но без крайностей.";
         }
 
         function findFlightById(id) {
@@ -4440,6 +4704,8 @@ allResults = flightsRaw
   )
   .filter((flight) => flight && flight.price > 0);
 
+            recalculateScores(allResults);
+
             updateFilterOptions();
             matrixData = normalizeMatrixResponse(matrixPayload);
             renderPriceMatrix(matrixData, toISO(departDate));
@@ -4560,6 +4826,19 @@ allResults = flightsRaw
           });
         }
 
+        function initTransferDetailsToggle() {
+          resultsBlock?.addEventListener("click", (event) => {
+            const trigger = event.target.closest(".badge-transfers");
+            if (!trigger || !(trigger instanceof HTMLElement)) return;
+            const id = trigger.dataset.id;
+            if (!id) return;
+            const details = resultsBlock.querySelector(`.result-layovers[data-id="${id}"]`);
+            if (details) {
+              details.classList.toggle("hidden");
+            }
+          });
+        }
+
         function initSuggests() {
           attachSuggest(originInput, handleSuggestPick("origin"));
           attachSuggest(destinationInput, handleSuggestPick("destination"));
@@ -4593,6 +4872,7 @@ allResults = flightsRaw
           initTripPreferenceChips();
           attachFiltersHandlers();
           attachGeneralHandlers();
+          initTransferDetailsToggle();
           renderRecent();
           updateSearchSummary();
         }
