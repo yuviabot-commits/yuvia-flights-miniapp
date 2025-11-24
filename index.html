@@ -142,6 +142,20 @@
         font-weight: 500;
         white-space: nowrap;
       }
+      #doSearch {
+        padding: 13px 22px;
+        font-size: 16px;
+        box-shadow: 0 12px 30px rgba(7, 94, 84, 0.45);
+        transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+      }
+      #doSearch:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 16px 34px rgba(7, 94, 84, 0.48);
+      }
+      #doSearch:active {
+        transform: translateY(0);
+        box-shadow: 0 10px 26px rgba(7, 94, 84, 0.42);
+      }
       .btn-primary {
         background: linear-gradient(135deg, #075e54, #0f766e);
         color: #f9fafb;
@@ -199,6 +213,33 @@
         flex-wrap: wrap;
         gap: 8px;
       }
+      .recent-scroll {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding-right: 32px;
+        position: relative;
+        scroll-snap-type: x proximity;
+      }
+      .recent-scroll-wrap {
+        position: relative;
+      }
+      .recent-scroll::-webkit-scrollbar {
+        height: 6px;
+      }
+      .recent-scroll::-webkit-scrollbar-thumb {
+        background: rgba(5, 50, 39, 0.18);
+        border-radius: 999px;
+      }
+      .recent-fade {
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        width: 38px;
+        pointer-events: none;
+        background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, var(--bg) 70%);
+      }
       .chip {
         border-radius: var(--radius-pill);
         padding: 7px 11px;
@@ -228,6 +269,23 @@
         grid-template-columns: 280px minmax(0, 1fr);
         gap: 16px;
         margin-top: 12px;
+      }
+      .filters-block {
+        position: sticky;
+        top: 12px;
+        align-self: start;
+      }
+      #matrixSection.hidden {
+        display: none;
+      }
+      .no-results-card {
+        border: 1px solid rgba(148, 163, 184, 0.6);
+        border-radius: 16px;
+        padding: 18px;
+        box-shadow: 0 12px 32px rgba(5, 50, 39, 0.08);
+        background: #ffffff;
+        text-align: center;
+        font-size: 15px;
       }
       .pill {
         display: inline-flex;
@@ -1589,10 +1647,6 @@
                 </div>
               </div>
             </div>
-            <div class="hint" id="originIataHint"></div>
-            <div class="hint" id="destIataHint"></div>
-            <div class="hint" id="departHint"></div>
-            <div class="hint" id="retHint"></div>
             <div class="oneway-row">
               <label class="oneway-toggle" for="onewayToggle">
                 <input type="checkbox" id="onewayToggle" />
@@ -1649,13 +1703,6 @@
                 <button
                   type="button"
                   class="chip-toggle"
-                  data-trigger="no_short_connections"
-                >
-                  Без коротких стыковок
-                </button>
-                <button
-                  type="button"
-                  class="chip-toggle"
                   data-trigger="no_overnight"
                 >
                   Не ночевать в аэропорту
@@ -1687,11 +1734,14 @@
         </div>
         <!-- Недавние запросы -->
         <div class="section-title">Недавние запросы</div>
-        <div class="chips" id="recentChips"></div>
+        <div class="recent-scroll-wrap">
+          <div class="chips recent-scroll" id="recentChips"></div>
+          <div class="recent-fade"></div>
+        </div>
         <!-- Фильтры + результаты -->
-        <div class="two-col">
+        <div class="two-col hidden" id="postSearchLayout">
           <!-- Фильтры -->
-          <div class="card filters-block">
+          <div class="card filters-block" id="filtersBlock">
             <div class="section-title" style="margin-top: 0">Фильтры</div>
             <div class="label">Пересадки</div>
             <div style="display: flex; flex-wrap: wrap; gap: 6px">
@@ -1832,8 +1882,10 @@
             </div>
             <div class="section-title" style="margin-top: 4px">Результаты</div>
             <div id="results" class="grid"></div>
-            <div class="section-title">Соседние даты</div>
-            <div id="matrix"></div>
+            <div id="matrixSection">
+              <div class="section-title">Соседние даты</div>
+              <div id="matrix"></div>
+            </div>
             <div class="results-disclaimer">
               <p>
                 Отображаемые варианты перелётов и цены основаны на данных сервиса Aviasales (Travelpayouts)
@@ -2250,6 +2302,7 @@
         let currentTopFlights = [];
         let lastCurrency = "RUB";
         let lastSearchContext = null;
+        let hasSearched = false;
 
         const TOOLTIP_TEXTS = {
           routeScore:
@@ -2270,7 +2323,6 @@
           triggers: {
             no_night_dep: false,
             direct_only: false,
-            no_short_connections: false,
             no_overnight: false,
             no_early_dep: false,
           },
@@ -2289,10 +2341,6 @@
         const destinationInput = $("#destination");
         const departInput = $("#depart");
         const returnInput = $("#ret");
-        const originHint = $("#originIataHint");
-        const destHint = $("#destIataHint");
-        const departHint = $("#departHint");
-        const returnHint = $("#retHint");
         const searchSummary = $("#searchSummary");
         const matrixBlock = $("#matrix");
         const resultsBlock = $("#results");
@@ -2303,6 +2351,9 @@
         const airlineFilter = $("#airlineFilter");
         const originAirportFilter = $("#originAirportFilter");
         const destinationAirportFilter = $("#destinationAirportFilter");
+        const postSearchLayout = $("#postSearchLayout");
+        const matrixSection = $("#matrixSection");
+        const filtersCard = $("#filtersBlock");
         const swapBtn = $("#swapInline");
         const paxTrigger = $("#paxTrigger");
         const paxPanel = $("#paxPanel");
@@ -2525,7 +2576,22 @@
 
           if (searchSummary) {
             searchSummary.textContent = parts.join(" · ");
-            searchSummary.classList.remove("hidden");
+            searchSummary.classList.toggle("hidden", !hasSearched);
+          }
+        }
+
+        function updatePostSearchLayout() {
+          if (postSearchLayout) {
+            postSearchLayout.classList.toggle("hidden", !hasSearched);
+          }
+          if (matrixSection) {
+            matrixSection.classList.toggle("hidden", !hasSearched);
+          }
+          if (searchSummary) {
+            searchSummary.classList.toggle(
+              "hidden",
+              !hasSearched || !searchSummary.textContent,
+            );
           }
         }
 
@@ -2553,13 +2619,10 @@
           if (!departInput) return null;
           let departDate = parseDateValue(departInput.value);
           if (!departDate) {
-            departHint.textContent = "Укажи дату вылета";
             return null;
           }
           departDate = clampToFuture(departDate);
           departInput.value = toISO(departDate);
-          departHint.textContent = `Вылет: ${ddmmyyyy(departDate)}`;
-          departHint.classList.remove("hidden");
           return departDate;
         }
 
@@ -2567,22 +2630,17 @@
           if (!returnInput) return null;
           const onewayControl = $("#onewayToggle");
           if (onewayControl?.checked) {
-            if (returnHint) {
-              returnHint.textContent = "Без обратного билета";
-            }
             return null;
           }
           const departDate = parseDateValue(departInput.value) || todayLocal;
           let returnDate = parseDateValue(returnInput.value);
           if (!returnDate) {
-            returnHint.textContent = "Дата возвращения не выбрана";
             return null;
           }
           if (returnDate < departDate) {
             returnDate = new Date(departDate);
           }
           returnInput.value = toISO(returnDate);
-          returnHint.textContent = `Возврат: ${ddmmyyyy(returnDate)}`;
           return returnDate;
         }
 
@@ -2592,9 +2650,6 @@
           if (onewayControl?.checked) {
             returnInput.value = "";
             returnInput.disabled = true;
-            if (returnHint) {
-              returnHint.textContent = "Без обратного билета";
-            }
           } else {
             returnInput.disabled = false;
             normalizeReturnDate();
@@ -2768,24 +2823,21 @@
           return select?.value || "RUB";
         }
 
-        function ensureIataFromPick(item, hintNode, setValue) {
+        function ensureIataFromPick(item, setValue) {
           if (!item) return;
           setValue(item.code || "");
-          if (hintNode) {
-            hintNode.textContent = `${item.city} · ${item.code}`;
-          }
         }
 
         function handleSuggestPick(target) {
           return (item) => {
             if (target === "origin") {
               originIATA = item.code;
-              ensureIataFromPick(item, originHint, (value) => {
+              ensureIataFromPick(item, (value) => {
                 originIATA = value;
               });
             } else {
               destIATA = item.code;
-              ensureIataFromPick(item, destHint, (value) => {
+              ensureIataFromPick(item, (value) => {
                 destIATA = value;
               });
             }
@@ -3096,21 +3148,15 @@
             const outboundSegments = Array.isArray(flight.outbound?.segments)
               ? flight.outbound.segments
               : [];
-            const returnSegments = Array.isArray(flight.return?.segments) ? flight.return.segments : [];
-            const connectionGroups = [outboundSegments, returnSegments].filter(
-              (group) => Array.isArray(group) && group.length,
-            );
-            if (
-              tripState.triggers.no_short_connections &&
-              connectionGroups.length &&
-              connectionGroups.some((group) => hasShortConnections(group))
-            )
-              return false;
-            if (
-              tripState.triggers.no_overnight &&
-              connectionGroups.length &&
-              connectionGroups.some((group) => hasOvernightLayover(group))
-            )
+          const returnSegments = Array.isArray(flight.return?.segments) ? flight.return.segments : [];
+          const connectionGroups = [outboundSegments, returnSegments].filter(
+            (group) => Array.isArray(group) && group.length,
+          );
+          if (
+            tripState.triggers.no_overnight &&
+            connectionGroups.length &&
+            connectionGroups.some((group) => hasOvernightLayover(group))
+          )
               return false;
 
             return true;
@@ -3319,6 +3365,30 @@
             aviasalesAllWrap = document.createElement("div");
             aviasalesAllWrap.className = "aviasales-all-wrap";
             container.after(aviasalesAllWrap);
+          }
+          const hasBaseResults = Array.isArray(allResults) && allResults.length > 0;
+          if (filtersCard) {
+            filtersCard.classList.toggle("hidden", !hasBaseResults);
+          }
+          if (!hasBaseResults && hasSearched) {
+            resultsBlock.innerHTML = "";
+            const empty = document.createElement("div");
+            empty.className = "no-results-card";
+            empty.innerHTML =
+              "<h4 style=\"margin: 0 0 8px\">Нет рейсов по твоему запросу</h4><p style=\"margin: 0; color: var(--muted);\">Попробуй изменить даты или города — мы покажем варианты, как только они появятся.</p>";
+            resultsBlock.appendChild(empty);
+            updateSummaryChip([]);
+            if (matrixSection) {
+              matrixSection.classList.add("hidden");
+            }
+            if (aviasalesAllWrap) {
+              aviasalesAllWrap.innerHTML = "";
+              aviasalesAllWrap.style.display = "none";
+            }
+            return;
+          }
+          if (matrixSection) {
+            matrixSection.classList.toggle("hidden", !hasSearched);
           }
           const updateAviasalesAllWrap = (flightsList) => {
             if (!aviasalesAllWrap) return;
@@ -4642,17 +4712,17 @@
           }
           const passengers = paxState.adults + paxState.children + paxState.infants;
           const oneway = isOneway;
+          hasSearched = true;
+          updatePostSearchLayout();
           setLoading(true);
           try {
             if (!originIATA) {
               const cities = await suggestCity(originCity);
               originIATA = cities[0]?.code || "";
-              originHint.textContent = `${originCity} · ${originIATA}`;
             }
             if (!destIATA) {
               const cities = await suggestCity(destCity);
               destIATA = cities[0]?.code || "";
-              destHint.textContent = `${destCity} · ${destIATA}`;
             }
             if (!originIATA || !destIATA) {
               throw new Error("iata missing");
@@ -4821,9 +4891,6 @@ allResults = flightsRaw
             originInput.value = destinationInput.value;
             destinationInput.value = tmp;
             [originIATA, destIATA] = [destIATA, originIATA];
-            const hintTmp = originHint.textContent;
-            originHint.textContent = destHint.textContent;
-            destHint.textContent = hintTmp;
             updateSearchSummary();
           });
           originInput?.addEventListener("input", () => {
@@ -4922,6 +4989,7 @@ allResults = flightsRaw
           initTooltips();
           renderRecent();
           updateSearchSummary();
+          updatePostSearchLayout();
         }
 
         init();
