@@ -1230,25 +1230,71 @@
         color: #4b5563;
       }
       .badge-transfers {
+        cursor: default;
+      }
+      .badge-with-tooltip {
+        position: relative;
+        padding-right: 7px;
+        gap: 8px;
+      }
+      .tooltip-trigger {
+        appearance: none;
+        border: none;
+        background: rgba(15, 118, 110, 0.08);
+        color: #0f766e;
+        border-radius: 50%;
+        width: 18px;
+        height: 18px;
+        font-size: 12px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         cursor: pointer;
+        padding: 0;
       }
-      .result-layovers {
-        margin-top: 8px;
-        padding: 10px 12px;
-        background: #f8fafc;
-        border: 1px dashed #e5e7eb;
+      .tooltip-trigger:hover,
+      .tooltip-trigger.active {
+        background: rgba(15, 118, 110, 0.16);
+      }
+      .tooltip-popover {
+        position: absolute;
+        left: 0;
+        top: calc(100% + 8px);
+        min-width: 280px;
+        max-width: 340px;
+        padding: 12px 14px;
+        background: #ffffff;
+        border: 1px solid rgba(148, 163, 184, 0.6);
         border-radius: 12px;
-        color: #111827;
-      }
-      .result-layovers .layover-heading {
-        font-weight: 600;
-        margin-bottom: 6px;
+        box-shadow: 0 12px 28px rgba(7, 94, 84, 0.16);
         font-size: 13px;
+        line-height: 1.55;
+        color: #1f2937;
+        z-index: 5;
+        display: none;
       }
-      .result-layovers .layover-line {
+      .tooltip-popover.visible {
+        display: block;
+      }
+      @media (max-width: 600px) {
+        .tooltip-popover {
+          position: fixed;
+          left: 12px;
+          right: 12px;
+          top: auto;
+          bottom: 20px;
+        }
+      }
+      .results-disclaimer {
+        margin-top: 18px;
+        padding: 14px 16px;
+        background: #f8fafc;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        border-radius: 12px;
         font-size: 13px;
-        margin-bottom: 4px;
-        color: #374151;
+        line-height: 1.55;
+        color: #4b5563;
       }
       .badge-yuvia {
         background: linear-gradient(
@@ -1788,6 +1834,20 @@
             <div id="results" class="grid"></div>
             <div class="section-title">Соседние даты</div>
             <div id="matrix"></div>
+            <div class="results-disclaimer">
+              <p>
+                Отображаемые варианты перелётов и цены основаны на данных сервиса Aviasales (Travelpayouts)
+                и являются выборкой лучших предложений на момент запроса. Информация предоставлена исключительно
+                в ознакомительных целях и может быть неполной или устаревшей.
+              </p>
+              <p>
+                Актуальная стоимость, наличие мест, расписание рейсов, условия перевозки и маршрут подлежат
+                обязательному уточнению на сайте Aviasales и/или у соответствующих перевозчиков и агентств перед
+                покупкой билета. Сервис Yuvia не гарантирует точность, полноту и актуальность указанных данных и не
+                несёт ответственности за изменения цен, расписания и условий, внесённые авиакомпаниями, агентствами
+                или иными третьими лицами.
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -2165,6 +2225,15 @@
           return name ? `${name} (${upper})` : upper;
         }
 
+        function escapeHtml(text) {
+          return String(text || "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+        }
+
         function resolveAirlineName(code, primaryName = "", fallbackName = "") {
           const upper = String(code || "").toUpperCase();
           if (primaryName) return primaryName;
@@ -2181,6 +2250,13 @@
         let currentTopFlights = [];
         let lastCurrency = "RUB";
         let lastSearchContext = null;
+
+        const TOOLTIP_TEXTS = {
+          routeScore:
+            "Оценка маршрута — это ориентировочная интегральная оценка, которая учитывает длительность поездки, количество пересадок, ночные перелёты и время ожидания между рейсами. Чем выше оценка, тем в среднем более комфортным и удобным выглядит маршрут для большинства путешественников. Это не персональная рекомендация, а мягкая подсказка, которая помогает сравнивать варианты между собой.",
+          stressLevel:
+            "Уровень стресса — приблизительная оценка того, насколько поездка может быть утомительной с учётом количества пересадок, длительных стыковок, ночных вылетов и ранних прилётов. Более низкий уровень стресса означает, что маршрут, как правило, воспринимается как более мягкий и щадящий. Эта оценка ориентировочная и не учитывает индивидуальные особенности и предпочтения путешественника.",
+        };
 
         const paxState = {
           adults: 1,
@@ -3221,64 +3297,22 @@
           `;
         }
 
-        function renderLayoversBlock(flight) {
-          const groups = [];
-          if (Array.isArray(flight.outbound?.segments) && flight.outbound.segments.length) {
-            groups.push({ label: flight.return ? "Туда" : "Маршрут", segments: flight.outbound.segments });
-          }
-          if (Array.isArray(flight.return?.segments) && flight.return.segments.length) {
-            groups.push({ label: "Обратно", segments: flight.return.segments });
-          }
-          if (!groups.length) {
-            return `<div class="result-layovers hidden" data-id="${flight.id}"><div class="layover-line">Нет детальной информации о пересадках</div></div>`;
-          }
-
-          const renderSegments = (segments) => {
-            const ordered = [...segments].sort(
-              (a, b) => (a.departAt?.getTime?.() || 0) - (b.departAt?.getTime?.() || 0)
-            );
-            const lines = [];
-            ordered.forEach((seg, idx) => {
-              const segmentDuration =
-                seg.durationMinutes ||
-                (seg.departAt instanceof Date && seg.arriveAt instanceof Date
-                  ? Math.max(0, Math.round((seg.arriveAt - seg.departAt) / 60000))
-                  : 0);
-              const from = [seg.originCity, formatAirport(seg.originAirport)].filter(Boolean).join(" ");
-              const to = [seg.destCity, formatAirport(seg.destAirport)].filter(Boolean).join(" ");
-              lines.push(
-                `<div class="layover-line">${from || "—"} → ${to || "—"}, ${formatDuration(segmentDuration)}</div>`
-              );
-              if (idx > 0) {
-                const prev = ordered[idx - 1];
-                const layoverMinutes =
-                  prev.arriveAt instanceof Date && seg.departAt instanceof Date
-                    ? (seg.departAt - prev.arriveAt) / 60000
-                    : 0;
-                if (layoverMinutes > 0) {
-                  const crosses = crossesNight(prev.arriveAt, seg.departAt);
-                  const airport = formatAirport(prev.destAirport || seg.originAirport);
-                  const nightText = crosses ? ", ночь" : "";
-                  lines.push(
-                    `<div class="layover-line">Стыковка: ${formatDuration(layoverMinutes)} в ${airport || "—"}${nightText}</div>`
-                  );
-                }
-              }
-            });
-            return lines.join("");
-          };
-
-          const content = groups
-            .map(({ label, segments }) => {
-              return `<div class="layover-heading">${label}</div>${renderSegments(segments)}`;
-            })
-            .join("");
-
-          return `<div class="result-layovers hidden" data-id="${flight.id}">${content}</div>`;
+        function renderBadgeWithTooltip({ label, value = "", className = "", tooltipKey = "" }) {
+          const text = [label, value].filter(Boolean).join(" ");
+          const tooltip = TOOLTIP_TEXTS[tooltipKey] || "";
+          const trigger = tooltip
+            ? `<button type="button" class="tooltip-trigger" data-tooltip-key="${tooltipKey}" aria-label="Подробнее">?</button>`
+            : "";
+          const popover = tooltip
+            ? `<div class="tooltip-popover" data-tooltip-key="${tooltipKey}">${escapeHtml(tooltip)}</div>`
+            : "";
+          const tooltipClass = tooltip ? " badge-with-tooltip" : "";
+          return `<span class="badge ${className}${tooltipClass}" data-tooltip-key="${tooltipKey}"><span>${text}</span>${trigger}${popover}</span>`;
         }
 
         function renderResults(list) {
           if (!resultsBlock) return;
+          closeAllTooltips();
           const container = resultsBlock;
           let aviasalesAllWrap = document.querySelector(".aviasales-all-wrap");
           if (!aviasalesAllWrap && container) {
@@ -3400,15 +3434,24 @@
             }
 
             const ratingText = typeof flight.rating === "number" ? flight.rating.toFixed(1) : flight.rating || "—";
-            const ratingTooltip =
-              "Оценка маршрута по цене, времени в пути, пересадкам и уровню стресса по сравнению с другими вариантами.";
             const stressClass =
               flight.stressLevel === "low"
                 ? "badge-stress-low"
                 : flight.stressLevel === "high"
                 ? "badge-stress-high"
                 : "badge-stress-medium";
-            const stressTooltip = getStressTooltip(flight.stressLevel);
+            const ratingBadge = renderBadgeWithTooltip({
+              label: "Оценка маршрута",
+              value: ratingText,
+              className: "badge-rating",
+              tooltipKey: "routeScore",
+            });
+            const stressBadge = renderBadgeWithTooltip({
+              label: getStressText(flight.stressLevel),
+              className: stressClass,
+              tooltipKey: "stressLevel",
+            });
+            const transfersBadge = `<span class="badge badge-chip badge-transfers">${formatTransfers(flight.transfers)}</span>`;
             const ticketUrl =
               flight.aviasalesTicketUrl ||
               flight.aviasalesSearchUrl ||
@@ -3438,8 +3481,6 @@
             const flightNumberLine = flightNumbersAll.length
               ? `<div class="result-flight-number">Рейсы: ${flightNumbersAll.join(", ")}</div>`
               : "";
-            const layoversBlock = renderLayoversBlock(flight);
-
             card.innerHTML = `
               <div class="result-header">
                 <div class="result-header-left">
@@ -3464,14 +3505,11 @@
                 ${segments.join("")}
               </div>
               <div class="result-chips">
-                <span class="badge badge-rating" title="${ratingTooltip}">Оценка маршрута ${ratingText}</span>
-                <span class="badge ${stressClass}" title="${stressTooltip}">${getStressText(flight.stressLevel)}</span>
-                <button type="button" class="badge badge-chip badge-transfers" data-id="${flight.id}">${formatTransfers(
-                  flight.transfers
-                )}</button>
+                ${ratingBadge}
+                ${stressBadge}
+                ${transfersBadge}
                 ${topBadges.join("")}
               </div>
-              ${layoversBlock}
               <div class="result-footer">
                 <div class="result-footer-actions">
                   <button type="button" class="btn-ghost btn-sm btn-fav" data-id="${flight.id}">
@@ -4376,14 +4414,6 @@
           return "стресс: неизвестно";
         }
 
-        function getStressTooltip(level) {
-          if (level === "low")
-            return "Низкий стресс: без ночных и экстремальных стыковок, без опасно коротких пересадок и без сильно растянутого маршрута.";
-          if (level === "high")
-            return "Высокий стресс: несколько пересадок, короткие или ночные стыковки, либо маршрут сильно длиннее большинства вариантов.";
-          return "Средний стресс: есть отдельные неудобства (пересадки, ночной или ранний вылет, чуть более долгий путь), но без крайностей.";
-        }
-
         function findFlightById(id) {
           if (!id) return null;
           return allResults.find((flight) => flight.id === id) || null;
@@ -4826,15 +4856,32 @@ allResults = flightsRaw
           });
         }
 
-        function initTransferDetailsToggle() {
-          resultsBlock?.addEventListener("click", (event) => {
-            const trigger = event.target.closest(".badge-transfers");
-            if (!trigger || !(trigger instanceof HTMLElement)) return;
-            const id = trigger.dataset.id;
-            if (!id) return;
-            const details = resultsBlock.querySelector(`.result-layovers[data-id="${id}"]`);
-            if (details) {
-              details.classList.toggle("hidden");
+        function closeAllTooltips() {
+          document.querySelectorAll(".tooltip-popover").forEach((popover) => {
+            popover.classList.remove("visible");
+          });
+          document.querySelectorAll(".tooltip-trigger").forEach((trigger) => {
+            trigger.classList.remove("active");
+          });
+        }
+
+        function initTooltips() {
+          document.addEventListener("click", (event) => {
+            const trigger = event.target.closest?.(".tooltip-trigger");
+            const insidePopover = event.target.closest?.(".tooltip-popover");
+            if (trigger) {
+              const badge = trigger.closest(".badge-with-tooltip");
+              const popover = badge?.querySelector(".tooltip-popover");
+              const isOpen = popover?.classList.contains("visible");
+              closeAllTooltips();
+              if (popover && !isOpen) {
+                popover.classList.add("visible");
+                trigger.classList.add("active");
+              }
+              return;
+            }
+            if (!insidePopover) {
+              closeAllTooltips();
             }
           });
         }
@@ -4872,7 +4919,7 @@ allResults = flightsRaw
           initTripPreferenceChips();
           attachFiltersHandlers();
           attachGeneralHandlers();
-          initTransferDetailsToggle();
+          initTooltips();
           renderRecent();
           updateSearchSummary();
         }
