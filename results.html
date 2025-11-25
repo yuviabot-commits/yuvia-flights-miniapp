@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Yuvia · Результаты поиска</title>
+    <link rel="icon" type="image/png" href="assets/favicon.png" sizes="256x256" />
+    <link rel="shortcut icon" type="image/png" href="assets/favicon.png" />
+    <link rel="stylesheet" href="css/yuvia.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="brand">
+        <img src="assets/Logo-Full.png" alt="Yuvia" class="brand-logo" />
+        <div class="brand-text">
+          <div class="brand-name">Yuvia</div>
+          <div class="brand-tagline">персональный тревел-консьерж</div>
+          <div class="brand-subline">поиск авиабилетов</div>
+        </div>
+      </header>
+      <div class="screen-back">
+        <a href="search.html" class="btn-ghost btn-sm">← К поиску</a>
+      </div>
+      <div id="searchSummary" class="search-summary hidden"></div>
+      <div class="two-col hidden" id="postSearchLayout">
+        <div class="card filters-block" id="filtersBlock">
+          <div class="section-title" style="margin-top: 0">Фильтры</div>
+          <div class="label">Пересадки</div>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px">
+            <label class="pill"
+              ><input type="radio" name="stops" value="any" checked />
+              любые</label
+            >
+            <label class="pill"
+              ><input type="radio" name="stops" value="0" /> только
+              прямые</label
+            >
+            <label class="pill"
+              ><input type="radio" name="stops" value="1" /> не более 1</label
+            >
+          </div>
+          <div class="label" style="margin-top: 10px">
+            Время рейса в <span id="timeOutboundLabel">город назначения</span> /
+            обратно в <span id="timeReturnLabel">город вылета</span>
+          </div>
+          <div class="grid grid-2">
+            <div class="depwin" id="depwin-outbound">
+              <label class="pill">
+                <input type="checkbox" class="depwin-outbound" value="morning" />
+                Утром</label
+              >
+              <label class="pill">
+                <input type="checkbox" class="depwin-outbound" value="day" /> День</label
+              >
+              <label class="pill">
+                <input type="checkbox" class="depwin-outbound" value="evening" />
+                Вечер</label
+              >
+              <label class="pill">
+                <input type="checkbox" class="depwin-outbound" value="night" />
+                Ночь</label
+              >
+            </div>
+            <div class="depwin" id="depwin-return">
+              <label class="pill">
+                <input type="checkbox" class="depwin-return" value="morning" />
+                Утром</label
+              >
+              <label class="pill">
+                <input type="checkbox" class="depwin-return" value="day" /> День</label
+              >
+              <label class="pill">
+                <input type="checkbox" class="depwin-return" value="evening" />
+                Вечер</label
+              >
+              <label class="pill">
+                <input type="checkbox" class="depwin-return" value="night" />
+                Ночь</label
+              >
+            </div>
+          </div>
+          <div class="label">Бюджет, ₽</div>
+          <div class="budget-row">
+            <input id="priceMin" type="number" placeholder="от" />
+            <span>—</span>
+            <input id="priceMax" type="number" placeholder="до" />
+          </div>
+          <div class="label">Длительность рейса</div>
+          <div class="range-row">
+            <input type="range" id="durMax" min="1" max="30" value="24" />
+            <div class="muted">до 24 часов</div>
+          </div>
+          <div class="label">Аэропорты вылета</div>
+          <div id="originAirportFilter" class="filter-chips"></div>
+          <div class="label">Аэропорты прилёта</div>
+          <div id="destinationAirportFilter" class="filter-chips"></div>
+          <div class="label">Авиакомпании</div>
+          <div id="airlineFilter" class="filter-chips"></div>
+        </div>
+        <div>
+          <div class="card" id="yuviaTopBlock">
+            <div class="topblock-row">
+              <div>
+                <div class="section-title" style="margin: 0">Yuvia рекомендует</div>
+                <div class="topblock-subtitle" id="yuviaTopSubtitle"></div>
+              </div>
+              <div class="tooltip badge-with-tooltip" data-tooltip="true">
+                <div class="tooltip-trigger">Что за рекомендации?</div>
+                <div class="tooltip-popover" role="tooltip">
+                  <div class="tooltip-title">Алгоритм Yuvia</div>
+                  <div class="tooltip-text">
+                    Мы оцениваем удобство рейса (пересадки, время стыковок и ночные перелёты) и балансируем с
+                    ценой. В топ выводим то, что подойдёт большинству людей.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="topblock-list" id="yuviaTopList"></div>
+          </div>
+          <div id="favoritesBlock" class="card favorites-block hidden"></div>
+          <div id="compareBlock" class="card compare-block hidden"></div>
+          <div class="toolbar">
+            <div class="label" style="margin: 0">Сортировка</div>
+            <select id="sortBy">
+              <option value="yuvia_score">Сначала рекомендации Yuvia</option>
+              <option value="price_asc">Сначала дешёвые</option>
+              <option value="price_desc">Сначала дорогие</option>
+              <option value="duration_asc">Короткий путь</option>
+              <option value="depart_asc">Ранний вылет</option>
+            </select>
+            <div class="chip" id="summaryChip" title="Краткая сводка по цене">—</div>
+          </div>
+          <div class="section-title" style="margin-top: 4px">Результаты</div>
+          <div id="results" class="grid"></div>
+          <div id="matrixSection">
+            <div class="section-title">Соседние даты</div>
+            <div id="matrix"></div>
+          </div>
+          <div class="results-disclaimer">
+            <p>
+              Отображаемые варианты перелётов и цены основаны на данных сервиса Aviasales (Travelpayouts)
+              и являются выборкой лучших предложений на момент запроса. Информация предоставлена исключительно
+              в ознакомительных целях и может быть неполной или устаревшей.
+            </p>
+            <p>
+              Актуальная стоимость, наличие мест, расписание рейсов, условия перевозки и маршрут подлежат
+              обязательному уточнению на сайте Aviasales и/или у соответствующих перевозчиков и агентств перед
+              покупкой билета. Сервис Yuvia не гарантирует точность, полноту и актуальность указанных данных и не
+              несёт ответственности за изменения цен, расписания и условий, внесённые авиакомпаниями, агентствами
+              или иными третьими лицами.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="compareModal" class="compare-modal-backdrop hidden" role="dialog" aria-modal="true">
+      <div class="compare-modal">
+        <h3>Сравнение рейсов</h3>
+        <table class="compare-table" id="compareTable"></table>
+        <div class="compare-close">
+          <button type="button" class="btn-ghost btn-sm" id="compareClose">Закрыть</button>
+        </div>
+      </div>
+    </div>
+    <div id="loadingOverlay" class="loading-overlay hidden">
+      <div class="loading-inner">
+        <div class="loading-logo-wrap">
+          <video
+            class="loading-logo-video"
+            autoplay
+            muted
+            loop
+            playsinline
+            preload="auto"
+          >
+            <source src="assets/Yuvia_Anim.webm" type="video/webm" />
+          </video>
+        </div>
+        <div class="loading-text">Ищем лучшие варианты...</div>
+      </div>
+    </div>
+    <div class="version">версия 17.5</div>
+    <script src="js/yuvia.js"></script>
+  </body>
+</html>

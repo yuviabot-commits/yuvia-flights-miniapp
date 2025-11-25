@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Yuvia · Поиск авиабилетов</title>
+    <link rel="icon" type="image/png" href="assets/favicon.png" sizes="256x256" />
+    <link rel="shortcut icon" type="image/png" href="assets/favicon.png" />
+    <link rel="stylesheet" href="css/yuvia.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="brand">
+        <img src="assets/Logo-Full.png" alt="Yuvia" class="brand-logo" />
+        <div class="brand-text">
+          <div class="brand-name">Yuvia</div>
+          <div class="brand-tagline">персональный тревел-консьерж</div>
+          <div class="brand-subline">поиск авиабилетов</div>
+        </div>
+      </header>
+      <div class="screen-back">
+        <a href="index.html" class="btn-ghost btn-sm">← К сценариям</a>
+      </div>
+      <div id="searchSummary" class="search-summary hidden"></div>
+      <div class="card" id="searchForm">
+        <div class="search-grid">
+          <div class="label">Откуда</div>
+          <div></div>
+          <div class="label">Куда</div>
+          <div class="label">Дата вылета</div>
+          <div class="label">Дата возвращения</div>
+          <div class="label">Пассажиры</div>
+          <div class="suggest-wrapper">
+            <input id="origin" placeholder="Москва" autocomplete="off" />
+          </div>
+          <div class="swap-cell swap-cell--full">
+            <button
+              type="button"
+              class="swap-btn"
+              id="swapInline"
+              aria-label="Поменять местами города"
+            >
+              ⇆
+            </button>
+          </div>
+          <div class="suggest-wrapper">
+            <input id="destination" placeholder="Казань" autocomplete="off" />
+          </div>
+          <div><input id="depart" type="date" /></div>
+          <div><input id="ret" type="date" /></div>
+          <div class="pax-field">
+            <button type="button" class="pax-trigger" id="paxTrigger">
+              <div class="pax-main" id="paxMainText">1 пассажир</div>
+              <div class="pax-sub" id="paxSubText">эконом</div>
+              <span class="pax-chevron">▾</span>
+            </button>
+            <select id="adults" style="display: none">
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>4</option>
+              <option>5</option>
+              <option>6</option>
+            </select>
+            <div class="pax-panel hidden" id="paxPanel">
+              <div class="pax-row">
+                <div class="pax-label-wrap">
+                  <div class="pax-title">Взрослые</div>
+                  <div class="pax-note">от 12 лет</div>
+                </div>
+                <div class="pax-counter">
+                  <button
+                    class="pax-btn"
+                    type="button"
+                    data-kind="adults"
+                    data-delta="-1"
+                  >
+                    −
+                  </button>
+                  <div class="pax-count" data-kind="adults">1</div>
+                  <button
+                    class="pax-btn"
+                    type="button"
+                    data-kind="adults"
+                    data-delta="1"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+              <div class="pax-row">
+                <div class="pax-label-wrap">
+                  <div class="pax-title">Дети</div>
+                  <div class="pax-note">от 2 до 12 лет</div>
+                </div>
+                <div class="pax-counter">
+                  <button
+                    class="pax-btn"
+                    type="button"
+                    data-kind="children"
+                    data-delta="-1"
+                  >
+                    −
+                  </button>
+                  <div class="pax-count" data-kind="children">0</div>
+                  <button
+                    class="pax-btn"
+                    type="button"
+                    data-kind="children"
+                    data-delta="1"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+              <div class="pax-row">
+                <div class="pax-label-wrap">
+                  <div class="pax-title">Младенцы</div>
+                  <div class="pax-note">до 2 лет (без места)
+</div>
+                </div>
+                <div class="pax-counter">
+                  <button
+                    class="pax-btn"
+                    type="button"
+                    data-kind="infants"
+                    data-delta="-1"
+                  >
+                    −
+                  </button>
+                  <div class="pax-count" data-kind="infants">0</div>
+                  <button
+                    class="pax-btn"
+                    type="button"
+                    data-kind="infants"
+                    data-delta="1"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+              <div class="pax-cabin">
+                <button
+                  type="button"
+                  class="pax-cabin-btn active"
+                  data-cabin="eco"
+                >
+                  Эконом
+                </button>
+                <button
+                  type="button"
+                  class="pax-cabin-btn"
+                  data-cabin="business"
+                >
+                  Бизнес
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="oneway-row">
+            <label class="oneway-toggle" for="onewayToggle">
+              <input type="checkbox" id="onewayToggle" />
+              <span class="oneway-switch" aria-hidden="true"></span>
+              <span class="oneway-text">Только в одну сторону</span>
+            </label>
+          </div>
+          <div class="pax-hint-placeholder"></div>
+        </div>
+        <div class="trip-preferences">
+          <div class="trip-style">
+            <div class="label">Стиль поездки</div>
+            <div class="chips-row" id="tripStyleChips">
+              <button
+                type="button"
+                class="chip-toggle chip-style"
+                data-style="calm"
+              >
+                Тише едешь
+              </button>
+              <button
+                type="button"
+                class="chip-toggle chip-style"
+                data-style="balanced"
+              >
+                Баланс цены и комфорта
+              </button>
+              <button
+                type="button"
+                class="chip-toggle chip-style"
+                data-style="cheap"
+              >
+                Экономлю по максимуму
+              </button>
+            </div>
+          </div>
+          <div class="trip-triggers">
+            <div class="label">Твои триггеры</div>
+            <div class="chips-row" id="tripTriggerChips">
+              <button
+                type="button"
+                class="chip-toggle"
+                data-trigger="no_night_dep"
+              >
+                Не хочу ночных вылетов
+              </button>
+              <button
+                type="button"
+                class="chip-toggle"
+                data-trigger="direct_only"
+              >
+                Только прямые рейсы
+              </button>
+              <button
+                type="button"
+                class="chip-toggle"
+                data-trigger="no_overnight"
+              >
+                Не ночевать в аэропорту
+              </button>
+              <button
+                type="button"
+                class="chip-toggle"
+                data-trigger="no_early_dep"
+              >
+                Не люблю ранние вылеты
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="search-actions-row">
+          <button class="btn-primary" id="doSearch">Искать</button>
+        </div>
+        <div class="hidden" aria-hidden="true">
+          <select id="currency">
+            <option value="RUB">RUB ₽</option>
+            <option value="USD">USD $</option>
+            <option value="EUR">EUR €</option>
+          </select>
+          <select id="cabin">
+            <option value="eco">Эконом</option>
+            <option value="business">Бизнес</option>
+          </select>
+        </div>
+      </div>
+      <div class="section-title">Недавние запросы</div>
+      <div class="recent-scroll-wrap">
+        <div class="chips recent-scroll" id="recentChips"></div>
+        <div class="recent-fade"></div>
+      </div>
+    </div>
+    <script src="js/yuvia.js"></script>
+  </body>
+</html>
