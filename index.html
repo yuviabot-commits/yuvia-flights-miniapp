@@ -147,6 +147,31 @@
         font-size: 16px;
         box-shadow: 0 12px 30px rgba(7, 94, 84, 0.45);
         transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+        position: relative;
+        overflow: hidden;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        animation: search-pulse 2.2s infinite ease-in-out;
+      }
+      #doSearch::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        transform: translateX(-120%);
+        background: linear-gradient(
+          120deg,
+          transparent 0%,
+          rgba(255, 255, 255, 0.65) 40%,
+          transparent 80%
+        );
+        pointer-events: none;
+        transition: transform 0.35s ease;
+      }
+      #doSearch:hover::after {
+        transform: translateX(120%);
       }
       #doSearch:hover {
         transform: translateY(-1px);
@@ -155,6 +180,17 @@
       #doSearch:active {
         transform: translateY(0);
         box-shadow: 0 10px 26px rgba(7, 94, 84, 0.42);
+      }
+      @keyframes search-pulse {
+        0%,
+        100% {
+          box-shadow: 0 10px 25px rgba(7, 94, 84, 0.35);
+          transform: translateY(0);
+        }
+        50% {
+          box-shadow: 0 14px 34px rgba(7, 94, 84, 0.45);
+          transform: translateY(-1px);
+        }
       }
       .btn-primary {
         background: linear-gradient(135deg, #075e54, #0f766e);
@@ -183,15 +219,39 @@
         margin: 24px auto 0;
         text-align: center;
       }
+      .aviasales-btn-ticket,
       .aviasales-btn-all {
-        min-width: 260px;
-        max-width: 320px;
-        padding: 12px 24px;
-        font-size: 15px;
+        background: linear-gradient(135deg, #ffdd2d, #ff9f1c);
+        color: #1f2937;
+        border: none;
         border-radius: 999px;
+        font-weight: 600;
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        gap: 6px;
+        padding: 9px 18px;
+        box-shadow: 0 10px 24px rgba(248, 181, 0, 0.45);
+        text-decoration: none;
+        cursor: pointer;
+        transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
+      }
+      .aviasales-btn-all {
+        min-width: 260px;
+        max-width: 320px;
+        font-size: 15px;
+      }
+      .aviasales-btn-ticket:hover,
+      .aviasales-btn-all:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 14px 32px rgba(248, 181, 0, 0.55);
+        filter: brightness(1.03);
+        text-decoration: underline;
+      }
+      .aviasales-btn-ticket:active,
+      .aviasales-btn-all:active {
+        transform: translateY(0);
+        box-shadow: 0 8px 18px rgba(248, 181, 0, 0.4);
       }
       .hint {
         font-size: 12px;
@@ -213,16 +273,19 @@
         flex-wrap: wrap;
         gap: 8px;
       }
+      .recent-scroll-wrap {
+        position: relative;
+        margin-top: 6px;
+        padding: 6px 0;
+      }
       .recent-scroll {
         display: flex;
         gap: 8px;
         overflow-x: auto;
         padding-right: 32px;
         position: relative;
-        scroll-snap-type: x proximity;
-      }
-      .recent-scroll-wrap {
-        position: relative;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
       }
       .recent-scroll::-webkit-scrollbar {
         height: 6px;
@@ -238,7 +301,7 @@
         bottom: 0;
         width: 38px;
         pointer-events: none;
-        background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, var(--bg) 70%);
+        background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, var(--surface) 70%);
       }
       .chip {
         border-radius: var(--radius-pill);
@@ -248,6 +311,15 @@
         border: 1px solid rgba(177, 54, 91, 0.35);
         font-size: 13px;
         cursor: pointer;
+        scroll-snap-align: start;
+        transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease,
+          transform 0.12s ease;
+      }
+      .chip:hover,
+      .chip-toggle:hover,
+      .pill:hover {
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
+        transform: translateY(-1px);
       }
       .chip#summaryChip {
         background: var(--accent-soft);
@@ -274,6 +346,9 @@
         position: sticky;
         top: 12px;
         align-self: start;
+        max-height: calc(100vh - 24px);
+        overflow-y: auto;
+        padding-right: 10px;
       }
       #matrixSection.hidden {
         display: none;
@@ -282,7 +357,7 @@
         border: 1px solid rgba(148, 163, 184, 0.6);
         border-radius: 16px;
         padding: 18px;
-        box-shadow: 0 12px 32px rgba(5, 50, 39, 0.08);
+        box-shadow: 0 10px 26px rgba(5, 50, 39, 0.08);
         background: #ffffff;
         text-align: center;
         font-size: 15px;
@@ -296,6 +371,9 @@
         border: 1px solid var(--line);
         font-size: 13px;
         background: #f9fafb;
+        cursor: pointer;
+        transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease,
+          transform 0.12s ease;
       }
       .pill input {
         width: auto;
@@ -329,7 +407,13 @@
         margin-top: 12px;
         margin-bottom: 12px;
         border-radius: 18px;
-        background: rgba(255, 255, 255, 0.8);
+        background: linear-gradient(
+          135deg,
+          rgba(7, 94, 84, 0.08),
+          rgba(13, 148, 136, 0.12)
+        );
+        border: 1px solid rgba(45, 212, 191, 0.4);
+        box-shadow: 0 16px 40px rgba(7, 94, 84, 0.18);
         backdrop-filter: blur(18px);
       }
       .topblock-header {
@@ -341,7 +425,9 @@
       }
       .topblock-title {
         font-size: 16px;
-        font-weight: 600;
+        font-weight: 650;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
       }
       .topblock-subtitle {
         font-size: 13px;
@@ -353,13 +439,19 @@
         gap: 10px;
       }
       .topcard {
-        border-radius: 14px;
-        border: 1px solid rgba(148, 163, 184, 0.5);
+        border-radius: 16px;
+        border: 1px solid rgba(148, 163, 184, 0.6);
         padding: 10px 12px;
-        background: linear-gradient(135deg, rgba(7, 94, 84, 0.02), rgba(7, 94, 84, 0.12));
+        background: rgba(255, 255, 255, 0.96);
         display: flex;
         flex-direction: column;
         gap: 6px;
+        transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+      }
+      .topcard:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 14px 32px rgba(15, 23, 42, 0.25);
+        border-color: rgba(7, 94, 84, 0.8);
       }
       .topcard-main {
         display: flex;
@@ -488,16 +580,17 @@
       }
       .search-summary {
         margin: 0 0 16px;
-        padding: 10px 14px;
+        padding: 12px 16px;
         border-radius: 14px;
         background: linear-gradient(
           135deg,
-          rgba(7, 94, 84, 0.08),
-          rgba(13, 148, 136, 0.14)
+          rgba(7, 94, 84, 0.06),
+          rgba(13, 148, 136, 0.11)
         );
         color: #0f4f43;
         font-size: 14px;
-        box-shadow: 0 10px 24px rgba(7, 94, 84, 0.08);
+        box-shadow: none;
+        border: 1px solid rgba(148, 163, 184, 0.45);
       }
       /* ------- Форма поиска ------- */
       .search-grid input,
@@ -655,11 +748,13 @@
         padding: 8px 14px;
         font-size: 14px;
         box-shadow: 0 6px 16px rgba(7, 94, 84, 0.08);
+        cursor: pointer;
         transition:
           background 0.2s,
           color 0.2s,
           border-color 0.2s,
-          box-shadow 0.2s;
+          box-shadow 0.2s,
+          transform 0.12s ease;
       }
       .chip-toggle:hover {
         border-color: rgba(7, 94, 84, 0.5);
@@ -788,9 +883,11 @@
       .favorites-block,
       .compare-block {
         margin-bottom: 10px;
-        background: #f9fafb;
-        border-style: dashed;
-        border-color: #d1d5db;
+        background: #ffffff;
+        border-style: solid;
+        border-color: rgba(148, 163, 184, 0.5);
+        border-radius: 18px;
+        box-shadow: 0 10px 26px rgba(15, 23, 42, 0.1);
       }
       .favorites-list,
       .compare-list {
@@ -839,6 +936,8 @@
         max-width: 760px;
         width: 100%;
         box-shadow: 0 28px 70px rgba(15, 23, 42, 0.55);
+        max-height: 80vh;
+        overflow: auto;
       }
       .compare-modal h3 {
         margin: 0 0 10px;
@@ -859,6 +958,10 @@
       .compare-table th {
         font-weight: 600;
         color: #4b5563;
+        position: sticky;
+        top: 0;
+        background: #f9fafb;
+        z-index: 1;
       }
       .compare-close {
         margin-top: 10px;
@@ -900,6 +1003,15 @@
         }
         .compare-table {
           font-size: 12px;
+        }
+        #doSearch {
+          width: 100%;
+          justify-content: center;
+        }
+        .filters-block {
+          position: static;
+          max-height: none;
+          overflow: visible;
         }
       } /* overlay загрузки */
       .loading-overlay {
@@ -1056,6 +1168,7 @@
           border-color 0.16s ease;
         opacity: 0;
         animation: result-fade-in 0.22s ease-out forwards;
+        cursor: default;
       }
       .result:hover {
         box-shadow: 0 18px 40px rgba(15, 23, 42, 0.14);
@@ -1095,7 +1208,7 @@
         gap: 2px;
       }
       .result-route-cities {
-        font-size: 18px;
+        font-size: 19px;
         font-weight: 700;
       }
       .result-route-airports {
@@ -1345,14 +1458,21 @@
         }
       }
       .results-disclaimer {
-        margin-top: 18px;
-        padding: 14px 16px;
-        background: #f8fafc;
-        border: 1px solid rgba(226, 232, 240, 0.8);
-        border-radius: 12px;
+        margin-top: 20px;
+        padding: 16px 18px;
+        background: linear-gradient(
+          135deg,
+          rgba(148, 163, 184, 0.08),
+          rgba(226, 232, 240, 0.25)
+        );
+        border-radius: 16px;
+        border: 1px dashed rgba(148, 163, 184, 0.8);
         font-size: 13px;
         line-height: 1.55;
         color: #4b5563;
+      }
+      .results-disclaimer p:last-child {
+        margin-bottom: 0;
       }
       .badge-yuvia {
         background: linear-gradient(
@@ -1382,6 +1502,11 @@
         flex-wrap: wrap;
         gap: 6px;
         justify-content: flex-end;
+      }
+      .btn-fav:hover,
+      .btn-compare:hover {
+        background: rgba(7, 94, 84, 0.08);
+        border-color: rgba(7, 94, 84, 0.35);
       }
       @media (max-width: 900px) {
         .result-header {
@@ -1831,19 +1956,9 @@
             <div class="label" style="margin-top: 10px">Авиакомпании</div>
             <div id="airlineFilter"></div>
             <div class="label" style="margin-top: 10px">Аэропорты вылета</div>
-            <select
-              id="originAirportFilter"
-              multiple
-              size="6"
-              style="width: 100%"
-            ></select>
+            <div class="chips" id="originAirportFilter"></div>
             <div class="label" style="margin-top: 10px">Аэропорты прилёта</div>
-            <select
-              id="destinationAirportFilter"
-              multiple
-              size="6"
-              style="width: 100%"
-            ></select>
+            <div class="chips" id="destinationAirportFilter"></div>
             <button
               class="btn-ghost"
               id="clearFilters"
@@ -2574,9 +2689,10 @@
           parts.push(`${passengers} пассаж.`);
           parts.push(paxState.cabin === "eco" ? "эконом" : "бизнес");
 
+          const shouldShow = parts.length > 0;
           if (searchSummary) {
             searchSummary.textContent = parts.join(" · ");
-            searchSummary.classList.toggle("hidden", !hasSearched);
+            searchSummary.classList.toggle("hidden", !shouldShow);
           }
         }
 
@@ -2586,12 +2702,6 @@
           }
           if (matrixSection) {
             matrixSection.classList.toggle("hidden", !hasSearched);
-          }
-          if (searchSummary) {
-            searchSummary.classList.toggle(
-              "hidden",
-              !hasSearched || !searchSummary.textContent,
-            );
           }
         }
 
@@ -2938,26 +3048,23 @@
             }
           });
 
-          function fillAirportSelect(select, codesArray) {
-            if (!select) return;
-            select.innerHTML = "";
-            codesArray.forEach((code) => {
-              const option = document.createElement("option");
-              option.value = code;
-              option.textContent = formatAirport(code);
-              select.appendChild(option);
+          function fillAirportFilter(container, codesArray) {
+            if (!container) return;
+            container.innerHTML = "";
+            codesArray.sort().forEach((code) => {
+              const label = document.createElement("label");
+              label.className = "pill";
+              const input = document.createElement("input");
+              input.type = "checkbox";
+              input.value = code;
+              label.appendChild(input);
+              label.appendChild(document.createTextNode(" " + formatAirport(code)));
+              container.appendChild(label);
             });
           }
 
-          fillAirportSelect(originAirportFilter, Array.from(originAirports).sort());
-          fillAirportSelect(
-            destinationAirportFilter,
-            Array.from(destinationAirports).sort()
-          );
-        }
-
-        function getSelectedValues(select) {
-          return Array.from(select?.selectedOptions || []).map((option) => option.value);
+          fillAirportFilter(originAirportFilter, Array.from(originAirports));
+          fillAirportFilter(destinationAirportFilter, Array.from(destinationAirports));
         }
 
         function getSelectedCheckboxValues(selector) {
@@ -2978,8 +3085,12 @@
         function withinListAfterFilters(list) {
           const min = Number(priceMinInput.value) || null;
           const max = Number(priceMaxInput.value) || null;
-          const originAirportValues = getSelectedValues(originAirportFilter);
-          const destinationAirportValues = getSelectedValues(destinationAirportFilter);
+          const originAirportValues = Array.from(
+            document.querySelectorAll('#originAirportFilter input[type="checkbox"]:checked')
+          ).map((el) => el.value);
+          const destinationAirportValues = Array.from(
+            document.querySelectorAll('#destinationAirportFilter input[type="checkbox"]:checked')
+          ).map((el) => el.value);
           const airlineValues = Array.from(
             document.querySelectorAll('#airlineFilter input[name="airlines"]:checked')
           ).map((el) => el.value);
@@ -3412,11 +3523,11 @@
                 })
               : null;
 
-            if (searchUrl) {
-              aviasalesAllWrap.innerHTML = `
+              if (searchUrl) {
+                aviasalesAllWrap.innerHTML = `
                 <button type="button"
                         class="btn-primary aviasales-btn-all">
-                  Все варианты на Aviasales
+                  Все варианты на Aviasales ↗
                 </button>
               `;
               const button = aviasalesAllWrap.querySelector(".aviasales-btn-all");
@@ -3527,16 +3638,16 @@
               flight.aviasalesSearchUrl ||
               flight.deeplink ||
               null;
-            const aviasalesButtons = ticketUrl
-              ? `
+                const aviasalesButtons = ticketUrl
+                  ? `
                 <a href="${ticketUrl}"
                    class="btn btn-primary btn-sm aviasales-btn-ticket"
                    target="_blank"
                    rel="noopener noreferrer">
-                  Купить на Aviasales
+                  Купить на Aviasales ↗
                 </a>
               `
-              : `<button class="btn-primary btn-sm" disabled>Нет ссылки</button>`;
+                  : `<button class="btn-primary btn-sm" disabled>Нет ссылки</button>`;
             const topBadges = [];
             if (flight.isTop) {
               topBadges.push('<span class="badge badge-yuvia">Рекомендация Yuvia</span>');
@@ -3670,8 +3781,11 @@
         function clearFilters() {
           priceMinInput.value = "";
           priceMaxInput.value = "";
-          originAirportFilter.selectedIndex = -1;
-          destinationAirportFilter.selectedIndex = -1;
+          document
+            .querySelectorAll('#originAirportFilter input[type="checkbox"], #destinationAirportFilter input[type="checkbox"]')
+            .forEach((input) => {
+              input.checked = false;
+            });
           document
             .querySelectorAll('#airlineFilter input[name="airlines"]')
             .forEach((input) => {
@@ -4864,8 +4978,8 @@ allResults = flightsRaw
               applyFiltersAndSort();
             });
           });
-          [originAirportFilter, destinationAirportFilter].forEach((select) => {
-            select?.addEventListener("change", () => {
+          [originAirportFilter, destinationAirportFilter].forEach((container) => {
+            container?.addEventListener("change", () => {
               applyFiltersAndSort();
             });
           });
