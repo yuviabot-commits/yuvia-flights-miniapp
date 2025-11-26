@@ -3781,12 +3781,137 @@ allResults = flightsRaw
           updateSummaryLinks();
         }
 
+        function initHomeScene() {
+          const stage = document.querySelector('.sky-stage');
+          if (!stage) return;
+
+          const birdShell = $('.yuvia-bird-shell');
+          const intentClouds = $$('.intent-cloud', stage);
+          const quickChips = $$('.quick-chip', stage);
+          const freeWindForm = $('#freeWindForm');
+          const freeWindInput = $('#freeWindText');
+          const cloudsLayer = $('.sky-clouds-background', stage);
+          const mapLinesLayer = $('.sky-map-lines', stage);
+          const birdVideo = stage.querySelector('.yuvia-bird');
+          const birdFallback = stage.querySelector('.yuvia-bird-fallback');
+
+          if (birdVideo && birdFallback) {
+            birdVideo.addEventListener('loadeddata', () => {
+              birdVideo.style.opacity = '1';
+              birdFallback.style.opacity = '0';
+            });
+            birdVideo.addEventListener('error', () => {
+              birdVideo.style.opacity = '0';
+              birdFallback.style.opacity = '1';
+            });
+          }
+
+          const tiltClasses = [
+            'yuvia-bird-shell--tilt-left',
+            'yuvia-bird-shell--tilt-right',
+            'yuvia-bird-shell--tilt-top',
+            'yuvia-bird-shell--tilt-bottom',
+          ];
+
+          function resetBirdTilt() {
+            if (!birdShell) return;
+            birdShell.classList.remove(...tiltClasses);
+          }
+
+          function tiltBird(direction = '') {
+            if (!birdShell) return;
+            resetBirdTilt();
+            if (direction) {
+              birdShell.classList.add(`yuvia-bird-shell--tilt-${direction}`);
+            }
+          }
+
+          intentClouds.forEach(button => {
+            button.addEventListener('mouseenter', () => {
+              const direction = button.dataset.tilt || '';
+              tiltBird(direction);
+            });
+
+            button.addEventListener('mouseleave', () => {
+              resetBirdTilt();
+            });
+
+            button.addEventListener('click', () => {
+              const { intent } = button.dataset;
+              if (button.classList.contains('intent-cloud--active')) {
+                button.classList.remove('intent-cloud--active');
+              } else {
+                intentClouds.forEach(item => item.classList.remove('intent-cloud--active'));
+                button.classList.add('intent-cloud--active');
+              }
+              console.log('[Yuvia] Intent selected:', intent);
+            });
+          });
+
+          quickChips.forEach(chip => {
+            chip.addEventListener('click', () => {
+              const { action } = chip.dataset;
+              switch (action) {
+                case 'go-search':
+                  window.location.href = 'search.html';
+                  break;
+                case 'see-prices':
+                  // TODO: направить на страницу с матрицей цен
+                  window.location.href = 'search.html';
+                  break;
+                case 'free-text':
+                  if (freeWindForm) {
+                    freeWindForm.classList.add('free-wind-input--visible');
+                  }
+                  if (freeWindInput) {
+                    freeWindInput.focus();
+                  }
+                  break;
+                default:
+                  break;
+              }
+            });
+          });
+
+          if (freeWindForm) {
+            freeWindForm.addEventListener('submit', event => {
+              event.preventDefault();
+              const text = freeWindInput?.value?.trim();
+              if (!text) return;
+              console.log('[Yuvia] Free wind input:', text);
+            });
+          }
+
+          function handleParallax(event) {
+            const bounds = stage.getBoundingClientRect();
+            const relX = (event.clientX - bounds.left) / bounds.width - 0.5;
+            const relY = (event.clientY - bounds.top) / bounds.height - 0.5;
+            const moveX = relX * 6;
+            const moveY = relY * 6;
+
+            if (mapLinesLayer) {
+              mapLinesLayer.style.transform = `translate3d(${moveX}px, ${moveY}px, 0)`;
+            }
+            if (cloudsLayer) {
+              cloudsLayer.style.transform = `translate3d(${moveX * 1.2}px, ${moveY * 1.2}px, 0)`;
+            }
+          }
+
+          stage.addEventListener('mousemove', handleParallax);
+        }
+
         window.initTravelSandbox = initTravelSandbox;
 
         document.addEventListener('DOMContentLoaded', () => {
           const sandbox = document.getElementById('travelSandbox');
+          const homeStage = document.querySelector('.sky-stage');
+
           if (sandbox) {
             initTravelSandbox();
+          }
+
+          if (homeStage) {
+            initHomeScene();
           }
         });
       })();
