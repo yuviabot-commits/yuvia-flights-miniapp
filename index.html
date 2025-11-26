@@ -10,39 +10,61 @@
   </head>
   <body class="home-body">
     <div class="home-wrap">
-      <main class="yuvia-shell" id="yuviaShell">
-        <header class="yuvia-shell__brand">
-          <img src="assets/Logo-Full.png" alt="Yuvia" class="yuvia-shell__logo" />
-          <div class="yuvia-shell__brand-text">
-            <div class="brand-name">Yuvia</div>
-            <div class="brand-tagline">персональный тревел-консьерж</div>
-            <p class="brand-subline">Помогу разобраться с маршрутами и билетами.</p>
-          </div>
-        </header>
+      <main class="home-stage">
+        <div class="home-stage__inner">
 
-        <section class="yuvia-dialog" id="yuviaDialog" aria-live="polite"></section>
+          <section class="home-panel" aria-labelledby="homePanelTitle">
 
-        <div class="yuvia-quick-row">
-          <div class="yuvia-chips" id="yuviaChips">
-            <button class="yuvia-chip" type="button" data-text="Лечу из Москвы в Стамбул в мае">Лечу из Москвы в Стамбул в мае</button>
-            <button class="yuvia-chip" type="button" data-text="Нужны идеи без самолёта на выходные">Нужны идеи без самолёта на выходные</button>
-            <button class="yuvia-chip" type="button" data-text="Хочу к морю из Петербурга">Хочу к морю из Петербурга</button>
-            <button class="yuvia-chip" type="button" data-text="Разложи дорогу из Москвы в Казань по шагам">Разложи дорогу из Москвы в Казань по шагам</button>
-          </div>
-          <a class="yuvia-fast-link" href="search.html">Я спешу — сразу к форме поиска</a>
+            <header class="home-panel__brand">
+              <div class="home-panel__brand-left">
+                <div class="yuvia-bird-shell">
+                  <div id="yuviaBird" class="yuvia-bird yuvia-bird--idle" aria-hidden="true">
+                    <!-- Временная реализация: одна картинка птицы -->
+                    <img src="assets/Logo-bird.png" alt="" class="yuvia-bird__sprite" />
+                  </div>
+                </div>
+                <div class="home-panel__brand-text">
+                  <div class="brand-name">Yuvia</div>
+                  <div class="brand-tagline">персональный тревел-консьерж</div>
+                  <p class="brand-subline" id="homePanelTitle">
+                    Помогу придумать маршрут и доведу до подходящих билетов.
+                  </p>
+                </div>
+              </div>
+              <div class="home-panel__brand-intent">
+                <!-- Быстрый выбор намерения, пока статичный текст, логику подключим позже -->
+                <span class="intent-badge">Выбери, с чем ты пришёл</span>
+              </div>
+            </header>
+
+            <section class="home-panel__screen" id="yuviaGameScreen" aria-live="polite">
+              <!-- Здесь позже будет отрисовываться игровая сцена JS-ом. 
+                   Пока можно вставить заглушку-текст: -->
+              <div class="home-screen-placeholder">
+                <p>Сейчас это тестовый экран. Логику игры добавим на следующем шаге.</p>
+              </div>
+            </section>
+
+            <footer class="home-panel__footer">
+              <div class="home-panel__footer-intent">
+                <button type="button" class="home-intent-chip" data-intent="fast-search">
+                  Я спешу — сразу к поиску
+                </button>
+                <button type="button" class="home-intent-chip" data-intent="need-help">
+                  Хочу, чтобы ты помогла с маршрутом
+                </button>
+                <button type="button" class="home-intent-chip" data-intent="ideas">
+                  Пришла за идеями, билеты потом
+                </button>
+              </div>
+              <a class="home-panel__link" href="search.html">
+                Перейти к классической форме поиска
+              </a>
+            </footer>
+
+          </section>
+
         </div>
-
-        <form class="yuvia-input-area" id="yuviaInputForm">
-          <label class="visually-hidden" for="yuviaUserInput">Расскажите о поездке</label>
-          <input
-            id="yuviaUserInput"
-            type="text"
-            name="yuviaUserInput"
-            placeholder="Напишите, откуда и куда хотите, или что важно"
-            autocomplete="off"
-          />
-          <button type="submit" id="yuviaSend">Отправить</button>
-        </form>
       </main>
     </div>
 
