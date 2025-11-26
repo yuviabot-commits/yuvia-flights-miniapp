@@ -10,56 +10,175 @@
   </head>
   <body class="home-body">
     <div class="home-wrap">
-      <main class="home-stage">
-        <div class="home-stage__inner">
+      <main class="sandbox-shell" id="travelSandbox">
+        <header class="sandbox-header">
+          <div class="sandbox-brand">
+            <div class="sandbox-bird">
+              <img src="assets/Logo-bird.png" alt="Yuvia" />
+            </div>
+            <div class="sandbox-brand-text">
+              <div class="sandbox-brand-name">Yuvia</div>
+              <div class="sandbox-brand-tagline">персональный тревел-консьерж</div>
+              <p class="sandbox-brand-subline">
+                Помогу придумать маршрут и доведу до подходящих билетов.
+              </p>
+            </div>
+          </div>
 
-          <section class="home-panel" aria-labelledby="homePanelTitle">
+          <button class="sandbox-intent-pill" type="button" id="sandboxIntentButton">
+            Выбери, с чем ты пришёл
+          </button>
+        </header>
 
-            <header class="home-panel__brand">
-              <div class="home-panel__brand-left">
-                <div class="yuvia-bird-shell">
-                  <div id="yuviaBird" class="yuvia-bird yuvia-bird--idle" aria-hidden="true">
-                    <!-- Временная реализация: одна картинка птицы -->
-                    <img src="assets/Logo-bird.png" alt="" class="yuvia-bird__sprite" />
-                  </div>
-                </div>
-                <div class="home-panel__brand-text">
-                  <div class="brand-name">Yuvia</div>
-                  <div class="brand-tagline">персональный тревел-консьерж</div>
-                  <p class="brand-subline" id="homePanelTitle">
-                    Помогу придумать маршрут и доведу до подходящих билетов.
-                  </p>
-                </div>
-              </div>
-              <div class="home-panel__brand-intent">
-                <!-- Быстрый выбор намерения, пока статичный текст, логику подключим позже -->
-                <span class="intent-badge">Выбери, с чем ты пришёл</span>
-              </div>
-            </header>
+        <section class="sandbox-main">
+          <!-- ЛЕВАЯ КОЛОНКА: птица + подсказка -->
+          <aside class="sandbox-side sandbox-side-left">
+            <div class="sandbox-concierge-card">
+              <p class="sandbox-concierge-line" id="sandboxConciergeLine">
+                Я здесь, чтобы помочь с маршрутом и билетами. Давай соберём картинку поездки.
+              </p>
+            </div>
 
-            <section class="home-panel__screen" id="yuviaGameScreen" aria-live="polite">
-            </section>
+            <div class="sandbox-intents" id="sandboxIntents">
+              <!-- три стартовых сценария-намерения -->
+              <button class="intent-chip" type="button" data-intent="fast-search">
+                Я спешу — сразу к поиску
+              </button>
+              <button class="intent-chip" type="button" data-intent="route-help">
+                Хочу, чтобы ты помогла с маршрутом
+              </button>
+              <button class="intent-chip" type="button" data-intent="ideas-first">
+                Пришла за идеями, билеты потом
+              </button>
+            </div>
+          </aside>
 
-            <footer class="home-panel__footer">
-              <div class="home-panel__footer-intent">
-                <button type="button" class="home-intent-chip" data-intent="fast-search">
-                  Я спешу — сразу к поиску
+          <!-- ЦЕНТР: компас-настроение -->
+          <section class="sandbox-center">
+            <div class="sandbox-compass" aria-label="Настроение поездки">
+              <div class="compass-layer compass-base"></div>
+
+              <!-- сектора настроений -->
+              <button class="compass-sector" type="button" data-mood="sea">
+                <span>Море</span>
+              </button>
+              <button class="compass-sector" type="button" data-mood="mountains">
+                <span>Горы</span>
+              </button>
+              <button class="compass-sector" type="button" data-mood="city">
+                <span>Города</span>
+              </button>
+              <button class="compass-sector" type="button" data-mood="nearby">
+                <span>Близко от дома</span>
+              </button>
+              <button class="compass-sector" type="button" data-mood="far">
+                <span>Подальше</span>
+              </button>
+
+              <!-- маркер-птица в центре компаса -->
+              <div class="compass-bird-marker" id="compassBirdMarker"></div>
+            </div>
+
+            <!-- ДУГА-таймлайн -->
+            <div class="sandbox-timeline" aria-label="Длительность поездки">
+              <div class="timeline-arc">
+                <button class="timeline-point" type="button" data-duration="evening">
+                  На вечер
                 </button>
-                <button type="button" class="home-intent-chip" data-intent="need-help">
-                  Хочу, чтобы ты помогла с маршрутом
+                <button class="timeline-point" type="button" data-duration="weekend">
+                  На выходные
                 </button>
-                <button type="button" class="home-intent-chip" data-intent="ideas">
-                  Пришла за идеями, билеты потом
+                <button class="timeline-point" type="button" data-duration="3-4">
+                  3–4 дня
+                </button>
+                <button class="timeline-point" type="button" data-duration="week">
+                  Неделя+
                 </button>
               </div>
-              <a class="home-panel__link" href="search.html">
-                Перейти к классической форме поиска
-              </a>
-            </footer>
+            </div>
 
+            <!-- Транспорт -->
+            <div class="sandbox-transport">
+              <span class="sandbox-transport-label">Как поедем:</span>
+              <button class="transport-chip" type="button" data-transport="plane">
+                ✈ самолёт
+              </button>
+              <button class="transport-chip" type="button" data-transport="train">
+                🚆 поезд
+              </button>
+              <button class="transport-chip" type="button" data-transport="bus">
+                🚌 автобус
+              </button>
+              <button class="transport-chip" type="button" data-transport="suburban">
+                🚉 электричка
+              </button>
+            </div>
+
+            <!-- Низ: универсальное поле ввода -->
+            <form class="sandbox-freeform" id="sandboxFreeformForm">
+              <label class="visually-hidden" for="sandboxFreeformInput">
+                Расскажи о поездке
+              </label>
+              <input
+                id="sandboxFreeformInput"
+                type="text"
+                name="sandboxFreeformInput"
+                autocomplete="off"
+                placeholder="Можешь просто написать: «из Москвы к морю на выходные»"
+              />
+              <button type="submit">Ок</button>
+            </form>
           </section>
 
-        </div>
+          <!-- ПРАВАЯ КОЛОНКА: сводка -->
+          <aside class="sandbox-side sandbox-side-right">
+            <div class="sandbox-summary" aria-live="polite">
+              <h2 class="sandbox-summary-title">Уже поняла про поездку</h2>
+              <dl class="sandbox-summary-list">
+                <div class="summary-row">
+                  <dt>Откуда</dt>
+                  <dd id="summaryFrom">ещё не решили</dd>
+                </div>
+                <div class="summary-row">
+                  <dt>Настроение</dt>
+                  <dd id="summaryMood">пока присматриваемся</dd>
+                </div>
+                <div class="summary-row">
+                  <dt>Длительность</dt>
+                  <dd id="summaryDuration">без привязки</dd>
+                </div>
+                <div class="summary-row">
+                  <dt>Транспорт</dt>
+                  <dd id="summaryTransport">любой</dd>
+                </div>
+                <div class="summary-row">
+                  <dt>Формат</dt>
+                  <dd id="summaryFormat">не выбрали</dd>
+                </div>
+              </dl>
+
+              <div class="sandbox-summary-actions">
+                <a href="search.html" class="summary-action primary" id="summaryToSearch">
+                  Подобрать билеты под это
+                </a>
+                <a href="ideas.html" class="summary-action" id="summaryToIdeas">
+                  Посмотреть идеи направлений
+                </a>
+              </div>
+            </div>
+
+            <!-- Формат поездки отдельным блоком -->
+            <div class="sandbox-format">
+              <p class="sandbox-format-label">С кем планируется поездка?</p>
+              <div class="sandbox-format-options" id="sandboxFormatOptions">
+                <button type="button" class="format-chip" data-format="solo">Один</button>
+                <button type="button" class="format-chip" data-format="couple">Пара</button>
+                <button type="button" class="format-chip" data-format="family">С семьёй</button>
+                <button type="button" class="format-chip" data-format="friends">Компания</button>
+              </div>
+            </div>
+          </aside>
+        </section>
       </main>
     </div>
 
