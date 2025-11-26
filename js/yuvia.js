@@ -2982,298 +2982,449 @@ allResults = flightsRaw
           });
         }
 
-        const homeConversation = {
-          state: "initial",
-          context: {
-            from: "",
-            to: "",
-            when: "",
-            transportPreference: "",
-            mood: "",
-            scenario: "",
-          },
-          summaryShown: false,
+        const YUVIA_STATES = {
+          INITIAL: 'initial',
+          UNDERSTANDING: 'understanding',
+          CLARIFYING: 'clarifying',
+          SUMMARY: 'summary',
         };
 
-        const homePhrases = {
-          initialQuestion: [
-            "Привет, я Ювия. Давай разберёмся с твоей поездкой — расскажи, откуда и куда собрался?",
-            "Я Ювия, твой тревел-консьерж. Куда тянет — море, горы, другой город? Поделись мыслями",
-            "Готова подсказать с маршрутами и билетами. Откуда стартуем и что важно в дороге?",
-            "Привет! Скидывай, куда надо попасть и когда, а я помогу разложить дорогу",
+        const initialGreetings = [
+          'Привет, я Ювия. Давай разберёмся с твоей поездкой. Расскажи, что планируется — можно просто "откуда–куда и когда".',
+          'Я здесь, чтобы помочь с маршрутами и билетами. Напиши коротко про поездку, а дальше я разложу всё по шагам.',
+          'С чего начнём? Опиши, куда и когда ты хочешь выбраться, а я подскажу, как лучше добраться.',
+        ];
+
+        const confirmationPhrases = {
+          known_route: [
+            'Поняла так: выезжаешь из {{from}} в {{to}} {{when}}. Сейчас уточню пару вещей, чтобы подобрать нормальные варианты.',
+            'Записала маршрут: {{from}} → {{to}} {{when}}. Давай уточним пару деталей для подбора.',
           ],
-          confirmationByScenario: {
-            known_route: [
-              "Поняла так: выезжаешь из {{from}} в {{to}}.",
-              "Записала маршрут: {{from}} → {{to}}.",
-            ],
-            date_but_no_place: [
-              "Есть даты {{when}}, но нужно понять направление — верно?",
-              "Слышала про сроки {{when}}. Давай подберём города под эти числа",
-            ],
-            place_but_no_dates: [
-              "Отмечаю: откуда {{from}} и точка интереса — {{to}}.",
-              "Маршрут в сторону {{to}} из {{from}}. Осталось решить по датам",
-            ],
-            only_mood: [
-              "Запомнила настроение: {{mood}}.",
-              "Сфокусировались на настроении {{mood}}",
-            ],
-            multi_city: [
-              "Услышала, что нужен маршрут с несколькими точками.",
-              "Маршрут получится многосоставным — зафиксировала",
-            ],
-            transport_focus: [
-              "Сделала пометку по транспорту: {{transportPreference}}.",
-              "Учту пожелание по транспорту: {{transportPreference}}",
-            ],
-            default: ["Приняла запрос, давай уточним детали"],
-          },
-          clarifyByScenario: {
-            known_route: [
-              "Когда удобнее ехать и на чём комфортнее — самолёт, поезд или автобус?",
-              "Уточни даты и предпочтения по транспорту, чтобы показать билеты",
-            ],
-            date_but_no_place: [
-              "Откуда выезжаешь и какой вайб нужен: море, горы, город?",
-              "Скажи город старта и настроение поездки — предложу варианты",
-            ],
-            place_but_no_dates: [
-              "На какие даты смотришь {{to}} и нужен ли отдельный транспорт?",
-              "Когда планируешь дорогу до {{to}} и какой транспорт подходит?",
-            ],
-            only_mood: [
-              "Откуда стартуешь и на какие даты рассчитывать?",
-              "Давай город вылета и примерные даты — соберу идеи",
-            ],
-            multi_city: [
-              "Перечисли ключевые точки и даты, чтобы разложить маршрут",
-              "Сколько остановок планируешь и есть ли фиксированные даты?",
-            ],
-            transport_focus: [
-              "Скажи, откуда и куда, чтобы подобрать {{transportPreference}}-маршруты",
-              "Добавь города и даты — соберу варианты под {{transportPreference}}",
-            ],
-            default: ["Подскажи город старта, направление и примерные даты"],
-          },
-          summary: [
-            "Могу собрать варианты и отправить на следующую страницу.",
-            "Готова перейти к поиску — покажу билеты и маршруты.",
-            "Собрала вводные, давай переключаться к подбору вариантов.",
+          date_but_no_place: [
+            'Вижу, что важны даты {{when}}. Сейчас сузим круг по настроению и расстоянию.',
+            'Даты отметила: {{when}}. Подберу направления, нужно немного подсказать детали.',
+          ],
+          place_but_no_dates: [
+            'Маршрут в сторону {{to}} из {{from}}. Осталось согласовать время и формат дороги.',
+            'Зафиксировала {{from}} → {{to}}. Согласуем даты и транспорт, чтобы показать билеты.',
+          ],
+          only_mood: [
+            'Красиво звучит. Давай приземлим мечту: из какого города выезжаешь?',
+            'Запомнила настроение: {{mood}}. Скажи город старта, чтобы я сузила выбор.',
+          ],
+          multi_city: [
+            'Услышала, что нужен маршрут с несколькими точками. Давай уточним порядок и даты.',
+            'Маршрут получается составной. Помогу, только уточним старт и даты.',
+          ],
+          transport_focus: [
+            'Сделаю акцент на транспорте: {{transport}}. Подскажи города и примерные даты.',
+            'Учту пожелание по транспорту {{transport}}. Осталось обозначить точки и время.',
+          ],
+          default: ['Приняла запрос, давай уточним детали.'],
+        };
+
+        const clarifyPrompts = {
+          missing_to: [
+            'Куда держишь путь? Назови город или регион.',
+            'Какое направление интересно? Море, горы или конкретный город?',
+          ],
+          missing_from: [
+            'Откуда выезжаешь? Нужен город старта.',
+            'С какого города стартуем?',
+          ],
+          missing_when: [
+            'Когда удобнее ехать? Даты или хотя бы месяц.',
+            'На какие числа смотришь? Можно примерно: выходные, май, лето.',
+          ],
+          missing_mood: [
+            'Какой вайб нужен: море, горы, города?',
+            'Что хочется почувствовать в поездке: пляжи, тропы, городскую атмосферу?',
           ],
         };
 
-        function pickHomePhrase(list = []) {
-          if (!Array.isArray(list) || !list.length) return "";
-          const index = Math.floor(Math.random() * list.length);
-          return list[index];
+        const clarifyChipsByScenario = {
+          known_route: ['Сначала самолёты', 'Хочу поезд', 'Посмотрим всё подряд'],
+          place_but_no_dates: ['Когда в пути? В мае', 'На выходных', 'На неделю позже'],
+          date_but_no_place: ['Море', 'Горы и тропы', 'Города'],
+          only_mood: ['Я из Москвы', 'Я из Петербурга', 'Можно из Екатеринбурга'],
+          default: ['Сначала самолёты', 'Хочу поезд', 'Посмотрим всё подряд'],
+        };
+
+        const summaryPhrases = [
+          'Тогда так: {{from}} → {{toOrMood}} {{when}}, {{transportText}}. Я подставлю всё это в форму и покажу варианты.',
+          'Собрала вводные: {{from}} → {{toOrMood}} {{when}}, учту транспорт {{transportText}} и покажу, что подходит.',
+        ];
+
+        let yuviaContext = null;
+        let yuviaState = YUVIA_STATES.INITIAL;
+        let dialogEl = null;
+        let chipsEl = null;
+        let formEl = null;
+        let inputEl = null;
+        let initialChipsHTML = '';
+
+        function freshContext() {
+          return {
+            rawInputs: [],
+            from: null,
+            to: null,
+            when: null,
+            mood: null,
+            transport: null,
+            scenario: null,
+          };
         }
 
-        function formatWithContext(template, context = {}) {
-          return String(template || "").replace(/{{(\w+)}}/g, (_, key) => context[key] || "");
+        function fillTemplate(str, context = {}) {
+          return String(str || '').replace(/{{(\w+)}}/g, (_, key) => context[key] || '');
         }
 
-        function appendHomeMessage(role, text) {
-          if (!homeDialog || !text) return;
-          const bubble = document.createElement("div");
-          bubble.className = `yuvia-message yuvia-message-${role === "user" ? "user" : "assistant"}`;
+        function addAssistantMessage(text) {
+          if (!dialogEl || !text) return;
+          const bubble = document.createElement('div');
+          bubble.className = 'yuvia-message yuvia-message-assistant';
           bubble.textContent = text;
-          homeDialog.appendChild(bubble);
-          bubble.scrollIntoView({ behavior: "smooth", block: "end" });
+          dialogEl.appendChild(bubble);
+          bubble.scrollIntoView({ behavior: 'smooth', block: 'end' });
         }
 
-        function capitalizeCity(value = "") {
-          if (!value) return "";
+        function addUserMessage(text) {
+          if (!dialogEl || !text) return;
+          const bubble = document.createElement('div');
+          bubble.className = 'yuvia-message yuvia-message-user';
+          bubble.textContent = text;
+          dialogEl.appendChild(bubble);
+          bubble.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
+
+        function renderChips(options = []) {
+          if (!chipsEl) return;
+          chipsEl.innerHTML = '';
+          options.forEach((label) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'yuvia-chip';
+            btn.textContent = label;
+            btn.dataset.text = label;
+            chipsEl.appendChild(btn);
+          });
+        }
+
+        function capitalizeWord(value = '') {
+          if (!value) return '';
           return value
-            .split(" ")
-            .map((word) => (word ? word[0].toUpperCase() + word.slice(1).toLowerCase() : ""))
-            .join(" ")
+            .split(' ')
+            .map((word) => (word ? word[0].toUpperCase() + word.slice(1).toLowerCase() : ''))
+            .join(' ')
             .trim();
         }
 
-        // Heuristic intent parser: highlights cities, dates, transport and mood keywords.
-        function analyzeIntent(userText) {
-          const ctx = homeConversation.context;
-          const text = String(userText || "").trim();
-          const lower = text.toLowerCase();
+        function extractCities(text, pattern) {
+          const matches = [];
+          const regex = new RegExp(pattern, 'gi');
+          let m;
+          while ((m = regex.exec(text))) {
+            matches.push(capitalizeWord(m[1]));
+          }
+          return matches;
+        }
 
-          const fromMatch = lower.match(/(?:из|откуда)\s+([a-zа-яё\s-]{3,})/i);
-          if (fromMatch && !ctx.from) ctx.from = capitalizeCity(fromMatch[1]);
+        function detectScenario(context, lowerText, allCities = []) {
+          if (allCities.length > 2) return 'multi_city';
+          if (context.from && context.to) {
+            if (context.transport) return 'transport_focus';
+            if (context.when) return 'known_route';
+            return 'place_but_no_dates';
+          }
+          if ((context.from || context.to) && context.when) return 'date_but_no_place';
+          if (context.mood && !context.to) return 'only_mood';
+          if (context.transport) return 'transport_focus';
+          return null;
+        }
 
-          const toMatch = lower.match(/(?:в|до)\s+([a-zа-яё\s-]{3,})/i);
-          if (toMatch && !ctx.to) ctx.to = capitalizeCity(toMatch[1]);
+        function analyzeIntent(text, context) {
+          const lower = String(text || '').toLowerCase();
+          const fromCities = extractCities(text, '\bиз\s+([А-ЯЁA-Z][а-яёa-z\-]+)');
+          const toCities = extractCities(text, '\bв\s+([А-ЯЁA-Z][а-яёa-z\-]+)');
+          const allCities = [...new Set([...fromCities, ...toCities])];
 
-          const months = [
-            "январ",
-            "феврал",
-            "март",
-            "апрел",
-            "май",
-            "июн",
-            "июл",
-            "август",
-            "сентябр",
-            "октябр",
-            "ноябр",
-            "декабр",
+          if (fromCities[0] && !context.from) context.from = fromCities[0];
+          if (toCities[0] && !context.to) context.to = toCities[0];
+
+          const whenKeywords = [
+            'январ',
+            'феврал',
+            'март',
+            'апрел',
+            'май',
+            'июн',
+            'июл',
+            'август',
+            'сентябр',
+            'октябр',
+            'ноябр',
+            'декабр',
+            'выходные',
+            'на неделю',
+            'на пару дней',
+            'каникул',
+            'зимой',
+            'летом',
           ];
-          const monthHit = months.find((word) => lower.includes(word));
-          if (monthHit) ctx.when = capitalizeCity(monthHit);
-          if (/(выходные|недел(ю|ю)|каникул)/i.test(lower)) ctx.when = "ближайшие даты";
+          const whenHit = whenKeywords.find((word) => lower.includes(word));
+          if (whenHit) context.when = whenHit.includes('на ')
+            ? whenHit
+            : capitalizeWord(whenHit);
 
-          if (/самол[её]т/.test(lower)) ctx.transportPreference = "самолёт";
-          else if (/поезд/.test(lower)) ctx.transportPreference = "поезд";
-          else if (/автобус/.test(lower)) ctx.transportPreference = "автобус";
-          else if (/без\s+самол[её]т/.test(lower)) ctx.transportPreference = "без самолёта";
+          if (/самол[её]т|авиа/.test(lower)) context.transport = 'plane';
+          else if (/поезд|электричк/.test(lower)) context.transport = 'train';
+          else if (/автобус/.test(lower)) context.transport = 'bus';
+          else if (/без\s+самол[её]т/.test(lower)) context.transport = 'any';
 
-          if (/море/.test(lower)) ctx.mood = "море";
-          else if (/горы/.test(lower)) ctx.mood = "горы";
-          else if (/сияни/.test(lower)) ctx.mood = "северное сияние";
-          else if (/байкал/.test(lower)) ctx.mood = "Байкал";
-          else if (/город/.test(lower)) ctx.mood = "город";
+          const moodMap = [
+            { key: 'море', value: 'море' },
+            { key: 'пляж', value: 'море' },
+            { key: 'горы', value: 'горы' },
+            { key: 'троп', value: 'горы и тропы' },
+            { key: 'город', value: 'город' },
+            { key: 'старый город', value: 'город' },
+            { key: 'сияни', value: 'северное сияние' },
+            { key: 'байкал', value: 'Байкал' },
+          ];
+          const moodHit = moodMap.find((item) => lower.includes(item.key));
+          if (moodHit) context.mood = moodHit.value;
 
-          ctx.scenario = detectScenario(ctx, lower);
-          if (ctx.scenario) homeConversation.state = "understanding";
-          return ctx.scenario;
+          context.scenario = detectScenario(context, lower, allCities);
+          return { enoughForSummary: isReadyForSummary(context) };
         }
 
-        function detectScenario(ctx, sourceText = "") {
-          const lower = sourceText.toLowerCase();
-          if (lower.includes("несколько город") || lower.includes("через")) return "multi_city";
-          if (ctx.from && ctx.to) {
-            if (ctx.transportPreference) return "transport_focus";
-            if (ctx.when) return "known_route";
-            return "place_but_no_dates";
+        function isReadyForSummary(context) {
+          return !!(context.from && (context.to || context.mood) && context.when);
+        }
+
+        function determineNextState(context, prevState, analysis) {
+          if (prevState === YUVIA_STATES.INITIAL) {
+            if (analysis?.enoughForSummary) return YUVIA_STATES.SUMMARY;
+            return YUVIA_STATES.UNDERSTANDING;
           }
-          if ((ctx.from || ctx.to) && ctx.when) return "date_but_no_place";
-          if (ctx.mood) return "only_mood";
-          if (ctx.transportPreference) return "transport_focus";
-          return "";
+          if (analysis?.enoughForSummary) return YUVIA_STATES.SUMMARY;
+          return YUVIA_STATES.CLARIFYING;
         }
 
-        function phraseByScenario(dictionary, scenario) {
-          if (!dictionary) return "";
-          return pickHomePhrase(dictionary[scenario] || dictionary.default || []);
-        }
-
-        function renderUnderstandingResponse() {
-          const ctx = homeConversation.context;
-          const scenario = ctx.scenario || "default";
-          const confirmation = phraseByScenario(homePhrases.confirmationByScenario, scenario);
-          if (confirmation) {
-            appendHomeMessage("assistant", formatWithContext(confirmation, ctx));
+        function nextClarifyChips(context) {
+          if (context.scenario && clarifyChipsByScenario[context.scenario]) {
+            return clarifyChipsByScenario[context.scenario];
           }
-          const clarify = phraseByScenario(homePhrases.clarifyByScenario, scenario);
-          if (clarify) {
-            appendHomeMessage("assistant", formatWithContext(clarify, ctx));
+          if (!context.transport && context.to) return clarifyChipsByScenario.known_route;
+          return clarifyChipsByScenario.default;
+        }
+
+        function nextClarifyPrompt(context) {
+          if (!context.to && context.from) return pickFromArray(clarifyPrompts.missing_to);
+          if (!context.from) return pickFromArray(clarifyPrompts.missing_from);
+          if (!context.when) return pickFromArray(clarifyPrompts.missing_when);
+          if (!context.mood && !context.to) return pickFromArray(clarifyPrompts.missing_mood);
+          return '';
+        }
+
+        function pickFromArray(list = []) {
+          if (!Array.isArray(list) || !list.length) return '';
+          return list[Math.floor(Math.random() * list.length)];
+        }
+
+        function renderSummary() {
+          const ctx = yuviaContext || {};
+          const toOrMood = ctx.to || (ctx.mood ? `с подбором под «${ctx.mood}»` : 'с идеями направлений');
+          const transportText = ctx.transport ?
+            (ctx.transport === 'plane'
+              ? 'с приоритетом самолётов'
+              : ctx.transport === 'train'
+              ? 'с приоритетом поездов'
+              : ctx.transport === 'bus'
+              ? 'с приоритетом автобусов'
+              : 'без жёсткой привязки к транспорту')
+            : 'с любым транспортом';
+          const phrase = pickFromArray(summaryPhrases);
+          addAssistantMessage(fillTemplate(phrase, {
+            ...ctx,
+            toOrMood,
+            transportText,
+          }));
+
+          const card = document.createElement('div');
+          card.className = 'yuvia-summary-card';
+
+          const list = document.createElement('ul');
+          list.className = 'yuvia-summary-list';
+          const params = [
+            `Город выезда: ${ctx.from || 'ещё уточняем'}`,
+            `Направление: ${ctx.to || (ctx.mood ? ctx.mood : 'ищем идеи')}`,
+            `Время: ${ctx.when || 'нужно уточнить'}`,
+            `Транспорт: ${transportText}`,
+          ];
+          params.forEach((item) => {
+            const li = document.createElement('li');
+            li.textContent = item;
+            list.appendChild(li);
+          });
+          card.appendChild(list);
+
+          const actions = document.createElement('div');
+          actions.className = 'yuvia-summary-actions';
+
+          const primaryBtn = document.createElement('button');
+          primaryBtn.type = 'button';
+          primaryBtn.className = 'btn-primary';
+          primaryBtn.textContent = ctx.to ? 'Перейти к поиску билетов' : 'Посмотреть идеи направлений';
+          primaryBtn.addEventListener('click', () => {
+            if (ctx.to) {
+              goToSearch();
+            } else {
+              goToIdeas();
+            }
+          });
+          actions.appendChild(primaryBtn);
+
+          const datesBtn = document.createElement('button');
+          datesBtn.type = 'button';
+          datesBtn.textContent = 'Поиграть с датами';
+          datesBtn.addEventListener('click', goToDates);
+          actions.appendChild(datesBtn);
+
+          const routeBtn = document.createElement('button');
+          routeBtn.type = 'button';
+          routeBtn.textContent = 'Разложить дорогу по шагам';
+          routeBtn.addEventListener('click', goToRouteHelper);
+          actions.appendChild(routeBtn);
+
+          card.appendChild(actions);
+
+          const restart = document.createElement('button');
+          restart.type = 'button';
+          restart.className = 'yuvia-summary-restart';
+          restart.textContent = 'Что-то не так? Начать сначала';
+          restart.addEventListener('click', resetConversation);
+          card.appendChild(restart);
+
+          dialogEl?.appendChild(card);
+          card.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
+
+        function renderNextStep() {
+          if (yuviaState === YUVIA_STATES.SUMMARY) {
+            renderSummary();
+            return;
+          }
+
+          if (yuviaState === YUVIA_STATES.UNDERSTANDING) {
+            const scenario = yuviaContext.scenario || 'default';
+            const confirmation = pickFromArray(confirmationPhrases[scenario]);
+            if (confirmation) {
+              addAssistantMessage(fillTemplate(confirmation, yuviaContext));
+            }
+            const prompt = nextClarifyPrompt(yuviaContext);
+            if (prompt) addAssistantMessage(prompt);
+            renderChips(nextClarifyChips(yuviaContext));
+            yuviaState = YUVIA_STATES.CLARIFYING;
+            return;
+          }
+
+          if (yuviaState === YUVIA_STATES.CLARIFYING) {
+            if (isReadyForSummary(yuviaContext)) {
+              yuviaState = YUVIA_STATES.SUMMARY;
+              renderSummary();
+              return;
+            }
+            const prompt = nextClarifyPrompt(yuviaContext);
+            if (prompt) addAssistantMessage(prompt);
+            renderChips(nextClarifyChips(yuviaContext));
           }
         }
 
-        function buildQueryFromContext(ctx = {}) {
+        function buildParams() {
           const params = new URLSearchParams();
-          if (ctx.from) params.set("from", ctx.from);
-          if (ctx.to) params.set("to", ctx.to);
-          if (ctx.when) params.set("when", ctx.when);
-          if (ctx.transportPreference) params.set("transport", ctx.transportPreference);
-          if (ctx.mood) params.set("mood", ctx.mood);
-          return params.toString();
+          if (yuviaContext.from) params.set('from', yuviaContext.from);
+          if (yuviaContext.to) params.set('to', yuviaContext.to);
+          if (yuviaContext.when) params.set('when', yuviaContext.when);
+          if (yuviaContext.transport) params.set('transport', yuviaContext.transport);
+          if (yuviaContext.mood) params.set('mood', yuviaContext.mood);
+          return params;
         }
 
-        function moodCollectionHref(ctx = {}) {
-          if (/море/i.test(ctx.mood || "")) return "collection-sea.html";
-          if (/горы/i.test(ctx.mood || "")) return "collection-mountains.html";
-          if (/сияние/i.test(ctx.mood || "")) return "collection-northern-lights.html";
-          if (/байкал/i.test(ctx.mood || "")) return "collection-baikal.html";
-          return "ideas.html";
+        function goToSearch() {
+          const params = buildParams();
+          window.location.href = 'search.html?' + params.toString();
         }
 
-        // Collects enough context and renders CTA buttons once route data is ready.
-        function renderSummaryIfReady() {
-          if (!homeDialog || homeConversation.summaryShown) return;
-          const ctx = homeConversation.context;
-          const hasRoute = ctx.from && ctx.to;
-          const hasEnough = hasRoute && (ctx.when || ctx.transportPreference || ctx.mood);
-          const hasIdeasMood = !ctx.to && ctx.mood && ctx.from;
-          if (!hasEnough && !hasIdeasMood) return;
+        function goToIdeas() {
+          const params = buildParams();
+          window.location.href = 'ideas.html?' + params.toString();
+        }
 
-          homeConversation.state = "summary";
-          homeConversation.summaryShown = true;
-          appendHomeMessage("assistant", formatWithContext(pickHomePhrase(homePhrases.summary), ctx));
+        function goToDates() {
+          const params = buildParams();
+          window.location.href = 'dates.html?' + params.toString();
+        }
 
-          const summaryCard = document.createElement("div");
-          summaryCard.className = "yuvia-summary-card";
-          const summaryText = document.createElement("div");
-          summaryText.textContent = "Готова переключиться на подбор подходящих вариантов.";
-          summaryCard.appendChild(summaryText);
+        function goToRouteHelper() {
+          const params = buildParams();
+          window.location.href = 'route-helper.html?' + params.toString();
+        }
 
-          const actions = document.createElement("div");
-          actions.className = "yuvia-summary-actions";
+        function handleUserInput(text) {
+          const clean = String(text || '').trim();
+          if (!clean) return;
+          addUserMessage(clean);
+          yuviaContext.rawInputs.push(clean);
+          const analysis = analyzeIntent(clean, yuviaContext);
+          yuviaState = determineNextState(yuviaContext, yuviaState, analysis);
+          renderNextStep();
+        }
 
-          if (hasRoute) {
-            const searchLink = document.createElement("a");
-            searchLink.className = "primary";
-            searchLink.href = `search.html?${buildQueryFromContext(ctx)}`;
-            searchLink.textContent = "Перейти к поиску билетов";
-            actions.appendChild(searchLink);
+        function handleChipClick(event) {
+          const chip = event.target.closest('.yuvia-chip');
+          if (!chip?.dataset?.text) return;
+          handleUserInput(chip.dataset.text);
+        }
 
-            const guideLink = document.createElement("a");
-            guideLink.href = `route-helper.html?${buildQueryFromContext(ctx)}`;
-            guideLink.textContent = "Разложить дорогу по шагам";
-            actions.appendChild(guideLink);
+        function handleFormSubmit(event) {
+          event.preventDefault();
+          handleUserInput(inputEl?.value);
+          if (inputEl) inputEl.value = '';
+        }
+
+        function resetConversation() {
+          yuviaContext = freshContext();
+          yuviaState = YUVIA_STATES.INITIAL;
+          if (dialogEl) dialogEl.innerHTML = '';
+          if (chipsEl) {
+            chipsEl.innerHTML = initialChipsHTML;
           }
-
-          if (!ctx.to) {
-            const ideasLink = document.createElement("a");
-            ideasLink.href = moodCollectionHref(ctx);
-            ideasLink.textContent = "Посмотреть идеи направлений";
-            actions.appendChild(ideasLink);
-          }
-
-          summaryCard.appendChild(actions);
-          homeDialog.appendChild(summaryCard);
-          summaryCard.scrollIntoView({ behavior: "smooth", block: "end" });
+          addAssistantMessage(pickFromArray(initialGreetings));
         }
 
-        // Handles user input on the home page, updates context and renders replies.
-        function handleHomeSubmit(rawText = "") {
-          const text = String(rawText || "").trim();
-          if (!text) return;
-          appendHomeMessage("user", text);
-          analyzeIntent(text);
+        function initYuviaConversation() {
+          dialogEl = document.getElementById('yuviaDialog');
+          chipsEl = document.getElementById('yuviaChips');
+          formEl = document.getElementById('yuviaInputForm');
+          inputEl = document.getElementById('yuviaUserInput');
+          if (!dialogEl || !formEl || !inputEl) return;
 
-          if (homeConversation.state === "initial") {
-            homeConversation.state = "understanding";
-          }
+          yuviaContext = freshContext();
+          yuviaState = YUVIA_STATES.INITIAL;
+          dialogEl.innerHTML = '';
+          initialChipsHTML = chipsEl?.innerHTML || '';
+          addAssistantMessage(pickFromArray(initialGreetings));
 
-          renderUnderstandingResponse();
-          if (homeConversation.state === "understanding") {
-            homeConversation.state = "clarifying";
-          }
-          renderSummaryIfReady();
-          if (homeInput) homeInput.value = "";
+          chipsEl?.addEventListener('click', handleChipClick);
+          formEl.addEventListener('submit', handleFormSubmit);
         }
 
-        // Entry point for the conversational shell: wires chips and form.
-        function initHomeConversation() {
-          if (!homeShell || !homeDialog || !homeInputForm) return;
-          appendHomeMessage("assistant", pickHomePhrase(homePhrases.initialQuestion));
-
-          homeInputForm.addEventListener("submit", (event) => {
-            event.preventDefault();
-            handleHomeSubmit(homeInput?.value);
-          });
-
-          homeSendBtn?.addEventListener("click", (event) => {
-            event.preventDefault();
-            handleHomeSubmit(homeInput?.value);
-          });
-
-          homeChips?.addEventListener("click", (event) => {
-            const chip = event.target.closest(".yuvia-chip");
-            if (!chip?.dataset?.text) return;
-            handleHomeSubmit(chip.dataset.text);
-          });
-        }
+        document.addEventListener('DOMContentLoaded', () => {
+          const shell = document.getElementById('yuviaShell');
+          if (!shell) return;
+          initYuviaConversation();
+        });
 
         function initSuggests() {
           attachSuggest(originInput, handleSuggestPick("origin"));
@@ -3283,7 +3434,6 @@ allResults = flightsRaw
         async function init() {
           const isSearchPage = !!document.getElementById("searchForm");
           const isResultsPage = !!postSearchLayout;
-          const isHomePage = !!homeShell && !!homeDialog;
 
           if (isSearchPage) {
             initMinDateHints();
@@ -3315,12 +3465,6 @@ allResults = flightsRaw
             if (hasOrigin && hasDest && hasDepart) {
               await doSearch();
             }
-            return;
-          }
-
-          if (isHomePage) {
-            initHomeConversation();
-            initTooltips();
             return;
           }
 
