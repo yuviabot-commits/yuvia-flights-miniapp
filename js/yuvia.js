@@ -3562,3 +3562,231 @@ allResults = flightsRaw
           parseFreeText,
         };
       })();
+
+      (function () {
+        function initTravelSandbox() {
+          const sandbox = document.getElementById('travelSandbox');
+          if (!sandbox) return;
+
+          const sandboxState = {
+            intent: null,
+            mood: null,
+            duration: null,
+            transport: [],
+            format: null,
+            from: null,
+          };
+
+          const conciergeLine = document.getElementById('sandboxConciergeLine');
+          const intentButtons = Array.from(document.querySelectorAll('.intent-chip'));
+          const compassSectors = Array.from(document.querySelectorAll('.compass-sector'));
+          const timelinePoints = Array.from(document.querySelectorAll('.timeline-point'));
+          const transportChips = Array.from(document.querySelectorAll('.transport-chip'));
+          const formatChips = Array.from(document.querySelectorAll('.format-chip'));
+          const summaryFrom = document.getElementById('summaryFrom');
+          const summaryMood = document.getElementById('summaryMood');
+          const summaryDuration = document.getElementById('summaryDuration');
+          const summaryTransport = document.getElementById('summaryTransport');
+          const summaryFormat = document.getElementById('summaryFormat');
+          const compassMarker = document.getElementById('compassBirdMarker');
+          const freeformForm = document.getElementById('sandboxFreeformForm');
+          const freeformInput = document.getElementById('sandboxFreeformInput');
+          const summaryToSearch = document.getElementById('summaryToSearch');
+          const summaryToIdeas = document.getElementById('summaryToIdeas');
+          const intentPill = document.getElementById('sandboxIntentButton');
+          const intentsBlock = document.getElementById('sandboxIntents');
+
+          const intentLines = {
+            'fast-search': 'Если ты спешишь — давай соберём только самое важное и сразу уйдём к билетам.',
+            'route-help': 'Окей, берём время и примерный маршрут, а дальше я помогу с деталями.',
+            'ideas-first': 'Тогда сначала определимся с настроением поездки, а билеты подстроим под это.',
+          };
+
+          const moodPhrases = {
+            sea: 'хочется к морю',
+            mountains: 'настроение на горы и тропы',
+            city: 'хочется городов и прогулок',
+            nearby: 'что-то недалеко от дома',
+            far: 'хочется уехать подальше',
+          };
+
+          const moodConcierge = {
+            sea: 'Вижу, тянет к морю. По длительности уже определились?',
+            mountains: 'Хочется гор и троп. Сколько дней закладываем?',
+            city: 'Хорошо, фокус на городских прогулках. Сколько времени есть?',
+            nearby: 'Хочется чего-то рядом. Скажи, на сколько дней это задумали?',
+            far: 'Тянет уехать подальше. Определимся с длительностью?',
+          };
+
+          const durationPhrases = {
+            evening: 'на один вечер',
+            weekend: 'на выходные',
+            '3-4': 'на 3–4 дня',
+            week: 'на неделю и больше',
+          };
+
+          const formatPhrases = {
+            solo: 'одиночная поездка',
+            couple: 'поездка парой',
+            family: 'семейная поездка',
+            friends: 'поездка компанией',
+          };
+
+          const transportLabels = {
+            plane: 'самолёт',
+            train: 'поезд',
+            bus: 'автобус',
+            suburban: 'электричка',
+          };
+
+          function updateConciergeLine(text) {
+            if (conciergeLine && text) {
+              conciergeLine.textContent = text;
+            }
+          }
+
+          function setActiveGroup(items, activeEl) {
+            items.forEach(el => {
+              el.classList.toggle('is-active', el === activeEl);
+            });
+          }
+
+          function updateSummaryLinks() {
+            const query = sandboxState.from ? `?from=${encodeURIComponent(sandboxState.from)}` : '';
+            if (summaryToSearch) {
+              summaryToSearch.href = `search.html${query}`;
+            }
+            if (summaryToIdeas) {
+              summaryToIdeas.href = `ideas.html${query}`;
+            }
+          }
+
+          function handleIntentClick(button) {
+            const intent = button.getAttribute('data-intent');
+            sandboxState.intent = intent;
+            setActiveGroup(intentButtons, button);
+            const line = intent && intentLines[intent];
+            if (line) {
+              updateConciergeLine(line);
+            }
+          }
+
+          function handleMoodClick(button) {
+            const mood = button.getAttribute('data-mood');
+            sandboxState.mood = mood;
+            setActiveGroup(compassSectors, button);
+            const phrase = mood ? moodPhrases[mood] : '';
+            if (summaryMood) {
+              summaryMood.textContent = phrase || 'пока присматриваемся';
+            }
+            if (compassMarker) {
+              compassMarker.className = 'compass-bird-marker';
+              if (mood) {
+                compassMarker.classList.add(`marker-${mood}`);
+              }
+            }
+            if (mood && moodConcierge[mood]) {
+              updateConciergeLine(moodConcierge[mood]);
+            }
+          }
+
+          function handleDurationClick(button) {
+            const duration = button.getAttribute('data-duration');
+            sandboxState.duration = duration;
+            setActiveGroup(timelinePoints, button);
+            if (summaryDuration) {
+              const phrase = duration ? durationPhrases[duration] : '';
+              summaryDuration.textContent = phrase || 'без привязки';
+            }
+          }
+
+          function handleTransportClick(button) {
+            const value = button.getAttribute('data-transport');
+            if (!value) return;
+            const hasValue = sandboxState.transport.includes(value);
+            if (hasValue) {
+              sandboxState.transport = sandboxState.transport.filter(item => item !== value);
+            } else {
+              sandboxState.transport = [...sandboxState.transport, value];
+            }
+            button.classList.toggle('is-active', !hasValue);
+            if (summaryTransport) {
+              if (!sandboxState.transport.length) {
+                summaryTransport.textContent = 'любой';
+              } else {
+                const labels = sandboxState.transport
+                  .map(key => transportLabels[key])
+                  .filter(Boolean);
+                summaryTransport.textContent = labels.join(', ');
+              }
+            }
+          }
+
+          function handleFormatClick(button) {
+            const value = button.getAttribute('data-format');
+            sandboxState.format = value;
+            setActiveGroup(formatChips, button);
+            if (summaryFormat) {
+              summaryFormat.textContent = value && formatPhrases[value] ? formatPhrases[value] : 'не выбрали';
+            }
+          }
+
+          function handleFreeformSubmit(event) {
+            event.preventDefault();
+            const text = freeformInput?.value?.trim();
+            if (!text) return;
+            sandboxState.from = text;
+            if (summaryFrom) {
+              summaryFrom.textContent = text;
+            }
+            updateConciergeLine(`Приняла: ${text}. Дальше подстрою под это настроение и длительность.`);
+            updateSummaryLinks();
+          }
+
+          intentButtons.forEach(button => {
+            button.addEventListener('click', () => handleIntentClick(button));
+          });
+
+          compassSectors.forEach(button => {
+            button.addEventListener('click', () => handleMoodClick(button));
+          });
+
+          timelinePoints.forEach(button => {
+            button.addEventListener('click', () => handleDurationClick(button));
+          });
+
+          transportChips.forEach(button => {
+            button.addEventListener('click', () => handleTransportClick(button));
+          });
+
+          formatChips.forEach(button => {
+            button.addEventListener('click', () => handleFormatClick(button));
+          });
+
+          if (freeformForm) {
+            freeformForm.addEventListener('submit', handleFreeformSubmit);
+          }
+
+          if (intentPill) {
+            intentPill.addEventListener('click', () => {
+              if (intentsBlock) {
+                intentsBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }
+              if (intentButtons[0]) {
+                intentButtons[0].focus();
+              }
+            });
+          }
+
+          updateSummaryLinks();
+        }
+
+        window.initTravelSandbox = initTravelSandbox;
+
+        document.addEventListener('DOMContentLoaded', () => {
+          const sandbox = document.getElementById('travelSandbox');
+          if (sandbox) {
+            initTravelSandbox();
+          }
+        });
+      })();
