@@ -3296,17 +3296,269 @@ allResults = flightsRaw
       })();
 
       (function () {
-        const intentChips = document.querySelectorAll('.home-intent-chip');
+        const scenes = {
+          intent: {
+            id: 'intent',
+            type: 'choice',
+            birdState: 'listen',
+            titleVariants: [
+              'С чем ты сегодня ко мне?',
+              'Поймём, с чего начнём поездку',
+              'Определимся с твоим запросом',
+            ],
+            text: 'Выбери, что тебе ближе сейчас — и я поведу по подходящему маршруту.',
+            options: [
+              {
+                id: 'fast-search',
+                label: 'Я знаю, куда и когда — сразу к конкретике',
+                intent: 'fast-search',
+              },
+              {
+                id: 'need-help',
+                label: 'Хочу, чтобы ты помогла с маршрутом и датами',
+                intent: 'need-help',
+              },
+              {
+                id: 'ideas',
+                label: 'Я пришёл за идеями, билеты потом',
+                intent: 'ideas',
+              },
+            ],
+          },
+          origin: {
+            id: 'origin',
+            type: 'input',
+            birdState: 'listen',
+            titleVariants: [
+              'Откуда вылетаем или выезжаем?',
+              'Город старта — откуда поедем?',
+              'Начнём с точки отправления',
+            ],
+            placeholder: 'Например: из Москвы / из Петербурга / из Казани',
+            field: 'origin',
+          },
+          destination: {
+            id: 'destination',
+            type: 'input',
+            birdState: 'listen',
+            titleVariants: [
+              'Куда хочется добраться на этот раз?',
+              'Финиш маршрута — куда тянет?',
+              'Город или место назначения',
+            ],
+            placeholder: 'Например: в Стамбул / в Сочи / к Байкалу',
+            field: 'destination',
+          },
+        };
 
+        let gameState = {
+          currentSceneId: 'intent',
+          intent: null,
+          origin: null,
+          destination: null,
+          dates: null,
+          duration: null,
+          transport: null,
+          format: null,
+          weekendTrip: false,
+        };
+
+        function updateGameState(partial = {}) {
+          gameState = { ...gameState, ...partial };
+        }
+
+        function parseFreeText(value, field) {
+          const text = (value || '').toLowerCase();
+
+          if (field === 'origin' || field === 'destination') {
+            let city = null;
+
+            if (text.includes('моск')) {
+              city = 'Москва';
+            } else if (text.includes('санкт') || text.includes('питер') || text.includes('спб')) {
+              city = 'Санкт-Петербург';
+            }
+
+            if (city) {
+              gameState[field] = city;
+            } else {
+              gameState[field] = value.trim();
+            }
+
+            if (text.includes('выходн')) {
+              gameState.weekendTrip = true;
+            }
+          }
+        }
+
+        function goToScene(id) {
+          if (!id || !scenes[id]) return;
+          gameState.currentSceneId = id;
+          renderScene();
+        }
+
+        function showSceneMessage(message) {
+          const container = document.getElementById('yuviaGameScreen');
+          const messageEl = container?.querySelector('[data-role="game-message"]');
+          if (messageEl) {
+            messageEl.textContent = message || '';
+          }
+        }
+
+        function handleIntentSelection(intent) {
+          updateGameState({ intent });
+
+          if (intent === 'fast-search') {
+            if (window.YuviaBird) window.YuviaBird.setState('confirm');
+            setTimeout(() => {
+              window.location.href = 'search.html';
+            }, 450);
+            return;
+          }
+
+          if (intent === 'need-help') {
+            goToScene('origin');
+            return;
+          }
+
+          if (intent === 'ideas') {
+            window.location.href = 'ideas.html';
+          }
+        }
+
+        function attachSceneListeners(scene) {
+          const container = document.getElementById('yuviaGameScreen');
+          if (!container || !scene) return;
+
+          if (scene.type === 'choice') {
+            container.querySelectorAll('[data-scene-option]').forEach(btn => {
+              btn.addEventListener('click', () => {
+                const intent = btn.getAttribute('data-intent') || '';
+                handleIntentSelection(intent);
+              });
+            });
+          } else if (scene.type === 'input') {
+            const form = container.querySelector('.game-input-form');
+            const input = form?.querySelector('input');
+
+            form?.addEventListener('submit', event => {
+              event.preventDefault();
+              const rawValue = input?.value?.trim() || '';
+
+              if (!rawValue) {
+                if (window.YuviaBird) window.YuviaBird.setState('oops');
+                showSceneMessage('Кажется, я не нашла город, давай ещё раз, можно просто “из Москвы”.');
+                return;
+              }
+
+              if (window.YuviaBird) window.YuviaBird.setState('think');
+
+              setTimeout(() => {
+                parseFreeText(rawValue, scene.field);
+
+                if (scene.id === 'origin') {
+                  goToScene('destination');
+                  return;
+                }
+
+                if (scene.id === 'destination') {
+                  if (gameState.origin && gameState.destination) {
+                    if (window.YuviaBird) window.YuviaBird.setState('confirm');
+                    setTimeout(() => {
+                      const params = new URLSearchParams();
+                      if (gameState.origin) params.set('from', gameState.origin);
+                      if (gameState.destination) params.set('to', gameState.destination);
+                      if (gameState.weekendTrip) params.set('weekend', '1');
+                      const qs = params.toString();
+                      window.location.href = qs ? `search.html?${qs}` : 'search.html';
+                    }, 650);
+                    return;
+                  }
+
+                  goToScene('intent');
+                }
+              }, 450);
+            });
+          }
+        }
+
+        function renderScene() {
+          const container = document.getElementById('yuviaGameScreen');
+          if (!container) return;
+          const scene = scenes[gameState.currentSceneId];
+          if (!scene) return;
+
+          if (window.YuviaBird && scene.birdState) {
+            window.YuviaBird.setState(scene.birdState);
+          }
+
+          const title = scene.titleVariants
+            ? scene.titleVariants[Math.floor(Math.random() * scene.titleVariants.length)]
+            : '';
+
+          if (scene.type === 'choice') {
+            container.innerHTML = `
+      <div class="game-scene game-scene--choice">
+        <h2 class="game-scene__title">${title}</h2>
+        <p class="game-scene__text">${scene.text || ''}</p>
+        <div class="game-scene__options">
+          ${scene.options
+            .map(
+              opt => `
+                <button type="button"
+                        class="game-option-chip"
+                        data-scene-option="${opt.id}"
+                        data-intent="${opt.intent || ''}">
+                  ${opt.label}
+                </button>
+              `
+            )
+            .join('')}
+        </div>
+        <div class="game-input-message" data-role="game-message" aria-live="polite"></div>
+      </div>
+    `;
+          } else if (scene.type === 'input') {
+            container.innerHTML = `
+      <div class="game-scene game-scene--input">
+        <h2 class="game-scene__title">${title}</h2>
+        <p class="game-scene__text">Можешь написать свободным текстом.</p>
+        <form class="game-input-form" data-scene-id="${scene.id}">
+          <label class="visually-hidden" for="gameInput">${scene.placeholder || ''}</label>
+          <input id="gameInput"
+                 type="text"
+                 name="gameInput"
+                 autocomplete="off"
+                 placeholder="${scene.placeholder || ''}">
+          <button type="submit">Продолжить</button>
+        </form>
+        <div class="game-input-message" data-role="game-message" aria-live="polite"></div>
+      </div>
+    `;
+          }
+
+          attachSceneListeners(scene);
+        }
+
+        function startGame() {
+          gameState.currentSceneId = 'intent';
+          renderScene();
+        }
+
+        const intentChips = document.querySelectorAll('.home-intent-chip');
         intentChips.forEach(chip => {
           chip.addEventListener('click', () => {
-            const intent = chip.getAttribute('data-intent');
-            if (!window.YuviaBird) return;
-            window.YuviaBird.setState('listen');
-
-            // Позже здесь будет логика показа разных сцен.
-            // Сейчас только консоль, чтобы проверить, что всё работает.
-            console.log('[Yuvia intent]', intent);
+            const intent = chip.getAttribute('data-intent') || '';
+            handleIntentSelection(intent);
           });
         });
+
+        startGame();
+
+        window.YuviaGame = {
+          startGame,
+          goToScene,
+          updateGameState,
+          parseFreeText,
+        };
       })();
