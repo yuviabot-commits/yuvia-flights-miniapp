@@ -9,77 +9,95 @@
     <link rel="stylesheet" href="css/yuvia.css" />
   </head>
   <body class="home-body">
-    <div class="home-wrap home-sky">
+    <div class="home-wrap">
       <main class="sky-stage" aria-label="Yuvia — стартовая сцена">
         <div class="sky-layer sky-gradient"></div>
-        <div class="sky-layer sky-map-lines"></div>
-        <div class="sky-layer sky-clouds-background"></div>
+        <div class="sky-layer sky-glow"></div>
+        <div class="sky-layer sky-parallax-clouds"></div>
+        <div class="sky-layer sky-parallax-lines"></div>
 
-        <section class="yuvia-center">
-          <div class="yuvia-bird-shell" aria-hidden="true">
-            <div class="yuvia-bird-visual">
-              <video class="yuvia-bird" autoplay loop muted playsinline poster="assets/Logo-bird.png">
-                <source src="assets/Yuvia_Anim.webm" type="video/webm" />
-              </video>
-              <img src="assets/Logo-bird.png" alt="" class="yuvia-bird-fallback" />
+        <div class="stage-content">
+          <div class="bird-anchor" id="birdAnchor">
+            <div class="bird-cloud-seat" aria-hidden="true">
+              <div class="bird-visual">
+                <video
+                  class="yuvia-bird"
+                  autoplay
+                  loop
+                  muted
+                  playsinline
+                  poster="assets/Logo-bird.png"
+                >
+                  <source src="assets/Yuvia_Anim.webm" type="video/webm" />
+                </video>
+                <img src="assets/Logo-bird.png" alt="" class="yuvia-bird-fallback" />
+              </div>
+            </div>
+            <div class="bird-speech" role="dialog" aria-live="polite">
+              <p>
+                Давай поймём, с чего начнём твоё путешествие.<br />
+                Посмотри на облака — в каждом спрятано одно из желаний.<br />
+                Выбери то, которое больше всего откликается сейчас, а дальше я помогу разложить поездку по шагам.
+              </p>
             </div>
           </div>
-          <div class="yuvia-greeting">
-            <p class="yuvia-greeting-line-1">Привет, я Ювия.</p>
-            <p class="yuvia-greeting-line-2">
-              Давай поймём, с чем ты пришёл(а), и решим, куда тебя вести дальше.
-            </p>
-          </div>
-        </section>
 
-        <section class="intent-clouds" aria-label="Выбор намерения">
-          <button class="intent-cloud intent-cloud--know-all" data-intent="know-all" data-tilt="left" type="button">
-            <span class="intent-title">Я знаю и куда, и когда</span>
-            <span class="intent-subtitle">Нужно просто подобрать удобные билеты</span>
-          </button>
-
-          <button class="intent-cloud intent-cloud--know-where" data-intent="know-where" data-tilt="top" type="button">
-            <span class="intent-title">Я знаю, куда, но не с датами</span>
-            <span class="intent-subtitle">Помоги найти хорошие варианты по времени</span>
-          </button>
-
-          <button class="intent-cloud intent-cloud--know-when" data-intent="know-when" data-tilt="right" type="button">
-            <span class="intent-title">У меня есть даты, но не знаю, куда</span>
-            <span class="intent-subtitle">Хочу идею под мои дни</span>
-          </button>
-
-          <button class="intent-cloud intent-cloud--just-want" data-intent="just-want" data-tilt="bottom" type="button">
-            <span class="intent-title">Просто хочется выбраться</span>
-            <span class="intent-subtitle">Давай подумаем, что тебе сейчас подойдёт</span>
-          </button>
-
-          <button class="intent-cloud intent-cloud--multi-city" data-intent="multi-city" data-tilt="right" type="button">
-            <span class="intent-title">Маршрут из нескольких городов</span>
-            <span class="intent-subtitle">Нужен сложный маршрут</span>
-          </button>
-        </section>
-
-        <section class="quick-cloud" aria-label="Быстрый выбор сценария">
-          <p class="quick-cloud-text">Если не до игры — скажи прямо:</p>
-          <div class="quick-cloud-options">
-            <button class="quick-chip" data-action="go-search" type="button">Сразу к поиску билетов</button>
-            <button class="quick-chip" data-action="see-prices" type="button">
-              Посмотреть цены на конкретном направлении
+          <div class="cloud-field" aria-label="Выбор намерения">
+            <button
+              class="mood-cloud"
+              type="button"
+              data-bird-x="42"
+              data-bird-y="38"
+              style="--cloud-left: 58%; --cloud-top: 42%"
+            >
+              Путешествие уже сложилось в голове
             </button>
-            <button class="quick-chip" data-action="free-text" type="button">Напишу своими словами</button>
+
+            <button
+              class="mood-cloud"
+              type="button"
+              data-bird-x="64"
+              data-bird-y="40"
+              style="--cloud-left: 74%; --cloud-top: 46%"
+            >
+              Сердце тянет в один город
+            </button>
+
+            <button
+              class="mood-cloud"
+              type="button"
+              data-bird-x="60"
+              data-bird-y="52"
+              style="--cloud-left: 64%; --cloud-top: 56%"
+            >
+              Есть свободные дни — ищу им приключение
+            </button>
+
+            <button
+              class="mood-cloud"
+              type="button"
+              data-bird-x="46"
+              data-bird-y="60"
+              style="--cloud-left: 54%; --cloud-top: 64%"
+            >
+              Хочется просто улететь от рутины
+            </button>
+
+            <button
+              class="mood-cloud"
+              type="button"
+              data-bird-x="68"
+              data-bird-y="66"
+              style="--cloud-left: 72%; --cloud-top: 70%"
+            >
+              Хочу маршрут с прыжками из города в город
+            </button>
           </div>
 
-          <form class="free-wind-input" id="freeWindForm">
-            <label for="freeWindText" class="visually-hidden">Расскажи о своей поездке</label>
-            <input
-              id="freeWindText"
-              name="freeWindText"
-              type="text"
-              placeholder="Напиши, откуда и куда хочешь, или просто, что хочется от поездки"
-              autocomplete="off"
-            />
-          </form>
-        </section>
+          <p class="cloud-selection-note" id="cloudSelectionNote" aria-live="polite">
+            Отлично, сейчас разберёмся с этим сценарием.
+          </p>
+        </div>
       </main>
     </div>
 
