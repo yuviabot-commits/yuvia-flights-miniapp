@@ -3785,13 +3785,11 @@ allResults = flightsRaw
           const stage = document.querySelector('.sky-stage');
           if (!stage) return;
 
-          const birdShell = $('.yuvia-bird-shell');
-          const intentClouds = $$('.intent-cloud', stage);
-          const quickChips = $$('.quick-chip', stage);
-          const freeWindForm = $('#freeWindForm');
-          const freeWindInput = $('#freeWindText');
-          const cloudsLayer = $('.sky-clouds-background', stage);
-          const mapLinesLayer = $('.sky-map-lines', stage);
+          const birdAnchor = $('#birdAnchor', stage);
+          const moodClouds = $$('.mood-cloud', stage);
+          const selectionNote = $('#cloudSelectionNote', stage);
+          const cloudsLayer = $('.sky-parallax-clouds', stage);
+          const mapLinesLayer = $('.sky-parallax-lines', stage);
           const birdVideo = stage.querySelector('.yuvia-bird');
           const birdFallback = stage.querySelector('.yuvia-bird-fallback');
 
@@ -3806,81 +3804,42 @@ allResults = flightsRaw
             });
           }
 
-          const tiltClasses = [
-            'yuvia-bird-shell--tilt-left',
-            'yuvia-bird-shell--tilt-right',
-            'yuvia-bird-shell--tilt-top',
-            'yuvia-bird-shell--tilt-bottom',
-          ];
+          let flightTimer = null;
 
-          function resetBirdTilt() {
-            if (!birdShell) return;
-            birdShell.classList.remove(...tiltClasses);
+          function moveBird(cloud) {
+            if (!birdAnchor || !cloud) return;
+            const targetX = Number(cloud.dataset.birdX) || 12;
+            const targetY = Number(cloud.dataset.birdY) || 44;
+
+            stage.style.setProperty('--bird-left', `${targetX}%`);
+            stage.style.setProperty('--bird-top', `${targetY}%`);
+
+            birdAnchor.classList.add('bird-anchor--in-flight');
+            clearTimeout(flightTimer);
+            flightTimer = setTimeout(() => {
+              birdAnchor.classList.remove('bird-anchor--in-flight');
+            }, 800);
           }
 
-          function tiltBird(direction = '') {
-            if (!birdShell) return;
-            resetBirdTilt();
-            if (direction) {
-              birdShell.classList.add(`yuvia-bird-shell--tilt-${direction}`);
+          function selectCloud(target) {
+            moodClouds.forEach(cloud => {
+              cloud.classList.remove('cloud-selected', 'cloud-dimmed');
+              if (cloud !== target) {
+                cloud.classList.add('cloud-dimmed');
+              }
+            });
+
+            target.classList.add('cloud-selected');
+            moveBird(target);
+
+            if (selectionNote) {
+              selectionNote.classList.add('is-visible');
             }
           }
 
-          intentClouds.forEach(button => {
-            button.addEventListener('mouseenter', () => {
-              const direction = button.dataset.tilt || '';
-              tiltBird(direction);
-            });
-
-            button.addEventListener('mouseleave', () => {
-              resetBirdTilt();
-            });
-
-            button.addEventListener('click', () => {
-              const { intent } = button.dataset;
-              if (button.classList.contains('intent-cloud--active')) {
-                button.classList.remove('intent-cloud--active');
-              } else {
-                intentClouds.forEach(item => item.classList.remove('intent-cloud--active'));
-                button.classList.add('intent-cloud--active');
-              }
-              console.log('[Yuvia] Intent selected:', intent);
-            });
+          moodClouds.forEach(cloud => {
+            cloud.addEventListener('click', () => selectCloud(cloud));
           });
-
-          quickChips.forEach(chip => {
-            chip.addEventListener('click', () => {
-              const { action } = chip.dataset;
-              switch (action) {
-                case 'go-search':
-                  window.location.href = 'search.html';
-                  break;
-                case 'see-prices':
-                  // TODO: направить на страницу с матрицей цен
-                  window.location.href = 'search.html';
-                  break;
-                case 'free-text':
-                  if (freeWindForm) {
-                    freeWindForm.classList.add('free-wind-input--visible');
-                  }
-                  if (freeWindInput) {
-                    freeWindInput.focus();
-                  }
-                  break;
-                default:
-                  break;
-              }
-            });
-          });
-
-          if (freeWindForm) {
-            freeWindForm.addEventListener('submit', event => {
-              event.preventDefault();
-              const text = freeWindInput?.value?.trim();
-              if (!text) return;
-              console.log('[Yuvia] Free wind input:', text);
-            });
-          }
 
           function handleParallax(event) {
             const bounds = stage.getBoundingClientRect();
