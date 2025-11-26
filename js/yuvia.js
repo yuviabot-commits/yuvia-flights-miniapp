@@ -3274,3 +3274,39 @@ allResults = flightsRaw
 
         init();
       })();
+
+      (function () {
+        const birdEl = document.getElementById('yuviaBird');
+
+        function setBirdState(state) {
+          if (!birdEl) return;
+          const states = ['idle', 'listen', 'think', 'confirm', 'oops'];
+          states.forEach(s => birdEl.classList.remove(`yuvia-bird--${s}`));
+          const safeState = states.includes(state) ? state : 'idle';
+          birdEl.classList.add(`yuvia-bird--${safeState}`);
+        }
+
+        // Экспортируем в глобальную область для дальнейшей игровой логики
+        window.YuviaBird = {
+          setState: setBirdState,
+        };
+
+        // По умолчанию — idle
+        setBirdState('idle');
+      })();
+
+      (function () {
+        const intentChips = document.querySelectorAll('.home-intent-chip');
+
+        intentChips.forEach(chip => {
+          chip.addEventListener('click', () => {
+            const intent = chip.getAttribute('data-intent');
+            if (!window.YuviaBird) return;
+            window.YuviaBird.setState('listen');
+
+            // Позже здесь будет логика показа разных сцен.
+            // Сейчас только консоль, чтобы проверить, что всё работает.
+            console.log('[Yuvia intent]', intent);
+          });
+        });
+      })();
