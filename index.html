@@ -3,69 +3,49 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Yuvia · Поиск авиабилетов</title>
+    <title>Yuvia · Персональный тревел-консьерж</title>
     <link rel="icon" type="image/png" href="assets/favicon.png" sizes="256x256" />
     <link rel="shortcut icon" type="image/png" href="assets/favicon.png" />
     <link rel="stylesheet" href="css/yuvia.css" />
   </head>
   <body class="home-body">
-    <div class="wrap home-wrap">
-      <div class="brand-shell">
-        <header class="brand brand-compact">
-          <img src="assets/Logo-Full.png" alt="Yuvia" class="brand-logo" />
-          <div class="brand-text">
+    <div class="home-wrap">
+      <main class="yuvia-shell" id="yuviaShell">
+        <header class="yuvia-shell__brand">
+          <img src="assets/Logo-Full.png" alt="Yuvia" class="yuvia-shell__logo" />
+          <div class="yuvia-shell__brand-text">
             <div class="brand-name">Yuvia</div>
             <div class="brand-tagline">персональный тревел-консьерж</div>
-            <div class="brand-subline">поиск авиабилетов</div>
+            <p class="brand-subline">Помогу разобраться с маршрутами и билетами.</p>
           </div>
         </header>
-      </div>
-      <section id="flights-hub" class="hub-shell">
-        <div class="card hub-intro hero-card">
-          <p>
-            Здесь разбираем перелёты по-человечески: подбираем рейсы, оцениваем
-            комфорт и подсказываем, как пройдёт день в дороге.
-          </p>
-        </div>
-        <div class="hub-grid scenarios-grid">
-          <a class="hub-card" href="search.html">
-            <h2>Маршрут уже выбран</h2>
-            <p>Знаю, откуда и куда лечу — подбери удобные рейсы.</p>
-          </a>
-          <a class="hub-card" href="ideas.html">
-            <h2>Хочу идею для направления</h2>
-            <p>Назову город вылета и даты, а ты предложишь, куда рвануть.</p>
-          </a>
-          <a class="hub-card" href="dates.html">
-            <h2>Колеблюсь с датами</h2>
-            <p>Город известен — помоги выбрать выгодные и удобные числа.</p>
-          </a>
-          <a class="hub-card" href="route-helper.html">
-            <h2>Билеты на руках, нужен проводник</h2>
-            <p>Разложи дорогу в аэропорт и до отеля по шагам.</p>
-          </a>
-        </div>
-        <div class="hub-mood mood-shell">
-          <h3>Настроение для побега</h3>
-          <div class="hub-mood-grid mood-pills">
-            <a class="hub-mood-card" href="collection-weekend.html">
-              <h4>Сбежать на выходные из [твоего города]</h4>
-            </a>
-            <a class="hub-mood-card" href="collection-sea.html">
-              <h4>Море и солёный воздух</h4>
-            </a>
-            <a class="hub-mood-card" href="collection-mountains.html">
-              <h4>Горы и тропы</h4>
-            </a>
-            <a class="hub-mood-card" href="collection-northern-lights.html">
-              <h4>Охота на северное сияние</h4>
-            </a>
-            <a class="hub-mood-card" href="collection-baikal.html">
-              <h4>Байкал: вода и лёд</h4>
-            </a>
+
+        <section class="yuvia-dialog" id="yuviaDialog" aria-live="polite"></section>
+
+        <div class="yuvia-quick-row">
+          <div class="yuvia-chips" id="yuviaChips">
+            <button class="yuvia-chip" type="button" data-text="Лечу из Москвы в Стамбул в мае">Лечу из Москвы в Стамбул в мае</button>
+            <button class="yuvia-chip" type="button" data-text="Нужны идеи без самолёта на выходные">Нужны идеи без самолёта на выходные</button>
+            <button class="yuvia-chip" type="button" data-text="Хочу к морю из Петербурга">Хочу к морю из Петербурга</button>
+            <button class="yuvia-chip" type="button" data-text="Разложи дорогу из Москвы в Казань по шагам">Разложи дорогу из Москвы в Казань по шагам</button>
           </div>
+          <a class="yuvia-fast-link" href="search.html">Я спешу — сразу к форме поиска</a>
         </div>
-      </section>
+
+        <form class="yuvia-input-area" id="yuviaInputForm">
+          <label class="visually-hidden" for="yuviaUserInput">Расскажите о поездке</label>
+          <input
+            id="yuviaUserInput"
+            type="text"
+            name="yuviaUserInput"
+            placeholder="Напишите, откуда и куда хотите, или что важно"
+            autocomplete="off"
+          />
+          <button type="submit" id="yuviaSend">Отправить</button>
+        </form>
+      </main>
     </div>
+
+    <script src="js/yuvia.js"></script>
   </body>
 </html>
