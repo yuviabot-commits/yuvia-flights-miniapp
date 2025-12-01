@@ -19,9 +19,17 @@
         </div>
       </header>
       <div class="screen-back">
-        <a href="search.html" class="btn-ghost btn-sm">← К поиску</a>
+        <a href="search.html" class="btn-ghost btn-sm" id="backToSearch">← К поиску</a>
       </div>
-      <div id="searchSummary" class="search-summary hidden"></div>
+      <div id="searchSummary" class="search-summary hidden">
+        <div
+          id="searchSummaryAction"
+          class="search-summary--clickable"
+          role="button"
+          tabindex="0"
+          aria-label="Вернуться к поиску и изменить параметры"
+        ></div>
+      </div>
       <div class="two-col hidden" id="postSearchLayout">
         <div class="card filters-block" id="filtersBlock">
           <div class="section-title" style="margin-top: 0">Фильтры</div>
@@ -98,24 +106,27 @@
           <div id="airlineFilter" class="filter-chips"></div>
         </div>
         <div>
-          <div class="card" id="yuviaTopBlock">
+          <div class="card topblock" id="yuviaTopBlock">
+            <div class="recommendations-overlay-title">Yuvia рекомендует</div>
             <div class="topblock-row">
-              <div>
-                <div class="section-title" style="margin: 0">Yuvia рекомендует</div>
+              <div class="topblock-heading">
+                <div class="section-title" style="margin: 0">Подбор для вас</div>
                 <div class="topblock-subtitle" id="yuviaTopSubtitle"></div>
               </div>
+            </div>
+            <div class="topblock-list" id="yuviaTopList"></div>
+            <div class="topblock-meta">
               <div class="tooltip badge-with-tooltip" data-tooltip="true">
-                <div class="tooltip-trigger">Что за рекомендации?</div>
+                <div class="tooltip-trigger">Как работает подбор</div>
                 <div class="tooltip-popover" role="tooltip">
                   <div class="tooltip-title">Алгоритм Yuvia</div>
                   <div class="tooltip-text">
-                    Мы оцениваем удобство рейса (пересадки, время стыковок и ночные перелёты) и балансируем с
-                    ценой. В топ выводим то, что подойдёт большинству людей.
+                    Мы оцениваем удобство рейса (пересадки, время стыковок, ночные вылеты) и балансируем это с
+                    ценой. В рекомендациях — варианты, которые подойдут большинству путешественников.
                   </div>
                 </div>
               </div>
             </div>
-            <div class="topblock-list" id="yuviaTopList"></div>
           </div>
           <div id="favoritesBlock" class="card favorites-block hidden"></div>
           <div id="compareBlock" class="card compare-block hidden"></div>
@@ -155,7 +166,14 @@
     </div>
     <div id="compareModal" class="compare-modal-backdrop hidden" role="dialog" aria-modal="true">
       <div class="compare-modal">
-        <h3>Сравнение рейсов</h3>
+        <div class="compare-modal-header">
+          <h3>Сравнение рейсов</h3>
+          <button type="button" class="section-close" id="compareModalDismiss" aria-label="Закрыть сравнение">
+            ×
+          </button>
+        </div>
+        <div id="compareYuviaChoice" class="compare-yuvia-choice hidden"></div>
+        <div class="compare-tabs" id="compareTabs"></div>
         <table class="compare-table" id="compareTable"></table>
         <div class="compare-close">
           <button type="button" class="btn-ghost btn-sm" id="compareClose">Закрыть</button>
