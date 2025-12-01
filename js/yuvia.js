@@ -137,6 +137,8 @@
         let lastCurrency = "RUB";
         let lastSearchContext = null;
         let hasSearched = false;
+        let lastSearchSuccess = false;
+        let currentInlineTarget = null;
         let compareDirection = "outbound";
 
         const TOOLTIP_TEXTS = {
@@ -171,6 +173,8 @@
 
         const suggestCache = new Map();
         const recentKey = "yuviaRecentSearches";
+        const conciergeSubtitle =
+          "Я учёл твой стиль поездки и ограничения по рейсам, убрал ночные и перегруженные стыковки. В этом блоке — варианты, с которых обычно удобно начинать выбор.";
 
         const originInput = $("#origin");
         const destinationInput = $("#destination");
@@ -178,6 +182,9 @@
         const returnInput = $("#ret");
         const searchSummary = $("#searchSummary");
         const searchSummaryAction = $("#searchSummaryAction");
+        const searchInlineEditor = $("#searchInlineEditor");
+        const searchInlineApply = $("#searchInlineApply");
+        const searchInlineCancel = $("#searchInlineCancel");
         const backToSearchLink = $("#backToSearch");
         const matrixBlock = $("#matrix");
         const resultsBlock = $("#results");
@@ -208,6 +215,10 @@
         const compareModalDismiss = $("#compareModalDismiss");
         const timeOutboundLabel = $("#timeOutboundLabel");
         const timeReturnLabel = $("#timeReturnLabel");
+
+        if (yuviaTopSubtitle) {
+          yuviaTopSubtitle.textContent = conciergeSubtitle;
+        }
 
         // Home/concierge page selectors
         const homeShell = $("#yuviaShell");
@@ -461,35 +472,96 @@
             timeReturnLabel.textContent = origin || "город вылета";
           }
 
-          if (!origin && !dest) {
-            searchSummary?.classList.add("hidden");
-            return;
-          }
-
-          const parts = [];
-          if (origin && dest) {
-            parts.push(`${origin} → ${dest}`);
-          }
+          const routeText = origin || dest ? `${origin || "—"} → ${dest || "—"}` : "";
+          let datesText = "";
           if (departDate) {
             const dateText = ddmmyyyy(departDate);
             if (returnDate && !isOneway) {
-              parts.push(`${dateText} · ${ddmmyyyy(returnDate)}`);
+              datesText = `${dateText} — ${ddmmyyyy(returnDate)}`;
             } else {
-              parts.push(dateText);
+              datesText = dateText;
             }
           }
-          parts.push(`${passengers} пассаж.`);
-          parts.push(paxState.cabin === "eco" ? "эконом" : "бизнес");
+          const paxText = passengers === 1 ? "1 пассажир" : `${passengers} пассажиров`;
+          const cabinText = paxState.cabin === "eco" ? "эконом" : "бизнес";
+          const paxSummary = `${paxText}, ${cabinText}`;
 
-          const shouldShow = parts.length > 0;
+          const segments = [];
+          if (routeText) {
+            segments.push({
+              text: routeText,
+              target: "route",
+              aria: "Изменить маршрут",
+            });
+          }
+          if (datesText) {
+            segments.push({
+              text: datesText,
+              target: "dates",
+              aria: "Изменить даты вылета",
+            });
+          }
+          segments.push({ text: paxSummary, target: "pax", aria: "Изменить пассажиров" });
+
+          const shouldShow = segments.length > 0 && Boolean(routeText);
           if (searchSummary) {
-            const text = parts.join(" · ");
-            if (searchSummaryAction) {
-              searchSummaryAction.textContent = text;
-            } else {
-              searchSummary.textContent = text;
-            }
             searchSummary.classList.toggle("hidden", !shouldShow);
+          }
+          if (searchSummaryAction) {
+            searchSummaryAction.innerHTML = "";
+            segments.forEach((segment, index) => {
+              if (index > 0) {
+                const divider = document.createElement("span");
+                divider.className = "search-summary-divider";
+                divider.textContent = "·";
+                searchSummaryAction.appendChild(divider);
+              }
+              const node = document.createElement("span");
+              node.className = "search-summary-segment";
+              node.setAttribute("role", "button");
+              node.setAttribute("tabindex", "0");
+              node.dataset.target = segment.target;
+              node.setAttribute("aria-label", segment.aria);
+              node.textContent = segment.text;
+              searchSummaryAction.appendChild(node);
+            });
+          } else if (searchSummary) {
+            searchSummary.textContent = segments.map((item) => item.text).join(" · ");
+          }
+        }
+
+        function focusInlineField(target) {
+          if (target === "route") {
+            originInput?.focus();
+          } else if (target === "dates") {
+            departInput?.focus();
+          } else if (target === "pax") {
+            paxTrigger?.focus();
+            togglePaxPanel(true);
+          }
+        }
+
+        function hideSearchInlineEditor() {
+          if (!searchInlineEditor) return;
+          searchInlineEditor.classList.add("hidden");
+          currentInlineTarget = null;
+          togglePaxPanel(false);
+        }
+
+        function showSearchInlineEditor(target) {
+          if (!searchInlineEditor) return;
+          searchInlineEditor.classList.remove("hidden");
+          currentInlineTarget = target;
+          setTimeout(() => focusInlineField(target), 20);
+        }
+
+        function toggleSearchInlineEditor(target) {
+          if (!searchInlineEditor) return;
+          const isOpen = !searchInlineEditor.classList.contains("hidden");
+          if (isOpen && currentInlineTarget === target) {
+            hideSearchInlineEditor();
+          } else {
+            showSearchInlineEditor(target);
           }
         }
 
@@ -2724,7 +2796,7 @@
             return;
           }
           yuviaTopBlock.classList.remove("hidden");
-          const subtitle = `Подобрали ${top.length} ${top.length === 1 ? "вариант" : "варианта"} для ${getOriginValue()} → ${getDestinationValue()}`;
+          const subtitle = conciergeSubtitle;
           yuviaTopSubtitle.textContent = subtitle;
           yuviaTopList.innerHTML = "";
           top.forEach((flight) => {
@@ -2735,16 +2807,25 @@
               flight.aviasalesSearchUrl ||
               flight.deeplink ||
               null;
-            const hintText = getRecommendationHint(flight.topLabel);
+            const stressClass =
+              flight.stressLevel === "low"
+                ? "badge-stress-low"
+                : flight.stressLevel === "high"
+                ? "badge-stress-high"
+                : "badge-stress-medium";
+            const stressText = getStressText(flight.stressLevel);
+            const transfersText = formatTransfers(flight.transfers);
             card.innerHTML = `
-              ${hintText ? `<div class="topcard-hint">${hintText}</div>` : ""}
               <div class="topcard-label">${flight.topLabel || "Рекомендация"}</div>
               <div class="topcard-main">
                 <div class="topcard-route">${flight.originCity} → ${flight.destCity}</div>
                 <div class="topcard-price">${formatCurrency(flight.price, flight.currency || lastCurrency)}</div>
               </div>
-              <div class="topcard-meta">${flight.departTimeStr || ""} · ${formatDuration(flight.outbound?.durationMinutes || flight.durationMinutes)}</div>
-              <div class="topcard-meta">${getStressText(flight.stressLevel)}</div>
+              <div class="topcard-meta">
+                <span>${flight.departTimeStr || ""}${flight.departTimeStr ? " · " : ""}${formatDuration(flight.outbound?.durationMinutes || flight.durationMinutes)}</span>
+                <span>${transfersText}</span>
+                <span class="badge ${stressClass}">${stressText}</span>
+              </div>
               <div class="topcard-actions">
                 <button type="button" class="btn-utility btn-sm" data-action="open">Открыть в выдаче</button>
                 ${ticketUrl ? `
@@ -2821,6 +2902,7 @@
 
         async function doSearch(event) {
           event?.preventDefault();
+          lastSearchSuccess = false;
           const originCity = getOriginValue();
           const destCity = getDestinationValue();
           if (!originCity || !destCity) {
@@ -2939,6 +3021,7 @@ allResults = flightsRaw
             renderPriceMatrix(matrixData, toISO(departDate));
             applyFiltersAndSort();
             updateSearchSummary();
+            lastSearchSuccess = true;
             saveRecent({
               origin: originCity,
               destination: destCity,
@@ -2954,6 +3037,13 @@ allResults = flightsRaw
             renderPriceMatrix(matrixData, toISO(departDate));
           } finally {
             setLoading(false);
+          }
+        }
+
+        async function applyInlineSearch(event) {
+          await doSearch(event);
+          if (lastSearchSuccess) {
+            hideSearchInlineEditor();
           }
         }
 
@@ -3108,10 +3198,36 @@ allResults = flightsRaw
             const isResultsPage = !!postSearchLayout;
             doSearchBtn.addEventListener("click", isResultsPage ? doSearch : navigateToResults);
           }
-          searchSummaryAction?.addEventListener("click", navigateBackToSearch);
+          searchInlineApply?.addEventListener("click", applyInlineSearch);
+          searchInlineCancel?.addEventListener("click", hideSearchInlineEditor);
+          searchSummaryAction?.addEventListener("click", (event) => {
+            const segment = event.target.closest?.(".search-summary-segment");
+            if (segment) {
+              toggleSearchInlineEditor(segment.dataset.target || "route");
+            }
+          });
           searchSummaryAction?.addEventListener("keydown", (event) => {
             if (event.key === "Enter" || event.key === " ") {
-              navigateBackToSearch(event);
+              const segment = event.target.closest?.(".search-summary-segment");
+              if (segment) {
+                event.preventDefault();
+                toggleSearchInlineEditor(segment.dataset.target || "route");
+              }
+            }
+          });
+          searchInlineEditor?.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") {
+              hideSearchInlineEditor();
+            }
+          });
+          document.addEventListener("click", (event) => {
+            if (!searchInlineEditor || searchInlineEditor.classList.contains("hidden")) return;
+            const insideEditor = event.target.closest?.("#searchInlineEditor");
+            const insideSegment = event.target.closest?.(".search-summary-segment");
+            const insidePax = paxPanel?.contains(event.target);
+            const insideSuggest = event.target.closest?.(".suggest-panel");
+            if (!insideEditor && !insideSegment && !insidePax && !insideSuggest) {
+              hideSearchInlineEditor();
             }
           });
           backToSearchLink?.addEventListener("click", navigateBackToSearch);
