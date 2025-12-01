@@ -1057,9 +1057,9 @@
       }
       .aviasales-btn-ticket,
       .aviasales-btn-all {
-        background: linear-gradient(135deg, #ffdd2d, #ff9f1c);
-        color: #1f2937;
-        border: none;
+        background: linear-gradient(135deg, #075e54, #0f766e);
+        color: #f9fafb;
+        border: 1px solid transparent;
         border-radius: 999px;
         font-weight: 600;
         display: inline-flex;
@@ -1067,7 +1067,7 @@
         justify-content: center;
         gap: 6px;
         padding: 9px 18px;
-        box-shadow: 0 10px 24px rgba(248, 181, 0, 0.45);
+        box-shadow: 0 10px 25px rgba(7, 94, 84, 0.35);
         text-decoration: none;
         cursor: pointer;
         transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
@@ -1080,14 +1080,14 @@
       .aviasales-btn-ticket:hover,
       .aviasales-btn-all:hover {
         transform: translateY(-1px);
-        box-shadow: 0 14px 32px rgba(248, 181, 0, 0.55);
+        box-shadow: 0 14px 32px rgba(7, 94, 84, 0.32);
         filter: brightness(1.03);
         text-decoration: underline;
       }
       .aviasales-btn-ticket:active,
       .aviasales-btn-all:active {
         transform: translateY(0);
-        box-shadow: 0 8px 18px rgba(248, 181, 0, 0.4);
+        box-shadow: 0 8px 18px rgba(7, 94, 84, 0.32);
       }
       .hint {
         font-size: 12px;
@@ -1237,20 +1237,44 @@
       }
       .toolbar select {
         border-radius: 999px;
-        padding: 7px 14px;
+        padding: 10px 14px;
+        background: #ffffff;
+        border: 1px solid rgba(148, 163, 184, 0.7);
+        box-shadow: 0 12px 22px rgba(7, 94, 84, 0.08);
+      }
+      .toolbar select option {
+        background: #ffffff;
+        color: var(--ink);
+      }
+      .toolbar select option:checked {
+        background: #e8f3ef;
+      }
+      .toolbar select option:hover {
+        background: #f4fbf8;
       }
       .topblock {
         margin-top: 12px;
         margin-bottom: 12px;
         border-radius: 18px;
         background: linear-gradient(
-          135deg,
-          rgba(7, 94, 84, 0.08),
-          rgba(13, 148, 136, 0.12)
-        );
-        border: 1px solid rgba(45, 212, 191, 0.4);
-        box-shadow: 0 16px 40px rgba(7, 94, 84, 0.18);
+            135deg,
+            rgba(255, 247, 227, 0.75),
+            rgba(243, 252, 248, 0.94)
+          ),
+          #ffffff;
+        border: 1px solid rgba(255, 233, 179, 0.9);
+        box-shadow: 0 16px 40px rgba(7, 94, 84, 0.16);
         backdrop-filter: blur(18px);
+        position: relative;
+        overflow: hidden;
+        padding-top: 22px;
+      }
+      .topblock::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 18% 16%, rgba(255, 247, 227, 0.45), transparent 32%);
+        pointer-events: none;
       }
       .topblock-header {
         display: flex;
@@ -1258,6 +1282,10 @@
         justify-content: space-between;
         gap: 8px;
         margin-bottom: 10px;
+      }
+      .topblock-heading {
+        position: relative;
+        z-index: 1;
       }
       .topblock-title {
         font-size: 16px;
@@ -1273,6 +1301,36 @@
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
         gap: 10px;
+        margin-top: 6px;
+        position: relative;
+        z-index: 1;
+      }
+      .topblock-meta {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 12px;
+      }
+      .recommendations-overlay-title {
+        position: absolute;
+        right: 18px;
+        top: -12px;
+        padding: 8px 14px;
+        background: rgba(255, 223, 128, 0.86);
+        color: #2f2f2f;
+        border-radius: 999px;
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+        z-index: 2;
+      }
+      .topblock .tooltip-trigger {
+        color: #8a8a8a;
+        font-size: 13px;
+        text-decoration: none;
+      }
+      .topblock .tooltip-trigger:hover {
+        text-decoration: underline;
       }
       .topcard {
         border-radius: 16px;
@@ -1312,6 +1370,11 @@
       .topcard-meta {
         font-size: 12px;
         color: var(--muted);
+      }
+      .topcard-hint {
+        font-size: 12px;
+        color: #7f8593;
+        margin-bottom: -2px;
       }
       .topcard-actions {
         display: flex;
@@ -1436,7 +1499,7 @@
       }
       .search-summary {
         margin: 0 0 16px;
-        padding: 12px 16px;
+        padding: 0;
         border-radius: 14px;
         background: linear-gradient(
           135deg,
@@ -1447,6 +1510,24 @@
         font-size: 14px;
         box-shadow: none;
         border: 1px solid rgba(148, 163, 184, 0.45);
+      }
+      .search-summary--clickable {
+        width: 100%;
+        display: block;
+        padding: 12px 16px;
+        border-radius: inherit;
+        transition: box-shadow 0.16s ease, background 0.16s ease, transform 0.16s ease;
+      }
+      .search-summary--clickable:hover,
+      .search-summary--clickable:focus-visible {
+        cursor: pointer;
+        background: linear-gradient(
+          135deg,
+          rgba(7, 94, 84, 0.09),
+          rgba(13, 148, 136, 0.14)
+        );
+        box-shadow: 0 10px 28px rgba(7, 94, 84, 0.18);
+        outline: none;
       }
       /* ------- Форма поиска ------- */
       .search-grid input,
@@ -1744,6 +1825,42 @@
         border-color: rgba(148, 163, 184, 0.5);
         border-radius: 18px;
         box-shadow: 0 10px 26px rgba(15, 23, 42, 0.1);
+        padding: 12px 14px 14px;
+      }
+      .compare-block {
+        margin-top: 16px;
+      }
+      .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+      .section-header .section-title {
+        margin: 0;
+        font-size: 19px;
+        font-weight: 700;
+      }
+      .section-close {
+        border: 1px solid rgba(148, 163, 184, 0.8);
+        background: #ffffff;
+        color: #6b7280;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        font-size: 18px;
+        cursor: pointer;
+        transition: background 0.12s ease, box-shadow 0.12s ease, color 0.12s ease;
+      }
+      .section-close:hover {
+        background: #f3f4f6;
+        box-shadow: 0 8px 16px rgba(15, 23, 42, 0.15);
+        color: var(--ink);
       }
       .favorites-list,
       .compare-list {
@@ -1751,6 +1868,11 @@
         flex-wrap: wrap;
         gap: 10px;
         margin-top: 6px;
+      }
+      .compare-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin: 10px 0 8px;
       }
       .mini-flight {
         border-radius: 14px;
@@ -1764,6 +1886,17 @@
       .mini-flight:hover {
         border-color: var(--accent);
         box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
+      }
+      .mini-flight--highlight {
+        border-color: rgba(7, 94, 84, 0.6);
+        background: #f3fcf8;
+        box-shadow: 0 10px 28px rgba(7, 94, 84, 0.18);
+        position: relative;
+      }
+      .mini-flight-note {
+        font-size: 12px;
+        color: #4b5563;
+        margin-top: 6px;
       }
       .mini-flight-title {
         font-weight: 600;
@@ -1788,16 +1921,55 @@
       .compare-modal {
         background: #ffffff;
         border-radius: 18px;
-        padding: 16px 20px;
+        padding: 18px 20px 20px;
         max-width: 760px;
         width: 100%;
         box-shadow: 0 28px 70px rgba(15, 23, 42, 0.55);
         max-height: 80vh;
         overflow: auto;
       }
+      .compare-modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 10px;
+      }
       .compare-modal h3 {
         margin: 0 0 10px;
         font-size: 18px;
+      }
+      .compare-yuvia-choice {
+        background: #f7fbf9;
+        border: 1px solid rgba(7, 94, 84, 0.16);
+        padding: 10px 12px;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        font-size: 14px;
+        box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
+      }
+      .compare-yuvia-choice strong {
+        color: var(--accent);
+      }
+      .compare-tabs {
+        display: inline-flex;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+      .compare-tab {
+        border-radius: 999px;
+        border: 1px solid rgba(148, 163, 184, 0.7);
+        background: #f8fafc;
+        padding: 8px 14px;
+        font-size: 13px;
+        cursor: pointer;
+        color: var(--ink);
+      }
+      .compare-tab.active {
+        background: #075e54;
+        color: #ffffff;
+        border-color: #075e54;
+        box-shadow: 0 10px 22px rgba(7, 94, 84, 0.28);
       }
       .compare-table {
         width: 100%;
@@ -1810,6 +1982,7 @@
         border-bottom: 1px solid #e5e7eb;
         text-align: left;
         white-space: nowrap;
+        background: #ffffff;
       }
       .compare-table th {
         font-weight: 600;
@@ -1818,6 +1991,9 @@
         top: 0;
         background: #f9fafb;
         z-index: 1;
+      }
+      .compare-table tr:nth-child(even) td {
+        background: #f8fafc;
       }
       .compare-close {
         margin-top: 10px;

@@ -133,9 +133,11 @@
         let filteredResults = [];
         let matrixData = [];
         let currentTopFlights = [];
+        let currentCompareFlights = [];
         let lastCurrency = "RUB";
         let lastSearchContext = null;
         let hasSearched = false;
+        let compareDirection = "outbound";
 
         const TOOLTIP_TEXTS = {
           routeScore:
@@ -175,6 +177,8 @@
         const departInput = $("#depart");
         const returnInput = $("#ret");
         const searchSummary = $("#searchSummary");
+        const searchSummaryAction = $("#searchSummaryAction");
+        const backToSearchLink = $("#backToSearch");
         const matrixBlock = $("#matrix");
         const resultsBlock = $("#results");
         const summaryChip = $("#summaryChip");
@@ -198,7 +202,10 @@
         const compareBlock = $("#compareBlock");
         const compareModal = $("#compareModal");
         const compareTable = $("#compareTable");
+        const compareTabs = $("#compareTabs");
+        const compareYuviaChoice = $("#compareYuviaChoice");
         const compareClose = $("#compareClose");
+        const compareModalDismiss = $("#compareModalDismiss");
         const timeOutboundLabel = $("#timeOutboundLabel");
         const timeReturnLabel = $("#timeReturnLabel");
 
@@ -476,7 +483,12 @@
 
           const shouldShow = parts.length > 0;
           if (searchSummary) {
-            searchSummary.textContent = parts.join(" · ");
+            const text = parts.join(" · ");
+            if (searchSummaryAction) {
+              searchSummaryAction.textContent = text;
+            } else {
+              searchSummary.textContent = text;
+            }
             searchSummary.classList.toggle("hidden", !shouldShow);
           }
         }
@@ -2395,6 +2407,20 @@
           });
         }
 
+        function getRecommendationHint(label) {
+          const normalized = String(label || "").toLowerCase();
+          if (normalized.includes("золотая")) {
+            return "Баланс цены и удобства — без экстремальных стыковок и ночных перелётов";
+          }
+          if (normalized.includes("быстр")) {
+            return "Если хочешь провести в дороге минимум времени";
+          }
+          if (normalized.includes("деш")) {
+            return "Подойдёт, если главное — сэкономить";
+          }
+          return "";
+        }
+
         function getStressText(level) {
           if (level === "low") return "стресс: низкий";
           if (level === "medium") return "стресс: средний";
@@ -2431,15 +2457,56 @@
           button.textContent = inCompare ? "Убрать из сравнения" : "Сравнить";
         }
 
-        function renderMiniCard(container, flight) {
+        function syncFavoriteButtons() {
+          document.querySelectorAll(".btn-fav").forEach((button) => {
+            const flightId = button.dataset.id;
+            updateFavButtonState(button, flightId);
+          });
+        }
+
+        function syncCompareButtons() {
+          document.querySelectorAll(".btn-compare").forEach((button) => {
+            const flightId = button.dataset.id;
+            updateCompareButtonState(button, flightId);
+          });
+        }
+
+        function clearFavorites() {
+          favoritesIds.clear();
+          persistFavorites();
+          renderFavoritesBlock();
+          syncFavoriteButtons();
+        }
+
+        function clearCompareSelection() {
+          compareIds.clear();
+          persistCompare();
+          renderCompareBlock();
+          syncCompareButtons();
+          closeCompareModal();
+        }
+
+        function renderMiniCard(container, flight, isYuviaChoice = false) {
           const card = document.createElement("div");
-          card.className = "mini-flight";
+          card.className = `mini-flight${isYuviaChoice ? " mini-flight--highlight" : ""}`;
+          const badge = isYuviaChoice ? '<div class="badge badge-soft">Выбор Yuvia</div>' : "";
           card.innerHTML = `
             <div class="mini-flight-title">${flight.originCity || ""} → ${flight.destCity || ""}</div>
             <div class="mini-flight-meta">${formatCurrency(flight.price, flight.currency || lastCurrency)}</div>
+            ${badge}
           `;
           card.addEventListener("click", () => highlightResultCard(flight.id));
           container.appendChild(card);
+        }
+
+        function pickYuviaChoice(flights) {
+          if (!flights?.length) return null;
+          const top = getYuviaTop3(flights);
+          if (top.length) {
+            const balanced = top.find((flight) => (flight.topLabel || "").includes("Золотая"));
+            return balanced || top[0];
+          }
+          return [...flights].sort((a, b) => (b.rating || 0) - (a.rating || 0) || a.price - b.price)[0] || null;
         }
 
         function renderFavoritesBlock() {
@@ -2452,29 +2519,62 @@
             favoritesBlock.innerHTML = "";
             return;
           }
+          const yuviaPick = pickYuviaChoice(flights);
           favoritesBlock.classList.remove("hidden");
-          favoritesBlock.innerHTML = `<div class="section-title" style="margin-top:0">Избранное</div>`;
+          favoritesBlock.innerHTML = `
+            <div class="section-header">
+              <div class="section-title" style="margin-top:0">Избранное</div>
+              <button type="button" class="section-close" id="favoritesClear" aria-label="Очистить избранное">×</button>
+            </div>
+          `;
           const list = document.createElement("div");
           list.className = "favorites-list";
-          flights.forEach((flight) => renderMiniCard(list, flight));
+          flights.forEach((flight) => renderMiniCard(list, flight, yuviaPick?.id === flight.id));
           favoritesBlock.appendChild(list);
+          if (yuviaPick) {
+            const note = document.createElement("div");
+            note.className = "mini-flight-note";
+            note.textContent = "Из сохранённых вариантов я бы выбрал этот: удобное время вылета и разумная цена";
+            favoritesBlock.appendChild(note);
+          }
+          favoritesBlock.querySelector("#favoritesClear")?.addEventListener("click", clearFavorites);
         }
 
-        function buildCompareTableRows(flights) {
+        function getDirectionSlice(flight, direction = "outbound") {
+          const segment = direction === "return" ? flight.return : flight.outbound || flight;
+          const originCity =
+            segment?.start?.city || (direction === "return" ? flight.destCity : flight.originCity) || "";
+          const destCity = segment?.end?.city || (direction === "return" ? flight.originCity : flight.destCity) || "";
+          const originAirport =
+            segment?.start?.airportCode || segment?.start?.airport || flight.originIATA || flight.originAirport || "";
+          const destAirport =
+            segment?.end?.airportCode || segment?.end?.airport || flight.destIATA || flight.destinationAirport || "";
+          const departAt = segment?.start?.departAt || flight.departAt;
+          const arriveAt = segment?.end?.arriveAt || flight.arriveAt;
+          const durationMinutes = segment?.durationMinutes || flight.durationMinutes;
+          const transfers =
+            typeof segment?.transfers === "number" ? segment.transfers : typeof flight.transfers === "number" ? flight.transfers : 0;
+          return { originCity, destCity, originAirport, destAirport, departAt, arriveAt, durationMinutes, transfers };
+        }
+
+        function buildCompareTableRows(flights, direction = compareDirection) {
           if (!compareTable) return;
           compareTable.innerHTML = "";
           const header = document.createElement("tr");
           header.innerHTML = `
             <th>Маршрут</th>
+            <th>Аэропорты</th>
             <th>Цена</th>
             <th>Длительность</th>
             <th>Пересадки</th>
-            <th>Вылет туда</th>
-            <th>Вылет обратно</th>
+            <th>Вылет</th>
+            <th>Прилёт</th>
             <th>Авиакомпании</th>
           `;
           compareTable.appendChild(header);
           flights.forEach((flight) => {
+            const slice = getDirectionSlice(flight, direction);
+            const airportsLine = [slice.originAirport, slice.destAirport].filter(Boolean).join(" → ") || "—";
             const airlinesLine = Array.isArray(flight.airlinesMetaAll)
               ? flight.airlinesMetaAll
                   .map(({ code, name }) => {
@@ -2490,16 +2590,56 @@
                   .join(", ");
             const row = document.createElement("tr");
             row.innerHTML = `
-              <td>${flight.originCity || ""} → ${flight.destCity || ""}</td>
+              <td>${slice.originCity || ""} → ${slice.destCity || ""}</td>
+              <td>${airportsLine}</td>
               <td>${formatCurrency(flight.price, flight.currency || lastCurrency)}</td>
-              <td>${formatDuration(flight.durationMinutes)}</td>
-              <td>${formatTransfers(flight.transfers)}</td>
-              <td>${formatTime(flight.outbound?.start?.departAt)}</td>
-              <td>${formatTime(flight.return?.start?.departAt)}</td>
+              <td>${formatDuration(slice.durationMinutes)}</td>
+              <td>${formatTransfers(slice.transfers)}</td>
+              <td>${formatTime(slice.departAt) || "—"}</td>
+              <td>${formatTime(slice.arriveAt) || "—"}</td>
               <td>${airlinesLine || ""}</td>
             `;
             compareTable.appendChild(row);
           });
+        }
+
+        function renderCompareChoice(choice) {
+          if (!compareYuviaChoice) return;
+          if (!choice) {
+            compareYuviaChoice.classList.add("hidden");
+            compareYuviaChoice.textContent = "";
+            return;
+          }
+          compareYuviaChoice.classList.remove("hidden");
+          const descriptor = `${choice.originCity || ""} → ${choice.destCity || ""}`;
+          const airline = choice.airlineName || (choice.airlinesAll || [])[0] || "";
+          const depart = formatTime(choice.outbound?.start?.departAt || choice.departAt);
+          compareYuviaChoice.innerHTML = `<strong>Выбор Yuvia.</strong> Из этих вариантов я бы выбрал рейс ${descriptor} ${airline ? `(${airline})` : ""}. У него удобное время в пути и адекватная цена${
+            depart ? ` — вылет в ${depart}` : ""
+          }.`;
+        }
+
+        function renderCompareTabs(hasReturnDirection) {
+          if (!compareTabs) return;
+          compareTabs.innerHTML = "";
+          const directions = [
+            { key: "outbound", label: "Туда" },
+            { key: "return", label: "Обратно" },
+          ];
+          directions
+            .filter((item) => item.key === "outbound" || hasReturnDirection)
+            .forEach((item) => {
+              const btn = document.createElement("button");
+              btn.type = "button";
+              btn.className = `compare-tab${compareDirection === item.key ? " active" : ""}`;
+              btn.textContent = item.label;
+              btn.addEventListener("click", () => {
+                compareDirection = item.key;
+                renderCompareTabs(currentCompareFlights.some((flight) => !!flight.return));
+                buildCompareTableRows(currentCompareFlights, compareDirection);
+              });
+              compareTabs.appendChild(btn);
+            });
         }
 
         function openCompareModal() {
@@ -2508,7 +2648,12 @@
             .map((id) => findFlightById(id))
             .filter(Boolean);
           if (flights.length < 2) return;
-          buildCompareTableRows(flights);
+          currentCompareFlights = flights;
+          const hasReturnDirection = flights.some((flight) => !!flight.return);
+          compareDirection = "outbound";
+          renderCompareTabs(hasReturnDirection);
+          renderCompareChoice(pickYuviaChoice(flights));
+          buildCompareTableRows(flights, compareDirection);
           compareModal.classList.remove("hidden");
         }
 
@@ -2527,19 +2672,28 @@
             return;
           }
           compareBlock.classList.remove("hidden");
-          compareBlock.innerHTML = `<div class="section-title" style="margin-top:0">Сравнение</div>`;
+          compareBlock.innerHTML = `
+            <div class="section-header">
+              <div class="section-title" style="margin-top:0">Сравнение</div>
+              <button type="button" class="section-close" id="compareClear" aria-label="Очистить сравнение">×</button>
+            </div>
+          `;
           const list = document.createElement("div");
           list.className = "compare-list";
           flights.forEach((flight) => renderMiniCard(list, flight));
           compareBlock.appendChild(list);
           if (flights.length >= 2) {
+            const actions = document.createElement("div");
+            actions.className = "compare-actions";
             const btn = document.createElement("button");
             btn.type = "button";
             btn.className = "btn-primary btn-sm";
             btn.textContent = "Сравнить выбранные";
             btn.addEventListener("click", openCompareModal);
-            compareBlock.appendChild(btn);
+            actions.appendChild(btn);
+            compareBlock.appendChild(actions);
           }
+          compareBlock.querySelector("#compareClear")?.addEventListener("click", clearCompareSelection);
         }
 
         function highlightResultCard(flightId) {
@@ -2579,7 +2733,9 @@
               flight.aviasalesSearchUrl ||
               flight.deeplink ||
               null;
+            const hintText = getRecommendationHint(flight.topLabel);
             card.innerHTML = `
+              ${hintText ? `<div class="topcard-hint">${hintText}</div>` : ""}
               <div class="topcard-label">${flight.topLabel || "Рекомендация"}</div>
               <div class="topcard-main">
                 <div class="topcard-route">${flight.originCity} → ${flight.destCity}</div>
@@ -2902,6 +3058,12 @@ allResults = flightsRaw
           $("#sortBy")?.addEventListener("change", () => applyFiltersAndSort());
         }
 
+        function navigateBackToSearch(event) {
+          event?.preventDefault();
+          const targetHref = backToSearchLink?.getAttribute("href") || "search.html";
+          window.location.href = targetHref;
+        }
+
         function attachGeneralHandlers() {
           swapBtn?.addEventListener("click", (event) => {
             event.preventDefault();
@@ -2944,7 +3106,15 @@ allResults = flightsRaw
             const isResultsPage = !!postSearchLayout;
             doSearchBtn.addEventListener("click", isResultsPage ? doSearch : navigateToResults);
           }
+          searchSummaryAction?.addEventListener("click", navigateBackToSearch);
+          searchSummaryAction?.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              navigateBackToSearch(event);
+            }
+          });
+          backToSearchLink?.addEventListener("click", navigateBackToSearch);
           compareClose?.addEventListener("click", closeCompareModal);
+          compareModalDismiss?.addEventListener("click", closeCompareModal);
           compareModal?.addEventListener("click", (event) => {
             if (event.target === compareModal) {
               closeCompareModal();
