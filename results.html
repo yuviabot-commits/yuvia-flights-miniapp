@@ -25,10 +25,101 @@
         <div
           id="searchSummaryAction"
           class="search-summary--clickable"
-          role="button"
-          tabindex="0"
-          aria-label="Вернуться к поиску и изменить параметры"
         ></div>
+      </div>
+      <div id="searchInlineEditor" class="card hidden search-inline-editor" aria-label="Редактировать поиск">
+        <div class="search-inline-grid">
+          <div class="field origin-field">
+            <div class="label">Откуда</div>
+            <div class="suggest-wrapper">
+              <input id="origin" placeholder="Москва" autocomplete="off" />
+            </div>
+          </div>
+          <div class="inline-swap">
+            <button type="button" class="pill" id="swapInline" aria-label="Поменять местами города">⇆</button>
+          </div>
+          <div class="field destination-field">
+            <div class="label">Куда</div>
+            <div class="suggest-wrapper">
+              <input id="destination" placeholder="Казань" autocomplete="off" />
+            </div>
+          </div>
+          <div class="field depart-field">
+            <div class="label">Дата вылета</div>
+            <input id="depart" type="date" />
+          </div>
+          <div class="field return-field">
+            <div class="label">Дата возвращения</div>
+            <input id="ret" type="date" />
+            <div class="oneway-row">
+              <label class="oneway-toggle" for="onewayToggle">
+                <input type="checkbox" id="onewayToggle" />
+                <span class="oneway-switch" aria-hidden="true"></span>
+                <span class="oneway-text">Только в одну сторону</span>
+              </label>
+            </div>
+          </div>
+          <div class="field pax-field">
+            <div class="label">Пассажиры и класс</div>
+            <button type="button" class="pax-trigger" id="paxTrigger">
+              <div class="pax-main" id="paxMainText">1 пассажир</div>
+              <div class="pax-sub" id="paxSubText">эконом</div>
+              <span class="pax-chevron">▾</span>
+            </button>
+            <select id="adults" style="display: none">
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>4</option>
+              <option>5</option>
+              <option>6</option>
+            </select>
+            <div class="pax-panel hidden" id="paxPanel">
+              <div class="pax-row">
+                <div class="pax-label-wrap">
+                  <div class="pax-title">Взрослые</div>
+                  <div class="pax-note">от 12 лет</div>
+                </div>
+                <div class="pax-counter">
+                  <button class="pax-btn" type="button" data-kind="adults" data-delta="-1">−</button>
+                  <div class="pax-count" data-kind="adults">1</div>
+                  <button class="pax-btn" type="button" data-kind="adults" data-delta="1">+</button>
+                </div>
+              </div>
+              <div class="pax-row">
+                <div class="pax-label-wrap">
+                  <div class="pax-title">Дети</div>
+                  <div class="pax-note">от 2 до 12 лет</div>
+                </div>
+                <div class="pax-counter">
+                  <button class="pax-btn" type="button" data-kind="children" data-delta="-1">−</button>
+                  <div class="pax-count" data-kind="children">0</div>
+                  <button class="pax-btn" type="button" data-kind="children" data-delta="1">+</button>
+                </div>
+              </div>
+              <div class="pax-row">
+                <div class="pax-label-wrap">
+                  <div class="pax-title">Младенцы</div>
+                  <div class="pax-note">до 2 лет (без места)</div>
+                </div>
+                <div class="pax-counter">
+                  <button class="pax-btn" type="button" data-kind="infants" data-delta="-1">−</button>
+                  <div class="pax-count" data-kind="infants">0</div>
+                  <button class="pax-btn" type="button" data-kind="infants" data-delta="1">+</button>
+                </div>
+              </div>
+              <div class="pax-cabin">
+                <button type="button" class="pax-cabin-btn active" data-cabin="eco">Эконом</button>
+                <button type="button" class="pax-cabin-btn" data-cabin="business">Бизнес</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="search-inline-actions">
+          <button type="button" class="btn-ghost" id="searchInlineCancel">Отмена</button>
+          <div class="actions-spacer"></div>
+          <button type="button" class="btn-primary" id="searchInlineApply">Обновить поиск</button>
+        </div>
       </div>
       <div class="two-col hidden" id="postSearchLayout">
         <div class="card filters-block" id="filtersBlock">
@@ -110,7 +201,7 @@
             <div class="recommendations-overlay-title">Yuvia рекомендует</div>
             <div class="topblock-row">
               <div class="topblock-heading">
-                <div class="section-title" style="margin: 0">Подбор для вас</div>
+                <div class="section-title" style="margin: 0">Комфортный старт</div>
                 <div class="topblock-subtitle" id="yuviaTopSubtitle"></div>
               </div>
             </div>
