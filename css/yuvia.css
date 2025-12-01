@@ -41,23 +41,10 @@
       .home-body {
         min-height: 100vh;
         margin: 0;
-        background: linear-gradient(180deg, #c9e7ff 0%, #ddf2ff 45%, #f3fbff 72%, #ffffff 100%);
+        background: linear-gradient(180deg, #b5ddff 0%, #d9efff 42%, #f4fbff 78%, #ffffff 100%);
         color: #042d2a;
         position: relative;
         overflow: hidden;
-      }
-
-      .home-body::before {
-        content: "";
-        position: fixed;
-        inset: 0;
-        background: radial-gradient(circle at 12% 18%, rgba(7, 94, 84, 0.16), transparent 32%),
-          radial-gradient(circle at 84% 22%, rgba(111, 74, 216, 0.12), transparent 34%),
-          radial-gradient(circle at 46% 78%, rgba(7, 94, 84, 0.08), transparent 38%);
-        filter: blur(90px);
-        opacity: 0.55;
-        pointer-events: none;
-        z-index: 0;
       }
 
       .wrap {
@@ -68,7 +55,7 @@
 
       .home-wrap {
         min-height: 100vh;
-        padding: 18vh 16px 64px;
+        padding: 0 16px 48px;
         display: flex;
         align-items: flex-start;
         justify-content: center;
@@ -83,16 +70,14 @@
       .sky-stage {
         position: relative;
         width: 100%;
-        max-width: 1200px;
-        min-height: 80vh;
+        max-width: 1400px;
+        min-height: 100vh;
         overflow: hidden;
-        padding: 24px 18px 64px;
+        padding: 0 12px 72px;
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         justify-content: center;
         isolation: isolate;
-        --bird-left: 16%;
-        --bird-top: 46%;
       }
 
       .sky-layer {
@@ -102,17 +87,15 @@
       }
 
       .sky-gradient {
-        background: radial-gradient(circle at 34% 22%, rgba(111, 74, 216, 0.08), transparent 46%),
-          radial-gradient(circle at 18% 46%, rgba(7, 94, 84, 0.08), transparent 42%),
-          linear-gradient(180deg, rgba(255, 255, 255, 0.24), transparent 70%);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.32), transparent 65%);
         z-index: 1;
       }
 
       .sky-glow {
-        background: radial-gradient(circle at 12% 70%, rgba(251, 191, 36, 0.18), transparent 36%),
-          radial-gradient(circle at 86% 18%, rgba(111, 74, 216, 0.16), transparent 40%);
-        filter: blur(32px);
-        opacity: 0.75;
+        background: radial-gradient(circle at 50% 16%, rgba(255, 255, 255, 0.18), transparent 36%),
+          radial-gradient(circle at 20% 46%, rgba(120, 174, 255, 0.18), transparent 48%);
+        filter: blur(26px);
+        opacity: 0.7;
         z-index: 2;
       }
 
@@ -149,36 +132,49 @@
       .stage-content {
         position: relative;
         width: 100%;
-        max-width: 1120px;
-        min-height: 640px;
-        margin: 0 auto;
-        padding: 16px 10px 24px;
+        max-width: 1200px;
+        min-height: 720px;
+        margin: 20vh auto 0;
+        padding: 0 12px;
         z-index: 5;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 32px;
+      }
+
+      .scene-hero {
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        gap: 28px;
+        flex-wrap: wrap;
       }
 
       .bird-anchor {
-        position: absolute;
-        left: var(--bird-left);
-        top: var(--bird-top);
-        transform: translate(-16%, -12%);
-        transition: left 0.65s ease, top 0.65s ease, transform 0.65s ease;
-        width: min(420px, 76vw);
-        max-width: 440px;
-        min-width: 260px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 22px;
+        transform: translate(var(--bird-shift-x, 0px), var(--bird-shift-y, 0px));
+        transition: transform 0.6s ease;
+        width: min(520px, 92vw);
+        max-width: 540px;
         pointer-events: none;
       }
 
       .bird-anchor--in-flight {
-        transform: translate(-16%, -16%) scale(1.02);
+        transform: translate(var(--bird-shift-x, 0px), var(--bird-shift-y, 0px)) scale(1.02);
       }
 
       .bird-cloud-seat {
         position: relative;
-        width: 76%;
-        padding: 42px 22px 32px;
-        background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(232, 248, 247, 0.95));
-        border-radius: 48% 52% 50% 52% / 52% 50% 48% 50%;
-        box-shadow: 0 22px 52px rgba(7, 94, 84, 0.16), 0 10px 24px rgba(7, 94, 84, 0.12);
+        min-width: 240px;
+        max-width: 320px;
+        padding: 34px 22px 28px;
+        background: radial-gradient(circle at 30% 36%, rgba(255, 255, 255, 0.98), #f4fbff 90%);
+        border-radius: 50% 48% 52% 50% / 56% 50% 48% 52%;
+        box-shadow: 0 16px 42px rgba(7, 94, 84, 0.16), 0 10px 24px rgba(7, 94, 84, 0.12);
         display: grid;
         place-items: center;
         overflow: hidden;
@@ -189,23 +185,23 @@
       .bird-cloud-seat::before {
         content: "";
         position: absolute;
-        background: rgba(255, 255, 255, 0.8);
+        background: rgba(255, 255, 255, 0.82);
         border-radius: 50%;
-        filter: blur(6px);
+        filter: blur(10px);
       }
 
       .bird-cloud-seat::before {
-        width: 46%;
+        width: 50%;
         height: 30%;
-        bottom: 10%;
-        left: 4%;
+        bottom: 6%;
+        left: 6%;
       }
 
       .bird-cloud-seat::after {
-        width: 42%;
-        height: 28%;
+        width: 44%;
+        height: 26%;
         bottom: 14%;
-        right: 0;
+        right: 6%;
       }
 
       .bird-visual {
@@ -218,7 +214,7 @@
 
       .yuvia-bird,
       .yuvia-bird-fallback {
-        width: 190px;
+        width: min(220px, 44vw);
         height: auto;
         display: block;
       }
@@ -236,59 +232,58 @@
       }
 
       .bird-speech {
-        position: absolute;
-        left: 62%;
-        top: 14%;
-        width: min(480px, 78vw);
-        padding: 18px 22px;
-        background: rgba(255, 255, 255, 0.96);
+        position: relative;
+        width: min(480px, 86vw);
+        padding: 18px 22px 20px;
+        background: #ffffff;
         border-radius: 26px;
-        box-shadow: 0 20px 48px rgba(4, 61, 53, 0.16), 0 10px 26px rgba(111, 74, 216, 0.12);
-        color: rgba(4, 45, 42, 0.9);
+        box-shadow: 0 18px 46px rgba(4, 61, 53, 0.14);
+        color: rgba(4, 45, 42, 0.94);
         line-height: 1.5;
         font-size: 16px;
-        backdrop-filter: blur(8px);
+        backdrop-filter: blur(6px);
       }
 
       .bird-speech::after {
         content: "";
         position: absolute;
-        left: -16px;
-        top: 34%;
-        width: 30px;
+        left: -18px;
+        top: 38%;
+        width: 32px;
         height: 22px;
-        background: rgba(255, 255, 255, 0.96);
-        border-radius: 14px 8px 14px 14px;
-        box-shadow: -10px 10px 22px rgba(4, 61, 53, 0.08);
+        background: #ffffff;
+        border-radius: 14px 10px 14px 14px;
+        box-shadow: -8px 10px 22px rgba(4, 61, 53, 0.08);
       }
 
       .cloud-field {
         position: relative;
         width: 100%;
-        min-height: 520px;
-        margin-left: 6%;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 18px 16px;
+        padding: 8px 12px 12px;
+        max-width: 780px;
+        justify-items: center;
       }
 
       .mood-cloud {
-        position: absolute;
-        left: var(--cloud-left);
-        top: var(--cloud-top);
-        transform: translate(-50%, -50%);
-        padding: 16px 28px;
-        min-width: 260px;
-        max-width: 320px;
+        position: relative;
+        width: 100%;
+        min-height: 56px;
+        padding: 14px 26px;
         border: none;
-        background: linear-gradient(160deg, #ffffff 0%, #f4fbff 100%);
-        border-radius: 48% 52% 50% 52% / 54% 50% 52% 48%;
-        box-shadow: 0 14px 36px rgba(7, 94, 84, 0.16), 0 6px 16px rgba(7, 94, 84, 0.12);
-        color: #0a4c45;
+        background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+        border-radius: 40px;
+        box-shadow: 0 14px 28px rgba(103, 170, 214, 0.18);
+        color: #0b3f45;
         font-size: 16px;
         font-weight: 600;
         text-align: center;
         cursor: pointer;
         transition: transform 0.35s ease, box-shadow 0.35s ease, opacity 0.3s ease, filter 0.3s ease,
           background 0.35s ease;
-        animation: cloudDrift 11s ease-in-out infinite;
+        animation: softFloat 12s ease-in-out infinite;
       }
 
       .mood-cloud::before,
@@ -302,30 +297,29 @@
       }
 
       .mood-cloud::before {
-        width: 34%;
-        height: 36%;
-        left: 10%;
-        top: 16%;
+        width: 32%;
+        height: 38%;
+        left: 14%;
+        bottom: 10%;
       }
 
       .mood-cloud::after {
-        width: 30%;
-        height: 32%;
-        right: 6%;
-        bottom: 12%;
+        width: 34%;
+        height: 36%;
+        right: 12%;
+        top: 8%;
       }
 
       .mood-cloud:hover {
-        transform: translate(-50%, -50%) scale(1.03);
-        box-shadow: 0 18px 45px rgba(7, 94, 84, 0.18), 0 8px 20px rgba(7, 94, 84, 0.12);
+        transform: scale(1.03);
+        box-shadow: 0 20px 42px rgba(103, 170, 214, 0.22);
       }
 
       .mood-cloud.cloud-selected {
-        background: linear-gradient(145deg, #ffffff, #e6fbf5);
-        box-shadow: 0 24px 55px rgba(7, 94, 84, 0.2), 0 10px 22px rgba(7, 94, 84, 0.16);
-        color: #06463d;
-        filter: saturate(1.05);
-        outline: 3px solid rgba(11, 150, 130, 0.18);
+        background: linear-gradient(180deg, #ffffff 0%, #e9f8ff 100%);
+        box-shadow: 0 22px 48px rgba(83, 157, 210, 0.24), 0 0 0 4px rgba(120, 174, 255, 0.16);
+        color: #063c44;
+        filter: saturate(1.06);
       }
 
       .mood-cloud.cloud-selected::before,
@@ -335,105 +329,71 @@
 
       .mood-cloud.cloud-dimmed {
         opacity: 0.55;
-        filter: saturate(0.75);
+        filter: saturate(0.82);
         animation-play-state: paused;
       }
 
       @media (max-width: 1024px) {
-        .home-wrap {
-          padding-top: 14vh;
-        }
-
         .stage-content {
-          min-height: 560px;
+          margin-top: 18vh;
+          min-height: 620px;
         }
 
         .bird-anchor {
-          --bird-left: 18%;
-          --bird-top: 44%;
-          max-width: 400px;
-        }
-
-        .bird-speech {
-          left: 58%;
-          top: 12%;
-          width: min(440px, 80vw);
+          width: min(520px, 96vw);
         }
       }
 
       @media (max-width: 768px) {
         .home-wrap {
-          padding: 14vh 12px 48px;
+          padding: 0 12px 48px;
         }
 
         .sky-stage {
-          min-height: 90vh;
-          padding: 12px 10px 48px;
-          --bird-left: 50%;
-          --bird-top: 22%;
+          min-height: 100vh;
+          padding: 6px 8px 48px;
         }
 
         .stage-content {
-          min-height: 760px;
+          margin-top: 14vh;
+          min-height: 740px;
+          gap: 24px;
+        }
+
+        .scene-hero {
+          flex-direction: column;
+          align-items: center;
+          gap: 18px;
         }
 
         .bird-anchor {
-          position: relative;
-          left: 50%;
-          top: auto;
-          transform: translate(-50%, 0);
-          max-width: 320px;
-          margin: 0 auto;
+          width: min(480px, 100vw);
+          justify-content: center;
         }
 
-        .bird-anchor--in-flight {
-          transform: translate(-50%, -4%) scale(1.02);
+        .bird-cloud-seat {
+          width: 100%;
         }
 
         .bird-speech {
-          position: relative;
-          left: auto;
-          top: auto;
           width: 100%;
-          margin: 16px auto 10px;
         }
 
         .bird-speech::after {
-          left: 22%;
-          top: -10px;
-          transform: rotate(88deg);
+          left: 24%;
+          top: -8px;
+          transform: rotate(86deg);
         }
 
         .cloud-field {
-          min-height: auto;
-          margin-left: 0;
-          margin-top: 12px;
-          display: flex;
-          flex-wrap: wrap;
-          justify-content: center;
-          gap: 14px 10px;
-          padding: 6px 4px 12px;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          gap: 14px 12px;
+          padding: 4px 4px 10px;
         }
 
         .mood-cloud {
-          position: relative;
-          left: auto;
-          top: auto;
-          transform: translate(0, 0);
-          min-width: min(320px, 92vw);
-          width: auto;
-        }
-
-        .mood-cloud:nth-child(odd) {
-          transform: translateY(4px);
-        }
-
-        .mood-cloud:nth-child(even) {
-          transform: translateY(-2px);
-        }
-
-        .mood-cloud:hover {
-          transform: translateY(-2px) scale(1.02);
+          min-height: 52px;
+          font-size: 15px;
         }
       }
 
@@ -742,6 +702,16 @@
         }
       }
 
+      @keyframes softFloat {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-6px);
+        }
+      }
+
       @keyframes mapDrift {
         0% {
           background-position: 10% 20%, 0 0, 0 0, 0 0;
@@ -814,54 +784,49 @@
 
       @media (max-width: 1024px) {
         .sky-stage {
-          padding: 28px 14px 44px;
-          min-height: 86vh;
+          padding: 18px 14px 52px;
+          min-height: 100vh;
         }
 
         .stage-content {
           min-height: 640px;
+          margin-top: 18vh;
         }
 
         .bird-anchor {
-          width: min(360px, 78vw);
+          width: min(520px, 96vw);
         }
 
         .bird-speech {
-          left: 56%;
-          top: 4%;
+          left: auto;
+          top: auto;
           font-size: 15px;
-        }
-
-        .cloud-field {
-          min-height: 540px;
-          margin-left: 0;
         }
       }
 
       @media (max-width: 768px) {
         .home-wrap {
-          padding: 20px 12px 32px;
+          padding: 0 12px 38px;
         }
 
         .sky-stage {
-          min-height: 760px;
-          padding: 26px 12px 40px;
-          --bird-left: 16%;
-          --bird-top: 34%;
+          min-height: 100vh;
+          padding: 12px 10px 46px;
         }
 
         .stage-content {
-          min-height: 700px;
+          min-height: 740px;
+          margin-top: 14vh;
         }
 
         .bird-anchor {
-          width: min(320px, 88vw);
-          transform: translate(-6%, -4%);
+          width: min(480px, 100vw);
+          transform: translate(var(--bird-shift-x, 0px), var(--bird-shift-y, 0px));
         }
 
         .bird-speech {
           position: relative;
-          left: 0;
+          left: auto;
           top: auto;
           width: 100%;
           margin: 12px auto 0;
@@ -871,11 +836,11 @@
           left: 22%;
           top: -10px;
           border-radius: 12px;
-          transform: rotate(-4deg);
+          transform: rotate(86deg);
         }
 
         .cloud-field {
-          min-height: 520px;
+          min-height: auto;
           margin-left: 0;
         }
 

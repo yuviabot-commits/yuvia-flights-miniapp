@@ -17,81 +17,47 @@
         <div class="sky-layer sky-parallax-lines"></div>
 
         <div class="stage-content">
-          <div class="bird-anchor" id="birdAnchor">
-            <div class="bird-cloud-seat" aria-hidden="true">
-              <div class="bird-visual">
-                <video
-                  class="yuvia-bird"
-                  autoplay
-                  loop
-                  muted
-                  playsinline
-                  poster="assets/Logo-bird.png"
-                >
-                  <source src="assets/Yuvia_Anim.webm" type="video/webm" />
-                </video>
-                <img src="assets/Logo-bird.png" alt="" class="yuvia-bird-fallback" />
+          <div class="scene-hero">
+            <div class="bird-anchor" id="birdAnchor">
+              <div class="bird-cloud-seat" aria-hidden="true">
+                <div class="bird-visual">
+                  <video
+                    class="yuvia-bird"
+                    autoplay
+                    loop
+                    muted
+                    playsinline
+                    poster="assets/Logo-bird.png"
+                  >
+                    <source src="assets/Yuvia_Anim.webm" type="video/webm" />
+                  </video>
+                  <img src="assets/Logo-bird.png" alt="" class="yuvia-bird-fallback" />
+                </div>
               </div>
-            </div>
-            <div class="bird-speech" role="dialog" aria-live="polite">
-              <p>
-                Давай поймём, с чего начнём твоё путешествие.<br />
-                Посмотри на облака — в каждом спрятано одно из желаний.<br />
-                Выбери то, которое больше всего откликается сейчас, а дальше я помогу разложить поездку по шагам.
-              </p>
+              <div class="bird-speech" role="dialog" aria-live="polite">
+                <p>
+                  Давай поймём, с чего начнём твоё путешествие.<br />
+                  Посмотри на облака — в каждом спрятано одно из желаний.<br />
+                  Выбери то, которое больше всего откликается сейчас, а дальше я помогу разложить поездку по шагам.
+                </p>
+              </div>
             </div>
           </div>
 
           <div class="cloud-field" aria-label="Выбор намерения">
-            <button
-              class="mood-cloud"
-              type="button"
-              data-bird-x="42"
-              data-bird-y="38"
-              style="--cloud-left: 58%; --cloud-top: 42%"
-            >
+            <button class="mood-cloud" type="button">
               Путешествие уже сложилось в голове
             </button>
 
-            <button
-              class="mood-cloud"
-              type="button"
-              data-bird-x="64"
-              data-bird-y="40"
-              style="--cloud-left: 74%; --cloud-top: 46%"
-            >
-              Сердце тянет в один город
-            </button>
+            <button class="mood-cloud" type="button">Сердце тянет в один город</button>
 
-            <button
-              class="mood-cloud"
-              type="button"
-              data-bird-x="60"
-              data-bird-y="52"
-              style="--cloud-left: 64%; --cloud-top: 56%"
-            >
+            <button class="mood-cloud" type="button">
               Есть свободные дни — ищу им приключение
             </button>
 
-            <button
-              class="mood-cloud"
-              type="button"
-              data-bird-x="46"
-              data-bird-y="60"
-              style="--cloud-left: 54%; --cloud-top: 64%"
-            >
-              Хочется просто улететь от рутины
-            </button>
+            <button class="mood-cloud" type="button">Хочется просто улететь от рутины</button>
 
-            <button
-              class="mood-cloud"
-              type="button"
-              data-bird-x="68"
-              data-bird-y="66"
-              style="--cloud-left: 72%; --cloud-top: 70%"
-            >
-              Хочу маршрут с прыжками из города в город
-            </button>
+            <button class="mood-cloud" type="button">Хочу маршрут с прыжками из города в город</button>
           </div>
 
           <p class="cloud-selection-note" id="cloudSelectionNote" aria-live="polite">
