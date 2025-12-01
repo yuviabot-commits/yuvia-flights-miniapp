@@ -3792,6 +3792,7 @@ allResults = flightsRaw
           const mapLinesLayer = $('.sky-parallax-lines', stage);
           const birdVideo = stage.querySelector('.yuvia-bird');
           const birdFallback = stage.querySelector('.yuvia-bird-fallback');
+          let baseBirdCenter = null;
 
           if (birdVideo && birdFallback) {
             birdVideo.addEventListener('loadeddata', () => {
@@ -3806,13 +3807,32 @@ allResults = flightsRaw
 
           let flightTimer = null;
 
+          function captureBaseBirdCenter() {
+            if (!birdAnchor) return;
+            const rect = birdAnchor.getBoundingClientRect();
+            baseBirdCenter = {
+              x: rect.left + rect.width / 2,
+              y: rect.top + rect.height / 2,
+            };
+          }
+
           function moveBird(cloud) {
             if (!birdAnchor || !cloud) return;
-            const targetX = Number(cloud.dataset.birdX) || 12;
-            const targetY = Number(cloud.dataset.birdY) || 44;
+            if (!baseBirdCenter) {
+              captureBaseBirdCenter();
+            }
 
-            stage.style.setProperty('--bird-left', `${targetX}%`);
-            stage.style.setProperty('--bird-top', `${targetY}%`);
+            const cloudRect = cloud.getBoundingClientRect();
+            const cloudCenter = {
+              x: cloudRect.left + cloudRect.width / 2,
+              y: cloudRect.top + cloudRect.height / 2,
+            };
+
+            const deltaX = cloudCenter.x - (baseBirdCenter?.x || cloudCenter.x);
+            const deltaY = cloudCenter.y - (baseBirdCenter?.y || cloudCenter.y);
+
+            birdAnchor.style.setProperty('--bird-shift-x', `${deltaX}px`);
+            birdAnchor.style.setProperty('--bird-shift-y', `${deltaY}px`);
 
             birdAnchor.classList.add('bird-anchor--in-flight');
             clearTimeout(flightTimer);
@@ -3840,6 +3860,8 @@ allResults = flightsRaw
           moodClouds.forEach(cloud => {
             cloud.addEventListener('click', () => selectCloud(cloud));
           });
+
+          setTimeout(captureBaseBirdCenter, 0);
 
           function handleParallax(event) {
             const bounds = stage.getBoundingClientRect();
