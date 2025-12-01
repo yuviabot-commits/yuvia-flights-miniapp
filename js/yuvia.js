@@ -1509,7 +1509,7 @@
               </div>
               <div class="result-footer">
                 <div class="result-footer-actions">
-                  <button type="button" class="btn-ghost btn-sm btn-fav" data-id="${flight.id}">
+                  <button type="button" class="btn-secondary btn-sm btn-fav" data-id="${flight.id}">
                     ${favoritesIds.has(flight.id) ? "Убрать из избранного" : "В избранное"}
                   </button>
                   <button type="button" class="btn-secondary btn-sm btn-compare" data-id="${flight.id}">
@@ -2444,16 +2444,18 @@
         function updateFavButtonState(button, flightId) {
           if (!button) return;
           const isFav = favoritesIds.has(flightId);
-          button.classList.toggle("btn-primary", isFav);
-          button.classList.toggle("btn-ghost", !isFav);
+          button.classList.add("btn-secondary", "btn-sm");
+          button.classList.remove("btn-primary", "btn-ghost");
+          button.classList.toggle("is-active", isFav);
           button.textContent = isFav ? "Убрать из избранного" : "В избранное";
         }
 
         function updateCompareButtonState(button, flightId) {
           if (!button) return;
           const inCompare = compareIds.has(flightId);
-          button.classList.toggle("btn-primary", inCompare);
-          button.classList.toggle("btn-secondary", !inCompare);
+          button.classList.add("btn-secondary", "btn-sm");
+          button.classList.remove("btn-primary");
+          button.classList.toggle("is-active", inCompare);
           button.textContent = inCompare ? "Убрать из сравнения" : "Сравнить";
         }
 
@@ -2687,7 +2689,7 @@
             actions.className = "compare-actions";
             const btn = document.createElement("button");
             btn.type = "button";
-            btn.className = "btn-primary btn-sm";
+            btn.className = "btn-secondary btn-sm";
             btn.textContent = "Сравнить выбранные";
             btn.addEventListener("click", openCompareModal);
             actions.appendChild(btn);
@@ -2744,7 +2746,7 @@
               <div class="topcard-meta">${flight.departTimeStr || ""} · ${formatDuration(flight.outbound?.durationMinutes || flight.durationMinutes)}</div>
               <div class="topcard-meta">${getStressText(flight.stressLevel)}</div>
               <div class="topcard-actions">
-                <button type="button" class="btn-secondary btn-sm" data-action="open">Открыть в выдаче</button>
+                <button type="button" class="btn-utility btn-sm" data-action="open">Открыть в выдаче</button>
                 ${ticketUrl ? `
                   <a href="${ticketUrl}"
                      class="btn btn-primary btn-sm aviasales-btn-ticket"
