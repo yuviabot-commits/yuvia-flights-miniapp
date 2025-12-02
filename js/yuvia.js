@@ -1580,7 +1580,7 @@
                 const aviasalesButtons = ticketUrl
                   ? `
                 <a href="${ticketUrl}"
-                   class="btn btn-primary btn-sm aviasales-btn-ticket"
+                   class="btn btn-primary btn-primary-hero btn-sm aviasales-btn-ticket"
                    target="_blank"
                    rel="noopener noreferrer">
                   Купить на Aviasales ↗
@@ -2503,21 +2503,16 @@
           const balanced = [...working]
             .sort((a, b) => (b.rating || 0) - (a.rating || 0) || a.price - b.price)
             .find((flight) => !medianPrice || flight.price <= medianPrice * 1.25);
-          const priority = {
-            "ЗОЛОТАЯ СЕРЕДИНА": 3,
-            "САМЫЙ ДЕШЁВЫЙ": 2,
-            "САМЫЙ БЫСТРЫЙ": 1,
-          };
+          const candidates = [
+            balanced ? { flight: balanced, label: "ЗОЛОТАЯ СЕРЕДИНА", type: "golden" } : null,
+            cheapest ? { flight: cheapest, label: "САМЫЙ ДЕШЁВЫЙ", type: "cheap" } : null,
+            fastest ? { flight: fastest, label: "САМЫЙ БЫСТРЫЙ", type: "fast" } : null,
+          ].filter(Boolean);
           const topMap = new Map();
-          function addCandidate(flight, label) {
-            if (!flight) return;
-            const existing = topMap.get(flight.id);
-            if (existing && priority[label] <= priority[existing.topLabel]) return;
-            topMap.set(flight.id, { ...flight, topLabel: label });
-          }
-          addCandidate(balanced, "ЗОЛОТАЯ СЕРЕДИНА");
-          addCandidate(cheapest, "САМЫЙ ДЕШЁВЫЙ");
-          addCandidate(fastest, "САМЫЙ БЫСТРЫЙ");
+          candidates.forEach(({ flight, label, type }) => {
+            if (!flight || topMap.has(flight.id)) return;
+            topMap.set(flight.id, { ...flight, topLabel: label, topType: type });
+          });
           return Array.from(topMap.values()).slice(0, 3);
         }
 
@@ -2527,6 +2522,7 @@
             flight.isTop = ids.has(flight.id);
             const match = top.find((item) => item.id === flight.id);
             flight.topLabel = match?.topLabel || "";
+            flight.topType = match?.topType || "";
           });
         }
 
@@ -2839,7 +2835,7 @@
             currentTopFlights = [];
             return;
           }
-          const top = presetTop?.length ? presetTop : getYuviaTop3(list);
+          const top = (presetTop?.length ? presetTop : getYuviaTop3(list)).slice(0, 3);
           currentTopFlights = top;
           if (!top.length) {
             yuviaTopBlock.classList.add("hidden");
@@ -2849,6 +2845,12 @@
           yuviaTopBlock.classList.remove("hidden");
           yuviaTopSubtitle.textContent = yuviaTopSubtitleText;
           yuviaTopList.innerHTML = "";
+          const topLabelClassMap = {
+            golden: "topcard-label--golden",
+            cheap: "topcard-label--cheap",
+            fast: "topcard-label--fast",
+          };
+
           top.forEach((flight) => {
             const card = document.createElement("div");
             card.className = "topcard";
@@ -2892,8 +2894,18 @@
                 : airlineName
               : airlineCode || "";
             const airportAirlineLine = [airportLineParts, airlineLabel].filter(Boolean).join(", ");
+            const topType =
+              flight.topType ||
+              (flight.topLabel === "ЗОЛОТАЯ СЕРЕДИНА"
+                ? "golden"
+                : flight.topLabel === "САМЫЙ ДЕШЁВЫЙ"
+                ? "cheap"
+                : flight.topLabel === "САМЫЙ БЫСТРЫЙ"
+                ? "fast"
+                : "");
+            const labelClass = topType ? ` ${topLabelClassMap[topType] || ""}` : "";
             card.innerHTML = `
-              <div class="topcard-label">${flight.topLabel || "Рекомендация"}</div>
+              <div class="topcard-label${labelClass}">${flight.topLabel || "Рекомендация"}</div>
               <div class="topcard-main">
                 <div class="topcard-route">${flight.originCity} → ${flight.destCity}</div>
                 <div class="topcard-price">${formatCurrency(flight.price, flight.currency || lastCurrency)}</div>
@@ -2913,7 +2925,7 @@
                 <button type="button" class="btn-utility btn-sm" data-action="open">Открыть в выдаче</button>
                 ${ticketUrl ? `
                   <a href="${ticketUrl}"
-                     class="btn btn-primary btn-sm aviasales-btn-ticket"
+                     class="btn btn-primary btn-primary-hero btn-sm aviasales-btn-ticket"
                      target="_blank"
                      rel="noopener noreferrer">
                     Купить на Aviasales
