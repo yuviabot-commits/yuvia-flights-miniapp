@@ -780,34 +780,29 @@
       .search-inline-editor {
         margin-bottom: 14px;
       }
+      .inline-editor {
+        display: grid;
+        gap: 12px;
+      }
       .search-inline-grid {
         display: grid;
-        grid-template-columns: 1fr 60px 1fr;
         gap: 10px;
         align-items: end;
       }
-      .search-inline-grid .origin-field {
-        grid-column: 1;
-        grid-row: 1;
+      .inline-route-grid {
+        grid-template-columns: 1fr 60px 1fr;
       }
-      .search-inline-grid .inline-swap {
+      .inline-route-grid .origin-field {
+        grid-column: 1;
+      }
+      .inline-route-grid .inline-swap {
         grid-column: 2;
-        grid-row: 1;
       }
-      .search-inline-grid .destination-field {
+      .inline-route-grid .destination-field {
         grid-column: 3;
-        grid-row: 1;
       }
-      .search-inline-grid .depart-field {
-        grid-column: 1;
-        grid-row: 2;
-      }
-      .search-inline-grid .return-field {
-        grid-column: 3;
-        grid-row: 2;
-      }
-      .search-inline-grid .pax-field {
-        grid-column: 1 / span 3;
+      .inline-dates-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
       .search-inline-grid .field {
         width: 100%;
@@ -828,11 +823,15 @@
         padding: 10px 12px;
         border-radius: 12px;
       }
+      .inline-oneway-row {
+        margin-top: -2px;
+      }
       .search-inline-actions {
         display: flex;
         align-items: center;
         gap: 10px;
-        margin-top: 12px;
+        margin-top: 4px;
+        flex-wrap: wrap;
       }
       .search-inline-actions .actions-spacer {
         flex: 1;
@@ -840,6 +839,9 @@
       .search-inline-actions .btn-primary {
         padding-left: 18px;
         padding-right: 18px;
+      }
+      .pax-inline-actions {
+        margin-top: 8px;
       }
       /* ------- Форма поиска ------- */
       .search-grid input,
@@ -1819,19 +1821,14 @@
         border-color: rgba(7, 94, 84, 0.35);
       }
       @media (max-width: 720px) {
-        .search-inline-grid {
+        .inline-route-grid,
+        .inline-dates-grid {
           grid-template-columns: 1fr;
-        }
-        .search-inline-grid .field,
-        .search-inline-grid .pax-field {
-          grid-column: auto;
-          grid-row: auto;
         }
         .inline-swap {
           display: none;
         }
         .search-inline-actions {
-          flex-wrap: wrap;
           justify-content: flex-start;
         }
         .topblock {

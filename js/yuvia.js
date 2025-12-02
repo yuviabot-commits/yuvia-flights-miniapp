@@ -139,6 +139,7 @@
         let hasSearched = false;
         let lastSearchSuccess = false;
         let currentInlineTarget = null;
+        let inlineSnapshot = null;
         let compareDirection = "outbound";
 
         const TOOLTIP_TEXTS = {
@@ -176,15 +177,16 @@
         const conciergeSubtitle =
           "Я учёл твой стиль поездки и ограничения по рейсам, убрал ночные и перегруженные стыковки. В этом блоке — варианты, с которых обычно удобно начинать выбор.";
 
-        const originInput = $("#origin");
-        const destinationInput = $("#destination");
-        const departInput = $("#depart");
-        const returnInput = $("#ret");
+        const originInput = $("#origin") || $("#inlineOrigin");
+        const destinationInput = $("#destination") || $("#inlineDestination");
+        const departInput = $("#depart") || $("#inlineDepart");
+        const returnInput = $("#ret") || $("#inlineRet");
         const searchSummary = $("#searchSummary");
         const searchSummaryAction = $("#searchSummaryAction");
         const searchInlineEditor = $("#searchInlineEditor");
-        const searchInlineApply = $("#searchInlineApply");
-        const searchInlineCancel = $("#searchInlineCancel");
+        const inlineRouteEditor = $("#inlineRouteEditor");
+        const inlineDatesEditor = $("#inlineDatesEditor");
+        const inlinePaxEditor = $("#inlinePaxEditor");
         const backToSearchLink = $("#backToSearch");
         const matrixBlock = $("#matrix");
         const resultsBlock = $("#results");
@@ -198,8 +200,8 @@
         const postSearchLayout = $("#postSearchLayout");
         const matrixSection = $("#matrixSection");
         const filtersCard = $("#filtersBlock");
-        const swapBtn = $("#swapInline");
-        const paxTrigger = $("#paxTrigger");
+        const swapBtn = $("#swapInline") || $("#inlineSwap");
+        const paxTrigger = $("#paxTrigger") || $("#inlinePaxTrigger");
         const paxPanel = $("#paxPanel");
         const recentChips = $("#recentChips");
         const yuviaTopBlock = $("#yuviaTopBlock");
@@ -215,6 +217,15 @@
         const compareModalDismiss = $("#compareModalDismiss");
         const timeOutboundLabel = $("#timeOutboundLabel");
         const timeReturnLabel = $("#timeReturnLabel");
+        const onewayControl = $("#inlineOnewayToggle") || $("#onewayToggle");
+        const inlineEditors = {
+          route: inlineRouteEditor,
+          dates: inlineDatesEditor,
+          pax: inlinePaxEditor,
+        };
+        const searchForm = $("#searchForm");
+        const isSearchPage = !!searchForm;
+        const isResultsPage = !!postSearchLayout;
 
         if (yuviaTopSubtitle) {
           yuviaTopSubtitle.textContent = conciergeSubtitle;
@@ -233,7 +244,7 @@
           destName: destinationInput?.value?.trim() || "",
           departDate: parseDateValue(departInput?.value) || null,
           returnDate: parseDateValue(returnInput?.value) || null,
-          oneway: $("#onewayToggle")?.checked || false,
+          oneway: onewayControl?.checked || false,
         };
 
         function setOriginValue(value) {
@@ -277,13 +288,12 @@
         }
 
         function getOnewayFlag() {
-          const control = $("#onewayToggle");
-          return control ? !!control.checked : !!formState.oneway;
+          return onewayControl ? !!onewayControl.checked : !!formState.oneway;
         }
 
         function setOnewayFlag(value) {
-          if ($("#onewayToggle")) {
-            $("#onewayToggle").checked = !!value;
+          if (onewayControl) {
+            onewayControl.checked = !!value;
           }
           formState.oneway = !!value;
         }
@@ -541,15 +551,56 @@
           }
         }
 
-        function hideSearchInlineEditor() {
+        function captureInlineSnapshot() {
+          return {
+            origin: getOriginValue(),
+            dest: getDestinationValue(),
+            originIATA,
+            destIATA,
+            depart: getDepartValue(),
+            returnDate: getReturnValue(),
+            oneway: getOnewayFlag(),
+            pax: { ...paxState },
+          };
+        }
+
+        function restoreInlineSnapshot(snapshot) {
+          if (!snapshot) return;
+          setOriginValue(snapshot.origin);
+          setDestinationValue(snapshot.dest);
+          originIATA = snapshot.originIATA || "";
+          destIATA = snapshot.destIATA || "";
+          setDepartValue(snapshot.depart);
+          setReturnValue(snapshot.returnDate);
+          setOnewayFlag(snapshot.oneway);
+          updateReturnControlState();
+          Object.assign(paxState, snapshot.pax || {});
+          updatePaxSummary();
+          updateSearchSummary();
+        }
+
+        function hideSearchInlineEditor(options = {}) {
           if (!searchInlineEditor) return;
+          const { restore = true } = options;
+          if (restore && inlineSnapshot) {
+            restoreInlineSnapshot(inlineSnapshot);
+          }
           searchInlineEditor.classList.add("hidden");
+          Object.values(inlineEditors).forEach((node) => node?.classList.add("hidden"));
           currentInlineTarget = null;
+          inlineSnapshot = null;
           togglePaxPanel(false);
         }
 
         function showSearchInlineEditor(target) {
           if (!searchInlineEditor) return;
+          if (currentInlineTarget && currentInlineTarget !== target && inlineSnapshot) {
+            restoreInlineSnapshot(inlineSnapshot);
+          }
+          inlineSnapshot = captureInlineSnapshot();
+          Object.entries(inlineEditors).forEach(([key, node]) => {
+            node?.classList.toggle("hidden", key !== target);
+          });
           searchInlineEditor.classList.remove("hidden");
           currentInlineTarget = target;
           setTimeout(() => focusInlineField(target), 20);
@@ -557,8 +608,8 @@
 
         function toggleSearchInlineEditor(target) {
           if (!searchInlineEditor) return;
-          const isOpen = !searchInlineEditor.classList.contains("hidden");
-          if (isOpen && currentInlineTarget === target) {
+          const isOpen = !searchInlineEditor.classList.contains("hidden") && currentInlineTarget === target;
+          if (isOpen) {
             hideSearchInlineEditor();
           } else {
             showSearchInlineEditor(target);
@@ -621,7 +672,6 @@
             formState.returnDate = fixed;
             return fixed;
           }
-          const onewayControl = $("#onewayToggle");
           if (onewayControl?.checked) {
             returnInput.value = "";
             formState.returnDate = null;
@@ -641,7 +691,6 @@
         }
 
         function updateReturnControlState() {
-          const onewayControl = $("#onewayToggle");
           if (!returnInput) return;
           if (onewayControl?.checked) {
             returnInput.value = "";
@@ -3043,7 +3092,8 @@ allResults = flightsRaw
         async function applyInlineSearch(event) {
           await doSearch(event);
           if (lastSearchSuccess) {
-            hideSearchInlineEditor();
+            inlineSnapshot = captureInlineSnapshot();
+            hideSearchInlineEditor({ restore: false });
           }
         }
 
@@ -3091,6 +3141,7 @@ allResults = flightsRaw
             });
           }
           applyTripStateToUI();
+          updateReturnControlState();
           updatePaxSummary();
           updateSearchSummary();
         }
@@ -3188,18 +3239,21 @@ allResults = flightsRaw
             normalizeReturnDate();
             updateSearchSummary();
           });
-          $("#onewayToggle")?.addEventListener("change", () => {
-            formState.oneway = !!$("#onewayToggle").checked;
+          onewayControl?.addEventListener("change", () => {
+            formState.oneway = !!onewayControl.checked;
             updateReturnControlState();
             updateSearchSummary();
           });
           const doSearchBtn = $("#doSearch");
           if (doSearchBtn) {
-            const isResultsPage = !!postSearchLayout;
             doSearchBtn.addEventListener("click", isResultsPage ? doSearch : navigateToResults);
           }
-          searchInlineApply?.addEventListener("click", applyInlineSearch);
-          searchInlineCancel?.addEventListener("click", hideSearchInlineEditor);
+          $$("[data-inline-action='apply']").forEach((btn) =>
+            btn.addEventListener("click", applyInlineSearch)
+          );
+          $$("[data-inline-action='cancel']").forEach((btn) =>
+            btn.addEventListener("click", () => hideSearchInlineEditor())
+          );
           searchSummaryAction?.addEventListener("click", (event) => {
             const segment = event.target.closest?.(".search-summary-segment");
             if (segment) {
@@ -3521,9 +3575,6 @@ allResults = flightsRaw
         }
 
         async function init() {
-          const isSearchPage = !!document.getElementById("searchForm");
-          const isResultsPage = !!postSearchLayout;
-
           if (isSearchPage) {
             initMinDateHints();
             initPaxFromAdultsSelect();
@@ -3541,6 +3592,10 @@ allResults = flightsRaw
 
           if (isResultsPage) {
             await loadDicts();
+            initMinDateHints();
+            initPaxFromAdultsSelect();
+            handlePaxButtons();
+            initSuggests();
             initTripPreferenceChips();
             initFromQueryParams();
             applyTripStateToUI();

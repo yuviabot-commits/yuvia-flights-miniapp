@@ -28,40 +28,60 @@
         ></div>
       </div>
       <div id="searchInlineEditor" class="card hidden search-inline-editor" aria-label="Редактировать поиск">
-        <div class="search-inline-grid">
-          <div class="field origin-field">
-            <div class="label">Откуда</div>
-            <div class="suggest-wrapper">
-              <input id="origin" placeholder="Москва" autocomplete="off" />
+        <div id="inlineRouteEditor" class="inline-editor hidden" data-target="route">
+          <div class="search-inline-grid inline-route-grid">
+            <div class="field origin-field">
+              <div class="label">Откуда</div>
+              <div class="suggest-wrapper">
+                <input id="inlineOrigin" placeholder="Москва" autocomplete="off" />
+              </div>
+            </div>
+            <div class="inline-swap">
+              <button type="button" class="pill" id="inlineSwap" aria-label="Поменять местами города">⇆</button>
+            </div>
+            <div class="field destination-field">
+              <div class="label">Куда</div>
+              <div class="suggest-wrapper">
+                <input id="inlineDestination" placeholder="Казань" autocomplete="off" />
+              </div>
             </div>
           </div>
-          <div class="inline-swap">
-            <button type="button" class="pill" id="swapInline" aria-label="Поменять местами города">⇆</button>
+          <div class="search-inline-actions">
+            <button type="button" class="btn-ghost" data-inline-action="cancel">Отмена</button>
+            <div class="actions-spacer"></div>
+            <button type="button" class="btn-primary" data-inline-action="apply">Обновить поиск</button>
           </div>
-          <div class="field destination-field">
-            <div class="label">Куда</div>
-            <div class="suggest-wrapper">
-              <input id="destination" placeholder="Казань" autocomplete="off" />
+        </div>
+
+        <div id="inlineDatesEditor" class="inline-editor hidden" data-target="dates">
+          <div class="search-inline-grid inline-dates-grid">
+            <div class="field depart-field">
+              <div class="label">Дата вылета</div>
+              <input id="inlineDepart" type="date" />
+            </div>
+            <div class="field return-field">
+              <div class="label">Дата возвращения</div>
+              <input id="inlineRet" type="date" />
             </div>
           </div>
-          <div class="field depart-field">
-            <div class="label">Дата вылета</div>
-            <input id="depart" type="date" />
+          <div class="oneway-row inline-oneway-row">
+            <label class="oneway-toggle" for="inlineOnewayToggle">
+              <input type="checkbox" id="inlineOnewayToggle" />
+              <span class="oneway-switch" aria-hidden="true"></span>
+              <span class="oneway-text">Только в одну сторону</span>
+            </label>
           </div>
-          <div class="field return-field">
-            <div class="label">Дата возвращения</div>
-            <input id="ret" type="date" />
-            <div class="oneway-row">
-              <label class="oneway-toggle" for="onewayToggle">
-                <input type="checkbox" id="onewayToggle" />
-                <span class="oneway-switch" aria-hidden="true"></span>
-                <span class="oneway-text">Только в одну сторону</span>
-              </label>
-            </div>
+          <div class="search-inline-actions">
+            <button type="button" class="btn-ghost" data-inline-action="cancel">Отмена</button>
+            <div class="actions-spacer"></div>
+            <button type="button" class="btn-primary" data-inline-action="apply">Обновить поиск</button>
           </div>
+        </div>
+
+        <div id="inlinePaxEditor" class="inline-editor hidden" data-target="pax">
           <div class="field pax-field">
             <div class="label">Пассажиры и класс</div>
-            <button type="button" class="pax-trigger" id="paxTrigger">
+            <button type="button" class="pax-trigger" id="inlinePaxTrigger">
               <div class="pax-main" id="paxMainText">1 пассажир</div>
               <div class="pax-sub" id="paxSubText">эконом</div>
               <span class="pax-chevron">▾</span>
@@ -114,11 +134,11 @@
               </div>
             </div>
           </div>
-        </div>
-        <div class="search-inline-actions">
-          <button type="button" class="btn-ghost" id="searchInlineCancel">Отмена</button>
-          <div class="actions-spacer"></div>
-          <button type="button" class="btn-primary" id="searchInlineApply">Обновить поиск</button>
+          <div class="search-inline-actions pax-inline-actions">
+            <button type="button" class="btn-ghost" data-inline-action="cancel">Отмена</button>
+            <div class="actions-spacer"></div>
+            <button type="button" class="btn-primary" data-inline-action="apply">Обновить поиск</button>
+          </div>
         </div>
       </div>
       <div class="two-col hidden" id="postSearchLayout">
