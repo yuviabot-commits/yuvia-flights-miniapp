@@ -142,7 +142,7 @@
         font-weight: 500;
         white-space: nowrap;
       }
-      #doSearch {
+      .btn-primary-hero {
         padding: 13px 22px;
         font-size: 16px;
         box-shadow: 0 12px 30px rgba(7, 94, 84, 0.45);
@@ -155,8 +155,11 @@
         letter-spacing: 0.02em;
         text-transform: uppercase;
         animation: search-pulse 2.2s infinite ease-in-out;
+        background: linear-gradient(135deg, #075e54, #0f766e);
+        color: #f9fafb;
+        border: 1px solid rgba(7, 94, 84, 0.2);
       }
-      #doSearch::after {
+      .btn-primary-hero::after {
         content: "";
         position: absolute;
         inset: 0;
@@ -170,14 +173,14 @@
         pointer-events: none;
         transition: transform 0.35s ease;
       }
-      #doSearch:hover::after {
+      .btn-primary-hero:hover::after {
         transform: translateX(120%);
       }
-      #doSearch:hover {
+      .btn-primary-hero:hover {
         transform: translateY(-1px);
         box-shadow: 0 16px 34px rgba(7, 94, 84, 0.48);
       }
-      #doSearch:active {
+      .btn-primary-hero:active {
         transform: translateY(0);
         box-shadow: 0 10px 26px rgba(7, 94, 84, 0.42);
       }
@@ -1843,7 +1846,7 @@
             </div>
           </div>
           <div class="search-actions-row">
-            <button class="btn-primary" id="doSearch">Искать</button>
+            <button class="btn-primary btn-primary-hero" id="doSearch">Искать</button>
           </div>
           <div class="hidden" aria-hidden="true">
             <select id="currency">
@@ -3641,7 +3644,7 @@
                 const aviasalesButtons = ticketUrl
                   ? `
                 <a href="${ticketUrl}"
-                   class="btn btn-primary btn-sm aviasales-btn-ticket"
+                   class="btn btn-primary btn-primary-hero btn-sm aviasales-btn-ticket"
                    target="_blank"
                    rel="noopener noreferrer">
                   Купить на Aviasales ↗
@@ -4787,7 +4790,7 @@
                 <button type="button" class="btn-secondary btn-sm" data-action="open">Открыть в выдаче</button>
                 ${ticketUrl ? `
                   <a href="${ticketUrl}"
-                     class="btn btn-primary btn-sm aviasales-btn-ticket"
+                     class="btn btn-primary btn-primary-hero btn-sm aviasales-btn-ticket"
                      target="_blank"
                      rel="noopener noreferrer">
                     Купить на Aviasales
