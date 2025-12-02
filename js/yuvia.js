@@ -207,6 +207,8 @@
         const yuviaTopBlock = $("#yuviaTopBlock");
         const yuviaTopList = $("#yuviaTopList");
         const yuviaTopSubtitle = $("#yuviaTopSubtitle");
+        const yuviaTopSubtitleText =
+          "Я учёл твой стиль поездки и ограничения по рейсам, убрал ночные и перегруженные стыковки. В этом блоке — варианты, с которых обычно удобно начинать выбор.";
         const favoritesBlock = $("#favoritesBlock");
         const compareBlock = $("#compareBlock");
         const compareModal = $("#compareModal");
@@ -228,7 +230,7 @@
         const isResultsPage = !!postSearchLayout;
 
         if (yuviaTopSubtitle) {
-          yuviaTopSubtitle.textContent = conciergeSubtitle;
+          yuviaTopSubtitle.textContent = yuviaTopSubtitleText;
         }
 
         // Home/concierge page selectors
@@ -2502,9 +2504,9 @@
             .sort((a, b) => (b.rating || 0) - (a.rating || 0) || a.price - b.price)
             .find((flight) => !medianPrice || flight.price <= medianPrice * 1.25);
           const priority = {
-            "Золотая середина": 3,
-            "Самый дешёвый": 2,
-            "Самый быстрый": 1,
+            "ЗОЛОТАЯ СЕРЕДИНА": 3,
+            "САМЫЙ ДЕШЁВЫЙ": 2,
+            "САМЫЙ БЫСТРЫЙ": 1,
           };
           const topMap = new Map();
           function addCandidate(flight, label) {
@@ -2513,9 +2515,9 @@
             if (existing && priority[label] <= priority[existing.topLabel]) return;
             topMap.set(flight.id, { ...flight, topLabel: label });
           }
-          addCandidate(balanced, "Золотая середина");
-          addCandidate(cheapest, "Самый дешёвый");
-          addCandidate(fastest, "Самый быстрый");
+          addCandidate(balanced, "ЗОЛОТАЯ СЕРЕДИНА");
+          addCandidate(cheapest, "САМЫЙ ДЕШЁВЫЙ");
+          addCandidate(fastest, "САМЫЙ БЫСТРЫЙ");
           return Array.from(topMap.values()).slice(0, 3);
         }
 
@@ -2845,8 +2847,7 @@
             return;
           }
           yuviaTopBlock.classList.remove("hidden");
-          const subtitle = conciergeSubtitle;
-          yuviaTopSubtitle.textContent = subtitle;
+          yuviaTopSubtitle.textContent = yuviaTopSubtitleText;
           yuviaTopList.innerHTML = "";
           top.forEach((flight) => {
             const card = document.createElement("div");
@@ -2856,6 +2857,7 @@
               flight.aviasalesSearchUrl ||
               flight.deeplink ||
               null;
+            const outboundDuration = flight.outbound?.durationMinutes || flight.durationMinutes;
             const stressClass =
               flight.stressLevel === "low"
                 ? "badge-stress-low"
@@ -2864,6 +2866,32 @@
                 : "badge-stress-medium";
             const stressText = getStressText(flight.stressLevel);
             const transfersText = formatTransfers(flight.transfers);
+            const outboundSlice = getDirectionSlice(flight, "outbound");
+            const hasReturnSegment = Boolean(flight.return && flight.return.durationMinutes);
+            const returnSlice = hasReturnSegment ? getDirectionSlice(flight, "return") : null;
+            const totalDurationMinutes =
+              hasReturnSegment && outboundDuration && returnSlice?.durationMinutes
+                ? outboundDuration + returnSlice.durationMinutes
+                : null;
+            const primaryDurationText = formatDuration(outboundDuration);
+            const totalDurationLine = totalDurationMinutes
+              ? { label: "В пути туда и обратно", value: formatDuration(totalDurationMinutes) }
+              : null;
+            const timeLine = `${flight.departTimeStr || ""}${flight.departTimeStr ? " · " : ""}${primaryDurationText}`;
+            const airportLineParts = [formatAirport(outboundSlice.originAirport), formatAirport(outboundSlice.destAirport)]
+              .filter(Boolean)
+              .join(" → ");
+            const airlineCode =
+              Array.isArray(flight.airlinesAll) && flight.airlinesAll.length
+                ? flight.airlinesAll[0]
+                : flight.airlineCode || flight.airline;
+            const airlineName = resolveAirlineName(airlineCode, flight.airlineName, flight.airlineName || flight.airline);
+            const airlineLabel = airlineName
+              ? airlineCode
+                ? `${airlineName} (${airlineCode})`
+                : airlineName
+              : airlineCode || "";
+            const airportAirlineLine = [airportLineParts, airlineLabel].filter(Boolean).join(", ");
             card.innerHTML = `
               <div class="topcard-label">${flight.topLabel || "Рекомендация"}</div>
               <div class="topcard-main">
@@ -2871,10 +2899,16 @@
                 <div class="topcard-price">${formatCurrency(flight.price, flight.currency || lastCurrency)}</div>
               </div>
               <div class="topcard-meta">
-                <span>${flight.departTimeStr || ""}${flight.departTimeStr ? " · " : ""}${formatDuration(flight.outbound?.durationMinutes || flight.durationMinutes)}</span>
+                <span>${timeLine}</span>
                 <span>${transfersText}</span>
                 <span class="badge ${stressClass}">${stressText}</span>
               </div>
+              ${
+                totalDurationLine
+                  ? `<div class="topcard-footnote"><strong>${totalDurationLine.label}:</strong> ${totalDurationLine.value}</div>`
+                  : ""
+              }
+              ${airportAirlineLine ? `<div class="topcard-footnote">${airportAirlineLine}.</div>` : ""}
               <div class="topcard-actions">
                 <button type="button" class="btn-utility btn-sm" data-action="open">Открыть в выдаче</button>
                 ${ticketUrl ? `
