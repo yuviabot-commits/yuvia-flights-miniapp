@@ -1040,75 +1040,56 @@ button:focus,
         text-decoration: none;
         cursor: default;
       }
-     .search-summary {
-  margin: 0 0 14px;
+.search-summary {
+  margin: 0 0 18px;
   padding: 0;
-  border-radius: 999px;
-  background: radial-gradient(circle at 0% 0%, rgba(7, 94, 84, 0.06), transparent 45%),
-              radial-gradient(circle at 100% 100%, rgba(111, 74, 216, 0.04), transparent 45%),
-              #f4faf8;
-  color: #0f4f43;
-  font-size: 14px;
-  box-shadow: 0 10px 26px rgba(7, 94, 84, 0.08);
-  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: transparent;        /* убираем заливку по всей ширине */
+  border: none;                   /* убираем рамку-колбасу */
+  box-shadow: none;               /* убираем тень по всей ширине */
   position: relative;
 }
-
 .search-summary--clickable {
-  width: 100%;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 10px;
-  padding: 8px 18px;
-  border-radius: inherit;
-  transition: box-shadow 0.16s ease, background 0.16s ease, transform 0.16s ease;
+  gap: 8px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid rgba(148, 163, 184, 0.7);
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.10);
+  transition: box-shadow 0.16s ease, transform 0.16s ease;
 }
 
 .search-summary--clickable:hover,
 .search-summary--clickable:focus-visible {
   cursor: default;
-  background: radial-gradient(circle at 0% 0%, rgba(7, 94, 84, 0.08), transparent 45%),
-              radial-gradient(circle at 100% 100%, rgba(111, 74, 216, 0.05), transparent 45%),
-              #f3fbf8;
-  box-shadow: 0 14px 32px rgba(7, 94, 84, 0.12);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.14);
+  transform: translateY(-1px);
   outline: none;
 }
+
+/* маленький тонкий заголовок слева */
 .search-summary--clickable::before {
   content: "Текущий поиск";
   font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(5, 50, 39, 0.65);
-  margin-right: 6px;
+  color: rgba(5, 50, 39, 0.55);
+  margin-right: 8px;
   padding-right: 10px;
   border-right: 1px solid rgba(148, 163, 184, 0.45);
   flex-shrink: 0;
   white-space: nowrap;
 }
-
-      .search-summary-segment {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 7px 10px;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.78);
-        border: 1px solid rgba(148, 163, 184, 0.5);
-        color: #0f4f43;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
-      }
-      .search-summary-segment:focus-visible,
-      .search-summary-segment:hover {
-        background: rgba(228, 241, 236, 0.9);
-        border-color: rgba(13, 148, 136, 0.3);
-        box-shadow: 0 6px 16px rgba(7, 94, 84, 0.14);
-        outline: none;
-      }
+.search-summary-segment {
+  background: #ffffff;
+  border: 1px solid rgba(148, 163, 184, 0.55);
+  padding: 5px 12px;
+  border-radius: 999px;
+}
 .search-summary-divider {
-  color: #9ca3af;
+  color: #cbd5e1;
   font-weight: 600;
 }
 
