@@ -731,36 +731,43 @@ button:focus,
       }
       .recommendations-emblem {
         position: absolute;
-        top: -42px;
-        left: 50%;
-        transform: translateX(-50%);
+        top: -36px;
+        right: 28px;
+        left: auto;
+        transform: none;
         display: flex;
         flex-direction: column;
-        align-items: center;
+        align-items: flex-end;
         gap: 4px;
         z-index: 15;
       }
       .recommendations-emblem__seal {
-        width: 70px;
-        height: 70px;
+        width: 64px;
+        height: 64px;
         border-radius: 50%;
-        background: #ffffff;
-        border: 2px solid rgba(5, 50, 39, 0.48);
+        background: #fffaf3;
+        border: 2px solid rgba(5, 50, 39, 0.52);
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 16px 34px rgba(7, 94, 84, 0.25);
+        box-shadow: 0 10px 26px rgba(7, 94, 84, 0.25);
+        position: relative;
+      }
+      .recommendations-emblem__seal::before {
+        content: "";
+        position: absolute;
+        inset: 6px;
+        border-radius: 50%;
+        border: 1px solid rgba(246, 196, 83, 0.9);
+        pointer-events: none;
       }
       .recommendations-emblem__icon {
-        width: 52px;
-        height: 52px;
+        width: 44px;
+        height: 44px;
         object-fit: contain;
       }
       .recommendations-emblem__text {
-        font-size: 17px;
-        font-weight: 760;
-        letter-spacing: 0.02em;
-        color: #0b3d31;
+        display: none;
       }
       .topblock-header {
         display: flex;
@@ -772,7 +779,22 @@ button:focus,
       .topblock-heading {
         position: relative;
         z-index: 1;
-        text-align: center;
+        text-align: left;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .topblock-label {
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: rgba(5, 50, 39, 0.55);
+      }
+      .topblock-title {
+        font-size: 20px;
+        font-weight: 780;
+        letter-spacing: 0.01em;
+        color: #0b3d31;
       }
       .topblock-title,
       .topblock .section-title {
@@ -786,7 +808,7 @@ button:focus,
         color: rgba(5, 50, 39, 0.78);
         max-width: 760px;
         margin: 6px auto 12px;
-        text-align: center;
+        text-align: left;
       }
       .topblock-list {
         display: flex;
@@ -798,8 +820,9 @@ button:focus,
       }
       .topblock-meta {
         display: flex;
-        justify-content: center;
+        justify-content: flex-end;
         margin-top: 14px;
+        padding-right: 4px;
       }
       .topblock .tooltip-trigger {
         color: var(--accent);
@@ -883,9 +906,9 @@ button:focus,
         display: flex;
         justify-content: flex-start;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
         margin-top: 2px;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
       }
       .topcard button.btn-sm,
       .topcard .btn-sm {
@@ -896,7 +919,9 @@ button:focus,
       }
       .topcard-actions .btn-primary,
       .topcard-actions .btn-utility {
+        flex: 1 1 0;
         min-width: 0;
+        justify-content: center;
       }
       .matrix-calendar {
         display: grid;
