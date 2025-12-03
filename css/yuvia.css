@@ -720,7 +720,7 @@ button:focus,
         box-shadow: 0 16px 40px rgba(7, 94, 84, 0.14);
         backdrop-filter: blur(18px);
         position: relative;
-        padding-top: 64px;
+        padding: 20px 18px 18px;
       }
       .topblock::before {
         content: "";
@@ -729,72 +729,15 @@ button:focus,
         background: radial-gradient(circle at 18% 16%, rgba(250, 244, 232, 0.32), transparent 32%);
         pointer-events: none;
       }
-      .recommendations-emblem {
-        position: absolute;
-        top: -36px;
-        right: 28px;
-        left: auto;
-        transform: none;
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        gap: 4px;
-        z-index: 15;
-      }
-      .recommendations-emblem__seal {
-        width: 64px;
-        height: 64px;
-        border-radius: 50%;
-        background: #fffaf3;
-        border: 2px solid rgba(5, 50, 39, 0.52);
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 10px 26px rgba(7, 94, 84, 0.25);
-        position: relative;
-      }
-      .recommendations-emblem__seal::before {
-        content: "";
-        position: absolute;
-        inset: 6px;
-        border-radius: 50%;
-        border: 1px solid rgba(246, 196, 83, 0.9);
-        pointer-events: none;
-      }
-      .recommendations-emblem__icon {
-        width: 44px;
-        height: 44px;
-        object-fit: contain;
-      }
-      .recommendations-emblem__text {
-        display: none;
-      }
       .topblock-header {
         display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 6px;
-        margin-bottom: 12px;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
       }
       .topblock-heading {
-        position: relative;
-        z-index: 1;
         text-align: left;
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-      }
-      .topblock-label {
-        font-size: 11px;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        color: rgba(5, 50, 39, 0.55);
-      }
-      .topblock-title {
-        font-size: 20px;
-        font-weight: 780;
-        letter-spacing: 0.01em;
-        color: #0b3d31;
+        max-width: 70%;
       }
       .topblock-title,
       .topblock .section-title {
@@ -802,19 +745,37 @@ button:focus,
         font-weight: 780;
         letter-spacing: 0.01em;
         color: #0b3d31;
+        margin: 0;
       }
       .topblock-subtitle {
         font-size: 14px;
         color: rgba(5, 50, 39, 0.78);
+        margin-top: 6px;
         max-width: 760px;
-        margin: 6px auto 12px;
-        text-align: left;
+      }
+      .topblock-seal-wrap {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        align-self: flex-start;
+      }
+      .topblock-seal {
+        width: 64px;
+        height: auto;
+        display: block;
+      }
+      .topblock-seal-text {
+        font-size: 13px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: rgba(5, 50, 39, 0.7);
+        white-space: nowrap;
       }
       .topblock-list {
-        display: flex;
-        flex-direction: column;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 16px;
-        margin-top: 8px;
+        margin-top: 12px;
         position: relative;
         z-index: 1;
       }
@@ -906,21 +867,21 @@ button:focus,
         display: flex;
         justify-content: flex-start;
         align-items: center;
-        gap: 8px;
-        margin-top: 2px;
+        gap: 10px;
+        margin-top: 8px;
         flex-wrap: nowrap;
       }
       .topcard button.btn-sm,
       .topcard .btn-sm {
         font-size: 12px;
-        width: auto;
         padding-left: 12px;
         padding-right: 12px;
+        width: auto;
       }
       .topcard-actions .btn-primary,
       .topcard-actions .btn-utility {
         flex: 1 1 0;
-        min-width: 0;
+        max-width: none;
         justify-content: center;
       }
       .matrix-calendar {
@@ -2251,23 +2212,15 @@ button:focus,
         .topblock {
           padding: 20px 14px 16px;
         }
-        .topblock-list {
-          display: flex;
-          overflow-x: auto;
-          gap: 12px;
-          padding-bottom: 6px;
-          scroll-snap-type: x mandatory;
+        .topblock-header {
+          flex-direction: column-reverse;
+          align-items: flex-start;
         }
-        .topblock-list::-webkit-scrollbar {
-          height: 6px;
+        .topblock-heading {
+          max-width: 100%;
         }
-        .topblock-list::-webkit-scrollbar-thumb {
-          background: rgba(148, 163, 184, 0.6);
-          border-radius: 999px;
-        }
-        .topcard {
-          min-width: 240px;
-          scroll-snap-align: start;
+        .topblock-seal-wrap {
+          align-self: flex-end;
         }
         .recommendations-overlay-title {
           left: 50%;
@@ -2275,6 +2228,9 @@ button:focus,
         }
       }
       @media (max-width: 900px) {
+        .topblock-list {
+          grid-template-columns: 1fr;
+        }
         .result-header {
           flex-direction: column;
           align-items: flex-start;
