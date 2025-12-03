@@ -377,7 +377,6 @@ button:focus,
           transform 0.12s ease;
       }
       .chip:hover,
-      .chip-toggle:hover,
       .pill:hover {
         box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
         transform: translateY(-1px);
@@ -509,34 +508,6 @@ button:focus,
         display: flex;
         gap: 8px;
         flex-wrap: wrap;
-      }
-      .time-pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 6px 10px;
-        border-radius: 999px;
-        border: 1px solid #dbe5e1;
-        background: #fcfdfc;
-        color: #0f3f33;
-        font-size: 13px;
-        cursor: pointer;
-        transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
-      }
-      .time-pill input {
-        width: 14px;
-        height: 14px;
-        accent-color: #0b3d31;
-      }
-      .time-pill input:checked + span {
-        color: #0b3d31;
-        font-weight: 600;
-      }
-      .time-pill:has(input:checked) {
-        background: #eef6f2;
-        border-color: #0b3d31;
-        color: #0b3d31;
-        box-shadow: 0 6px 14px rgba(7, 94, 84, 0.14);
       }
       .budget-row {
         display: flex;
@@ -1090,31 +1061,6 @@ button:focus,
   flex-shrink: 0;
   white-space: nowrap;
 }
-.search-summary-segment {
-  background: #ffffff;
-  border: 1px solid rgba(148, 163, 184, 0.55);
-  padding: 5px 12px;
-  border-radius: 999px;
-
-  font-weight: 600;        /* жирный */
-  font-style: italic;      /* курсив */
-  cursor: pointer;         /* видно, что можно нажать */
-  transition:
-    background 0.18s ease,
-    border-color 0.18s ease,
-    box-shadow 0.18s ease,
-    transform 0.12s ease;
-}
-
-/* Подсветка «как у чипов стиля/триггеров» */
-.search-summary-segment:hover,
-.search-summary-segment:focus-visible {
-  background: var(--accent-soft);                 /* мягкий зелёный фон */
-  border-color: rgba(7, 94, 84, 0.5);
-  box-shadow: 0 6px 16px rgba(7, 94, 84, 0.12);
-  transform: translateY(-1px);
-  outline: none;
-}
 
 .search-summary-divider {
   color: #cbd5e1;
@@ -1370,31 +1316,6 @@ button:focus,
         display: flex;
         flex-wrap: wrap;
         gap: 8px;
-      }
-      .chip-toggle {
-        border-radius: var(--radius-pill);
-        border: 1px solid rgba(7, 94, 84, 0.25);
-        background: #ffffff;
-        color: var(--ink);
-        padding: 8px 14px;
-        font-size: 14px;
-        box-shadow: 0 6px 16px rgba(7, 94, 84, 0.08);
-        cursor: pointer;
-        transition:
-          background 0.2s,
-          color 0.2s,
-          border-color 0.2s,
-          box-shadow 0.2s,
-          transform 0.12s ease;
-      }
-      .chip-toggle:hover {
-        border-color: rgba(7, 94, 84, 0.5);
-      }
-      .chip-toggle.active {
-        background: var(--accent);
-        color: #f9fafb;
-        border-color: var(--accent);
-        box-shadow: 0 10px 20px rgba(7, 94, 84, 0.25);
       }
       .chip-style {
         min-width: 0;
@@ -2338,14 +2259,21 @@ button:focus,
           text-align: left;
         }
       }
-/* Базовый стиль интерактивных чипов: стиль, триггеры, фильтры, текущий поиск */
+
+/* Единая система зелёных чипов: стиль, триггеры, фильтры, текущий поиск */
 .chip-toggle,
 .time-pill,
 .search-summary-segment {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
   border-radius: var(--radius-pill);
   border: 1px solid rgba(7, 94, 84, 0.25);
   background: #ffffff;
   color: #0f3f33;
+  font-size: 13px;
+  cursor: pointer;
   box-shadow: 0 6px 16px rgba(7, 94, 84, 0.06);
   transition:
     background 0.18s ease,
@@ -2354,7 +2282,7 @@ button:focus,
     transform 0.12s ease;
 }
 
-/* Hover — одинаковый для всех чипов */
+/* Ховер — одинаковый для всех зелёных чипов */
 .chip-toggle:hover,
 .time-pill:hover,
 .search-summary-segment:hover {
@@ -2364,7 +2292,7 @@ button:focus,
   transform: translateY(-1px);
 }
 
-/* Активные/выбранные чипы: стиль, триггеры, фильтры */
+/* Активные / выбранные чипы: стиль, триггеры, временные окна */
 .chip-toggle.active,
 .time-pill:has(input:checked) {
   background: var(--accent-soft);
@@ -2374,12 +2302,15 @@ button:focus,
   box-shadow: 0 10px 20px rgba(7, 94, 84, 0.18);
 }
 
-/* Чипы в плашке "Текущий поиск" — всегда активные, с жирным курсивом */
+/* Внутренний input у time-pill оставляем компактным */
+.time-pill input {
+  width: 14px;
+  height: 14px;
+  accent-color: #0b3d31;
+}
+
+/* Чипы «Текущий поиск» — всегда ощущаются активными и подчёркнутыми */
 .search-summary-segment {
-  background: var(--accent-soft);
-  border-color: rgba(7, 94, 84, 0.7);
-  color: var(--accent);
   font-weight: 600;
   font-style: italic;
 }
-
