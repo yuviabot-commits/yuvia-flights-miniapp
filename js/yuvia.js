@@ -202,6 +202,13 @@
         const postSearchLayout = $("#postSearchLayout");
         const matrixSection = $("#matrixSection");
         const filtersCard = $("#filtersBlock");
+        const filtersToggle = $("#filtersToggle");
+        const filtersClose = $("#filtersClose");
+        const filtersOverlay = $("#filtersSheetOverlay");
+        const filtersApply = $("#filtersApply");
+        const durationResetBtn = $("#durationReset");
+        const durationCurrentText = $("#durationCurrent");
+        const durMaxInput = $("#durMax");
         const swapBtn = $("#swapInline") || $("#inlineSwap");
         const paxTrigger = $("#paxTrigger") || $("#inlinePaxTrigger");
         const paxPanel = $("#paxPanel");
@@ -971,7 +978,7 @@
               .sort((a, b) => String(a[1] || a[0]).localeCompare(String(b[1] || b[0])))
               .forEach(([code, name]) => {
                 const label = document.createElement("label");
-                label.className = "pill";
+                label.className = "filter-option";
                 const input = document.createElement("input");
                 input.type = "checkbox";
                 input.name = "airlines";
@@ -1006,7 +1013,7 @@
             container.innerHTML = "";
             codesArray.sort().forEach((code) => {
               const label = document.createElement("label");
-              label.className = "pill";
+              label.className = "filter-option";
               const input = document.createElement("input");
               input.type = "checkbox";
               input.value = code;
@@ -1035,6 +1042,65 @@
           return "evening";
         }
 
+        function formatDurationLabel(hoursValue) {
+          const minutesTotal = Math.round(Number(hoursValue || 0) * 60);
+          if (!Number.isFinite(minutesTotal) || minutesTotal <= 0) return "0 мин";
+          const hours = Math.floor(minutesTotal / 60);
+          const minutes = minutesTotal % 60;
+          const parts = [];
+          if (hours) parts.push(`${hours} ч`);
+          if (minutes) parts.push(`${minutes} мин`);
+          return parts.join(" ");
+        }
+
+        function isDurationLimited() {
+          if (!durMaxInput) return false;
+          const current = Number(durMaxInput.value);
+          const max = Number(durMaxInput.max);
+          return Number.isFinite(current) && Number.isFinite(max) && current < max;
+        }
+
+        function updateDurationDisplay() {
+          if (!durMaxInput || !durationCurrentText) return;
+          const current = Number(durMaxInput.value);
+          const max = Number(durMaxInput.max);
+          if (!Number.isFinite(current) || !Number.isFinite(max)) return;
+          if (current >= max) {
+            durationCurrentText.textContent = "Сейчас: без ограничения по длительности";
+            return;
+          }
+          durationCurrentText.textContent = `Сейчас: показывать рейсы не длиннее ${formatDurationLabel(current)}`;
+        }
+
+        function countActiveFilters() {
+          let count = 0;
+          if (priceMinInput?.value || priceMaxInput?.value) count += 1;
+
+          const stops = document.querySelector('input[name="stops"]:checked')?.value;
+          if (stops && stops !== "any") count += 1;
+
+          count += document.querySelectorAll(
+            '.depwin-outbound:checked, .depwin-return:checked'
+          ).length;
+
+          count += document.querySelectorAll(
+            '#originAirportFilter input[type="checkbox"]:checked'
+          ).length;
+          count += document.querySelectorAll(
+            '#destinationAirportFilter input[type="checkbox"]:checked'
+          ).length;
+          count += document.querySelectorAll('#airlineFilter input[name="airlines"]:checked').length;
+
+          if (isDurationLimited()) count += 1;
+          return count;
+        }
+
+        function updateActiveFiltersCount() {
+          if (!filtersToggle) return;
+          const count = countActiveFilters();
+          filtersToggle.textContent = count > 0 ? `Фильтры · ${count}` : "Фильтры";
+        }
+
         function withinListAfterFilters(list) {
           const min = Number(priceMinInput.value) || null;
           const max = Number(priceMaxInput.value) || null;
@@ -1049,7 +1115,11 @@
           ).map((el) => el.value);
           const stopsInput = document.querySelector('input[name="stops"]:checked');
           const stops = stopsInput ? stopsInput.value : "any";
-          const durMax = Number(document.getElementById("durMax")?.value) || null;
+          const durInputEl = durMaxInput || document.getElementById("durMax");
+          const durMaxValue = durInputEl ? Number(durInputEl.value) : null;
+          const durMaxAttr = durInputEl ? Number(durInputEl.max) : null;
+          const hasDurationLimit =
+            Number.isFinite(durMaxValue) && Number.isFinite(durMaxAttr) && durMaxValue < durMaxAttr;
           const outboundWindows = getSelectedCheckboxValues(".depwin-outbound");
           const returnWindows = getSelectedCheckboxValues(".depwin-return");
 
@@ -1081,8 +1151,8 @@
               !dAirports.some((code) => destinationAirportValues.includes(code))
             )
               return false;
-            if (durMax) {
-              const limit = durMax * 60;
+            if (hasDurationLimit) {
+              const limit = durMaxValue * 60;
               const outboundDuration = flight?.outbound?.durationMinutes;
               if (Number.isFinite(outboundDuration) && outboundDuration > limit) return false;
               const returnDuration = flight?.return?.durationMinutes;
@@ -1744,16 +1814,20 @@
             .forEach((input) => {
               input.checked = false;
             });
-          document.querySelectorAll(".depwin").forEach((checkbox) => {
+          document.querySelectorAll(".depwin-outbound, .depwin-return").forEach((checkbox) => {
             checkbox.checked = false;
           });
           const durMaxInput = document.getElementById("durMax");
-          if (durMaxInput) durMaxInput.value = "";
+          if (durMaxInput) {
+            durMaxInput.value = durMaxInput.max || "";
+          }
           const stopsAny = document.querySelector('input[name="stops"][value="any"]');
           if (stopsAny) {
             stopsAny.checked = true;
           }
           applyFiltersAndSort();
+          updateDurationDisplay();
+          updateActiveFiltersCount();
         }
 
         function applyFiltersAndSort() {
@@ -1779,6 +1853,7 @@
           markTopFlights(filteredResults, topFlights);
           renderResults(filteredResults);
           renderYuviaTop(filteredResults, topFlights);
+          updateActiveFiltersCount();
         }
 
         function mapSegment(segment, fallback = {}) {
@@ -3224,28 +3299,62 @@ allResults = flightsRaw
         }
 
         function attachFiltersHandlers() {
+          const handleFilterChange = () => {
+            applyFiltersAndSort();
+            updateActiveFiltersCount();
+          };
+
           [priceMinInput, priceMaxInput].forEach((input) => {
             input?.addEventListener("input", () => {
-              applyFiltersAndSort();
+              handleFilterChange();
             });
           });
           [originAirportFilter, destinationAirportFilter].forEach((container) => {
             container?.addEventListener("change", () => {
-              applyFiltersAndSort();
+              handleFilterChange();
             });
           });
-          document.getElementById("durMax")?.addEventListener("input", applyFiltersAndSort);
-          document.querySelectorAll(".depwin").forEach((checkbox) => {
-            checkbox.addEventListener("change", applyFiltersAndSort);
+          durMaxInput?.addEventListener("input", () => {
+            updateDurationDisplay();
+            handleFilterChange();
           });
-          airlineFilter?.addEventListener("change", applyFiltersAndSort);
+          document.querySelectorAll(".depwin-outbound, .depwin-return").forEach((checkbox) => {
+            checkbox.addEventListener("change", handleFilterChange);
+          });
+          airlineFilter?.addEventListener("change", handleFilterChange);
           document.querySelectorAll('input[name="stops"]').forEach((radio) => {
-            radio.addEventListener("change", applyFiltersAndSort);
+            radio.addEventListener("change", handleFilterChange);
           });
           $("#clearFilters")?.addEventListener("click", (event) => {
             event.preventDefault();
             clearFilters();
           });
+          filtersToggle?.addEventListener("click", () => {
+            document.body.classList.add("filters-open");
+            filtersOverlay?.classList.remove("hidden");
+          });
+          filtersClose?.addEventListener("click", () => {
+            document.body.classList.remove("filters-open");
+            filtersOverlay?.classList.add("hidden");
+          });
+          filtersOverlay?.addEventListener("click", () => {
+            document.body.classList.remove("filters-open");
+            filtersOverlay?.classList.add("hidden");
+          });
+          filtersApply?.addEventListener("click", () => {
+            handleFilterChange();
+            document.body.classList.remove("filters-open");
+            filtersOverlay?.classList.add("hidden");
+          });
+          durationResetBtn?.addEventListener("click", () => {
+            if (durMaxInput) {
+              durMaxInput.value = durMaxInput.max || durMaxInput.value || "";
+              updateDurationDisplay();
+            }
+            handleFilterChange();
+          });
+          updateDurationDisplay();
+          updateActiveFiltersCount();
           $("#sortBy")?.addEventListener("change", () => applyFiltersAndSort());
         }
 
