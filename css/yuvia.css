@@ -1095,7 +1095,27 @@ button:focus,
   border: 1px solid rgba(148, 163, 184, 0.55);
   padding: 5px 12px;
   border-radius: 999px;
+
+  font-weight: 600;        /* жирный */
+  font-style: italic;      /* курсив */
+  cursor: pointer;         /* видно, что можно нажать */
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.12s ease;
 }
+
+/* Подсветка «как у чипов стиля/триггеров» */
+.search-summary-segment:hover,
+.search-summary-segment:focus-visible {
+  background: var(--accent-soft);                 /* мягкий зелёный фон */
+  border-color: rgba(7, 94, 84, 0.5);
+  box-shadow: 0 6px 16px rgba(7, 94, 84, 0.12);
+  transform: translateY(-1px);
+  outline: none;
+}
+
 .search-summary-divider {
   color: #cbd5e1;
   font-weight: 600;
