@@ -183,6 +183,8 @@
         const returnInput = $("#ret") || $("#inlineRet");
         const searchSummary = $("#searchSummary");
         const searchSummaryAction = $("#searchSummaryAction");
+        const searchOverlay = $("#searchOverlay");
+        const searchOverlayTitle = $("#searchOverlayTitle");
         const searchInlineEditor = $("#searchInlineEditor");
         const inlineRouteEditor = $("#inlineRouteEditor");
         const inlineDatesEditor = $("#inlineDatesEditor");
@@ -588,6 +590,8 @@
             restoreInlineSnapshot(inlineSnapshot);
           }
           searchInlineEditor.classList.add("hidden");
+          searchOverlay?.classList.add("hidden");
+          document.body.classList.remove("overlay-locked");
           Object.values(inlineEditors).forEach((node) => node?.classList.add("hidden"));
           currentInlineTarget = null;
           inlineSnapshot = null;
@@ -604,6 +608,16 @@
             node?.classList.toggle("hidden", key !== target);
           });
           searchInlineEditor.classList.remove("hidden");
+          searchOverlay?.classList.remove("hidden");
+          document.body.classList.add("overlay-locked");
+          if (searchOverlayTitle) {
+            const overlayTitles = {
+              route: "Изменить маршрут",
+              dates: "Изменить даты",
+              pax: "Пассажиры и класс",
+            };
+            searchOverlayTitle.textContent = overlayTitles[target] || "Редактировать поиск";
+          }
           currentInlineTarget = target;
           setTimeout(() => focusInlineField(target), 20);
         }
@@ -1583,7 +1597,7 @@
                    class="btn btn-primary btn-primary-hero btn-sm aviasales-btn-ticket"
                    target="_blank"
                    rel="noopener noreferrer">
-                  Купить на Aviasales ↗
+                  Купить на Aviasales
                 </a>
               `
                   : `<button class="btn-primary btn-sm" disabled>Нет ссылки</button>`;
@@ -1759,13 +1773,9 @@
           }
           let list = withinListAfterFilters(allResults);
           list = applyTripTriggers(list);
-          if (tripState.style) {
-            list = applyTripStyle(list);
-            filteredResults = list;
-          } else {
-            filteredResults = sortBySelection(list);
-          }
-          const topFlights = getYuviaTop3(filteredResults);
+          const baseForTop = tripState.style ? applyTripStyle(list) : list.slice();
+          filteredResults = tripState.style ? baseForTop : sortBySelection(list);
+          const topFlights = getYuviaTop3(baseForTop);
           markTopFlights(filteredResults, topFlights);
           renderResults(filteredResults);
           renderYuviaTop(filteredResults, topFlights);
@@ -2495,25 +2505,42 @@
           if (!list.length) return [];
           const working = list.filter((flight) => typeof flight.price === "number" && flight.price > 0);
           if (!working.length) return [];
-          const cheapest = [...working].sort((a, b) => a.price - b.price)[0];
-          const fastest = [...working].sort(
-            (a, b) => (a.outbound?.durationMinutes || a.durationMinutes || Infinity) - (b.outbound?.durationMinutes || b.durationMinutes || Infinity)
-          )[0];
           const medianPrice = getMedianPrice(working);
-          const balanced = [...working]
-            .sort((a, b) => (b.rating || 0) - (a.rating || 0) || a.price - b.price)
-            .find((flight) => !medianPrice || flight.price <= medianPrice * 1.25);
-          const candidates = [
-            balanced ? { flight: balanced, label: "ЗОЛОТАЯ СЕРЕДИНА", type: "golden" } : null,
-            cheapest ? { flight: cheapest, label: "САМЫЙ ДЕШЁВЫЙ", type: "cheap" } : null,
-            fastest ? { flight: fastest, label: "САМЫЙ БЫСТРЫЙ", type: "fast" } : null,
-          ].filter(Boolean);
-          const topMap = new Map();
-          candidates.forEach(({ flight, label, type }) => {
-            if (!flight || topMap.has(flight.id)) return;
-            topMap.set(flight.id, { ...flight, topLabel: label, topType: type });
-          });
-          return Array.from(topMap.values()).slice(0, 3);
+          const picks = [];
+
+          const balanced = [...working].sort((a, b) => (b.rating || 0) - (a.rating || 0) || (a.price || 0) - (b.price || 0))[0];
+          if (balanced && (!medianPrice || balanced.price <= medianPrice * 1.3)) {
+            picks.push({ ...balanced, topLabel: "ЗОЛОТАЯ СЕРЕДИНА", topType: "golden" });
+          }
+
+          const cheapest = [...working].sort((a, b) => (a.price || Infinity) - (b.price || Infinity))[0];
+          if (cheapest) {
+            picks.push({ ...cheapest, topLabel: "САМЫЙ ДЁШЕВЫЙ", topType: "cheap" });
+          }
+
+          const fastest = [...working].sort(
+            (a, b) =>
+              (a.outbound?.durationMinutes || a.durationMinutes || Infinity) - (b.outbound?.durationMinutes || b.durationMinutes || Infinity)
+          )[0];
+          if (fastest) {
+            picks.push({ ...fastest, topLabel: "САМЫЙ БЫСТРЫЙ", topType: "fast" });
+          }
+
+          const minimalTransfers = [...working].sort(
+            (a, b) => (a.transfers || 0) - (b.transfers || 0) || (a.durationMinutes || Infinity) - (b.durationMinutes || Infinity)
+          )[0];
+          if (minimalTransfers) {
+            picks.push({ ...minimalTransfers, topLabel: "МИНИМУМ ПЕРЕСАДОК", topType: "minimal_transfers" });
+          }
+
+          const lowStress = [...working].sort(
+            (a, b) => (a.stressPoints || Infinity) - (b.stressPoints || Infinity) || (a.price || 0) - (b.price || 0)
+          )[0];
+          if (lowStress) {
+            picks.push({ ...lowStress, topLabel: "НИЗКИЙ СТРЕСС", topType: "low_stress" });
+          }
+
+          return picks;
         }
 
         function markTopFlights(list, top) {
@@ -2835,7 +2862,7 @@
             currentTopFlights = [];
             return;
           }
-          const top = (presetTop?.length ? presetTop : getYuviaTop3(list)).slice(0, 3);
+          const top = presetTop?.length ? presetTop : getYuviaTop3(list);
           currentTopFlights = top;
           if (!top.length) {
             yuviaTopBlock.classList.add("hidden");
@@ -2845,12 +2872,6 @@
           yuviaTopBlock.classList.remove("hidden");
           yuviaTopSubtitle.textContent = yuviaTopSubtitleText;
           yuviaTopList.innerHTML = "";
-          const topLabelClassMap = {
-            golden: "topcard-label--golden",
-            cheap: "topcard-label--cheap",
-            fast: "topcard-label--fast",
-          };
-
           top.forEach((flight) => {
             const card = document.createElement("div");
             card.className = "topcard";
@@ -2860,12 +2881,6 @@
               flight.deeplink ||
               null;
             const outboundDuration = flight.outbound?.durationMinutes || flight.durationMinutes;
-            const stressClass =
-              flight.stressLevel === "low"
-                ? "badge-stress-low"
-                : flight.stressLevel === "high"
-                ? "badge-stress-high"
-                : "badge-stress-medium";
             const stressText = getStressText(flight.stressLevel);
             const transfersText = formatTransfers(flight.transfers);
             const outboundSlice = getDirectionSlice(flight, "outbound");
@@ -2877,9 +2892,11 @@
                 : null;
             const primaryDurationText = formatDuration(outboundDuration);
             const totalDurationLine = totalDurationMinutes
-              ? { label: "В пути туда и обратно", value: formatDuration(totalDurationMinutes) }
+              ? `В пути туда и обратно: ${formatDuration(totalDurationMinutes)}`
               : null;
-            const timeLine = `${flight.departTimeStr || ""}${flight.departTimeStr ? " · " : ""}${primaryDurationText}`;
+            const durationDetails = hasReturnSegment
+              ? `Туда: ${primaryDurationText} · Обратно: ${formatDuration(returnSlice.durationMinutes)} · ${transfersText}`
+              : `В пути: ${primaryDurationText} · ${transfersText}`;
             const airportLineParts = [formatAirport(outboundSlice.originAirport), formatAirport(outboundSlice.destAirport)]
               .filter(Boolean)
               .join(" → ");
@@ -2894,33 +2911,18 @@
                 : airlineName
               : airlineCode || "";
             const airportAirlineLine = [airportLineParts, airlineLabel].filter(Boolean).join(", ");
-            const topType =
-              flight.topType ||
-              (flight.topLabel === "ЗОЛОТАЯ СЕРЕДИНА"
-                ? "golden"
-                : flight.topLabel === "САМЫЙ ДЕШЁВЫЙ"
-                ? "cheap"
-                : flight.topLabel === "САМЫЙ БЫСТРЫЙ"
-                ? "fast"
-                : "");
-            const labelClass = topType ? ` ${topLabelClassMap[topType] || ""}` : "";
             card.innerHTML = `
-              <div class="topcard-label${labelClass}">${flight.topLabel || "Рекомендация"}</div>
-              <div class="topcard-main">
-                <div class="topcard-route">${flight.originCity} → ${flight.destCity}</div>
+              <div class="topcard-label">${(flight.topLabel || "Рекомендация").toUpperCase()}</div>
+              <div class="topcard-route">${flight.originCity} → ${flight.destCity}</div>
+              ${airportAirlineLine ? `<div class="topcard-subline">${airportAirlineLine}</div>` : ""}
+              <div class="topcard-duration">
+                ${totalDurationLine || `В пути: ${primaryDurationText}`}
+                <div class="muted">${durationDetails}</div>
+              </div>
+              <div class="topcard-price-row">
                 <div class="topcard-price">${formatCurrency(flight.price, flight.currency || lastCurrency)}</div>
+                <div class="stress-chip">${stressText}</div>
               </div>
-              <div class="topcard-meta">
-                <span>${timeLine}</span>
-                <span>${transfersText}</span>
-                <span class="badge ${stressClass}">${stressText}</span>
-              </div>
-              ${
-                totalDurationLine
-                  ? `<div class="topcard-footnote"><strong>${totalDurationLine.label}:</strong> ${totalDurationLine.value}</div>`
-                  : ""
-              }
-              ${airportAirlineLine ? `<div class="topcard-footnote">${airportAirlineLine}.</div>` : ""}
               <div class="topcard-actions">
                 <button type="button" class="btn-utility btn-sm" data-action="open">Открыть в выдаче</button>
                 ${ticketUrl ? `
@@ -3317,6 +3319,11 @@ allResults = flightsRaw
           });
           searchInlineEditor?.addEventListener("keydown", (event) => {
             if (event.key === "Escape") {
+              hideSearchInlineEditor();
+            }
+          });
+          searchOverlay?.addEventListener("click", (event) => {
+            if (event.target === searchOverlay) {
               hideSearchInlineEditor();
             }
           });
