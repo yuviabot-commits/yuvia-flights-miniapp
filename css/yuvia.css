@@ -413,20 +413,20 @@
         flex-direction: column;
         gap: 16px;
         scrollbar-width: thin;
-        scrollbar-color: rgba(0, 0, 0, 0.12) transparent;
+        scrollbar-color: rgba(148, 163, 184, 0.35) transparent;
       }
       .filters-block::-webkit-scrollbar {
-        width: 4px;
+        width: 3px;
       }
       .filters-block::-webkit-scrollbar-track {
         background: transparent;
       }
       .filters-block::-webkit-scrollbar-thumb {
-        background-color: rgba(0, 0, 0, 0.12);
-        border-radius: 10px;
+        background-color: rgba(148, 163, 184, 0.35);
+        border-radius: 999px;
       }
       .filters-block:hover::-webkit-scrollbar-thumb {
-        background-color: rgba(0, 0, 0, 0.2);
+        background-color: rgba(148, 163, 184, 0.5);
       }
       .filters-header {
         display: flex;
@@ -435,8 +435,11 @@
         gap: 8px;
       }
       .filters-block .section-title {
-        font-size: 17px;
-        font-weight: 600;
+        margin: 0 0 6px;
+        font-size: 18px;
+        font-weight: 700;
+        color: #053227;
+        letter-spacing: 0.01em;
       }
       .filters-section {
         display: flex;
@@ -467,10 +470,10 @@
         gap: 6px;
       }
       .filters-block .label {
-        font-size: 14px;
-        color: #1f2937;
+        font-size: 15px;
+        color: #053227;
         font-weight: 600;
-        margin-bottom: 2px;
+        margin-bottom: 4px;
       }
       .filter-option {
         display: inline-flex;
@@ -479,12 +482,16 @@
         padding: 4px 2px;
         min-height: 30px;
         font-size: 14px;
-        color: #0b3d31;
+        color: #0f3f33;
       }
       .filter-option input {
         width: 16px;
         height: 16px;
         accent-color: #0b3d31;
+      }
+      .filter-option span,
+      .time-pill span {
+        color: #0f3f33;
       }
       .time-group {
         display: flex;
@@ -510,7 +517,7 @@
         border-radius: 999px;
         border: 1px solid #dbe5e1;
         background: #fcfdfc;
-        color: #0b3d31;
+        color: #0f3f33;
         font-size: 13px;
         cursor: pointer;
         transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
@@ -560,10 +567,42 @@
       #durMax {
         width: 100%;
         accent-color: #0b3d31;
+        height: 4px;
+      }
+      #durMax::-webkit-slider-runnable-track {
+        height: 4px;
+        border-radius: 999px;
+        background: linear-gradient(
+          90deg,
+          rgba(7, 94, 84, 0.15),
+          rgba(7, 94, 84, 0.05)
+        );
       }
       #durMax::-webkit-slider-thumb {
         width: 16px;
         height: 16px;
+        border-radius: 999px;
+        background: #ffffff;
+        border: 2px solid rgba(7, 94, 84, 0.7);
+        box-shadow: 0 4px 10px rgba(7, 94, 84, 0.25);
+        margin-top: -6px;
+      }
+      #durMax::-moz-range-track {
+        height: 4px;
+        border-radius: 999px;
+        background: linear-gradient(
+          90deg,
+          rgba(7, 94, 84, 0.15),
+          rgba(7, 94, 84, 0.05)
+        );
+      }
+      #durMax::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+        border-radius: 999px;
+        background: #ffffff;
+        border: 2px solid rgba(7, 94, 84, 0.7);
+        box-shadow: 0 4px 10px rgba(7, 94, 84, 0.25);
       }
       .duration-scale {
         display: flex;
@@ -571,6 +610,7 @@
         font-size: 12px;
         color: #4b5563;
         padding: 0 2px;
+        margin-top: 2px;
       }
       .duration-scale span {
         position: relative;
@@ -587,15 +627,15 @@
         margin-left: 6px;
       }
       .duration-current {
-        font-size: 15px;
+        font-size: 14px;
         font-weight: 400;
         color: #0b3d31;
       }
       .duration-current strong {
-        font-weight: 700;
+        font-weight: 600;
       }
       .duration-note {
-        font-size: 13px;
+        font-size: 12.5px;
         color: #9ca3af;
       }
       .filters-sheet-footer {
