@@ -564,59 +564,60 @@
         flex-direction: column;
         gap: 6px;
       }
-      /* Ползунок длительности рейса — лёгкий, мятный */
-     #durMax {
+   
+    /* Ползунок длительности рейса — светло-серый, без зелёной заливки и без обводки */
+
+#durMax {
+  -webkit-appearance: none;
+  appearance: none;
   width: 100%;
   height: 4px;
   border-radius: 999px;
-  -webkit-appearance: none;
-  appearance: none;
-  background: linear-gradient(
-    90deg,
-    rgba(7, 94, 84, 0.08),
-    rgba(7, 94, 84, 0.02)
-  ); /* очень светлый трек */
+  background: #e5e7eb;      /* светло-серый трек */
   outline: none;
 }
 
-      #durMax::-webkit-slider-runnable-track {
-        height: 4px;
-        border-radius: 999px;
-        background: linear-gradient(
-          90deg,
-          rgba(7, 94, 84, 0.08),
-          rgba(7, 94, 84, 0.02)
-        ); /* очень светлый трек */
-      }
-      #durMax::-webkit-slider-thumb {
+/* Chrome / Edge / Safari */
+#durMax::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: #e5e7eb;      /* такой же светло-серый, без “прогресса” */
+}
+
+#durMax::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 14px;
   height: 14px;
-  border-radius: 999px;
-  background: #ffffff;
-  border: 2px solid rgba(7, 94, 84, 0.35);
-  box-shadow: 0 3px 8px rgba(7, 94, 84, 0.16);
-  margin-top: -5px;
+  border-radius: 50%;
+  background: #ffffff;      /* белый кружок */
+  border: none;             /* без обводки */
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.12);
+  margin-top: -5px;         /* чтобы встал по центру трека */
 }
 
-      #durMax::-moz-range-track {
-        height: 4px;
-        border-radius: 999px;
-        background: linear-gradient(
-          90deg,
-          rgba(7, 94, 84, 0.08),
-          rgba(7, 94, 84, 0.02)
-        );
-      }
-      #durMax::-moz-range-thumb {
-        width: 14px;
-        height: 14px;
-        border-radius: 999px;
-        background: #ffffff;
-        border: 2px solid rgba(7, 94, 84, 0.35);
-        box-shadow: 0 3px 8px rgba(7, 94, 84, 0.16);
-      }
+/* Firefox */
+#durMax::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: #e5e7eb;      /* трек */
+}
+
+#durMax::-moz-range-progress {
+  height: 4px;
+  border-radius: 999px;
+  background: #e5e7eb;      /* прогресс такой же светло-серый, убираем зелёную заливку */
+}
+
+#durMax::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: none;             /* без обводки */
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.12);
+}
+
       .duration-scale {
         display: flex;
         justify-content: space-between;
