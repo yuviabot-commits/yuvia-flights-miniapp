@@ -1109,7 +1109,9 @@
             durationCurrentText.textContent = "Сейчас: без ограничения по длительности";
             return;
           }
-          durationCurrentText.textContent = `Сейчас: показывать рейсы не длиннее ${formatDurationLabel(current)}`;
+          durationCurrentText.innerHTML = `Сейчас: показывать рейсы не длиннее <strong>${formatDurationLabel(
+            current
+          )}</strong>`;
         }
 
         function countActiveFilters() {
