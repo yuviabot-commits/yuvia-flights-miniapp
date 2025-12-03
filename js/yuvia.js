@@ -2996,6 +2996,18 @@
             const outboundSlice = getDirectionSlice(flight, "outbound");
             const hasReturnSegment = Boolean(flight.return && flight.return.durationMinutes);
             const returnSlice = hasReturnSegment ? getDirectionSlice(flight, "return") : null;
+            const routeOriginCity =
+              outboundSlice.originCity ||
+              flight.originCity ||
+              flight.originName ||
+              formState.originName ||
+              "";
+            const routeDestCity =
+              outboundSlice.destCity ||
+              flight.destCity ||
+              flight.destName ||
+              formState.destName ||
+              "";
             const totalDurationMinutes =
               hasReturnSegment && outboundDuration && returnSlice?.durationMinutes
                 ? outboundDuration + returnSlice.durationMinutes
@@ -3021,9 +3033,13 @@
                 : airlineName
               : airlineCode || "";
             const airportAirlineLine = [airportLineParts, airlineLabel].filter(Boolean).join(", ");
+            const routeLine =
+              [routeOriginCity || airportLineParts.split(" → ")[0], routeDestCity || airportLineParts.split(" → ")[1]]
+                .filter(Boolean)
+                .join(" → ") || "Маршрут";
             card.innerHTML = `
               <div class="topcard-label">${(flight.topLabel || "Рекомендация").toUpperCase()}</div>
-              <div class="topcard-route">${flight.originCity} → ${flight.destCity}</div>
+              <div class="topcard-route">${routeLine}</div>
               ${airportAirlineLine ? `<div class="topcard-subline">${airportAirlineLine}</div>` : ""}
               <div class="topcard-duration">
                 ${totalDurationLine || `В пути: ${primaryDurationText}`}
