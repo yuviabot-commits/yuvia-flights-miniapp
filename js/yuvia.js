@@ -3008,6 +3008,8 @@
               flight.destName ||
               formState.destName ||
               "";
+            const searchOriginCity = getOriginValue();
+            const searchDestCity = getDestinationValue();
             const totalDurationMinutes =
               hasReturnSegment && outboundDuration && returnSlice?.durationMinutes
                 ? outboundDuration + returnSlice.durationMinutes
@@ -3033,10 +3035,10 @@
                 : airlineName
               : airlineCode || "";
             const airportAirlineLine = [airportLineParts, airlineLabel].filter(Boolean).join(", ");
-            const routeLine =
-              [routeOriginCity || airportLineParts.split(" → ")[0], routeDestCity || airportLineParts.split(" → ")[1]]
-                .filter(Boolean)
-                .join(" → ") || "Маршрут";
+            const airportRouteParts = airportLineParts ? airportLineParts.split(" → ") : [];
+            const originDisplay = routeOriginCity || searchOriginCity || airportRouteParts[0];
+            const destDisplay = routeDestCity || searchDestCity || airportRouteParts[1];
+            const routeLine = [originDisplay, destDisplay].filter(Boolean).join(" → ") || "Маршрут";
             card.innerHTML = `
               <div class="topcard-label">${(flight.topLabel || "Рекомендация").toUpperCase()}</div>
               <div class="topcard-route">${routeLine}</div>
