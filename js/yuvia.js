@@ -184,6 +184,7 @@
         const searchSummary = $("#searchSummary");
         const searchSummaryAction = $("#searchSummaryAction");
         const searchOverlay = $("#searchOverlay");
+        const searchOverlayCard = searchOverlay?.querySelector?.(".search-overlay-card") || null;
         const searchOverlayTitle = $("#searchOverlayTitle");
         const searchInlineEditor = $("#searchInlineEditor");
         const inlineRouteEditor = $("#inlineRouteEditor");
@@ -557,8 +558,8 @@
           } else if (target === "dates") {
             departInput?.focus();
           } else if (target === "pax") {
-            paxTrigger?.focus();
-            togglePaxPanel(true);
+            const firstPaxBtn = document.querySelector("#inlinePaxEditor .pax-btn");
+            firstPaxBtn?.focus();
           }
         }
 
@@ -616,7 +617,11 @@
           });
           searchInlineEditor.classList.remove("hidden");
           searchOverlay?.classList.remove("hidden");
-          document.body.classList.add("overlay-locked");
+          if (isInlineMobile()) {
+            document.body.classList.add("overlay-locked");
+          } else {
+            document.body.classList.remove("overlay-locked");
+          }
           if (searchOverlayTitle) {
             const overlayTitles = {
               route: "Изменить маршрут",
@@ -625,6 +630,7 @@
             };
             searchOverlayTitle.textContent = overlayTitles[target] || "Редактировать поиск";
           }
+          positionInlinePopover(target);
           currentInlineTarget = target;
           setTimeout(() => focusInlineField(target), 20);
         }
@@ -724,6 +730,38 @@
           }
         }
 
+        const mobileInlineQuery = window.matchMedia("(max-width: 720px)");
+
+        function isInlineMobile() {
+          return mobileInlineQuery?.matches;
+        }
+
+        function positionInlinePopover(target) {
+          if (!searchOverlayCard) return;
+          if (isInlineMobile()) {
+            searchOverlayCard.style.left = "";
+            searchOverlayCard.style.top = "";
+            searchOverlayCard.style.width = "";
+            return;
+          }
+          const anchor =
+            document.querySelector(`.search-summary-segment[data-target="${target}"]`) || searchSummaryAction;
+          const rect = anchor?.getBoundingClientRect();
+          if (!rect) return;
+          const cardWidth = Math.min(440, Math.max(380, window.innerWidth - 24));
+          const centeredLeft = rect.left + rect.width / 2 - cardWidth / 2;
+          const left = Math.max(12, Math.min(window.innerWidth - cardWidth - 12, centeredLeft));
+          searchOverlayCard.style.width = `${cardWidth}px`;
+          searchOverlayCard.style.left = `${left}px`;
+          searchOverlayCard.style.top = `${rect.bottom + 10}px`;
+          searchOverlayCard.style.transform = "none";
+        }
+
+        function repositionInlinePopover() {
+          if (!currentInlineTarget || !searchInlineEditor || searchInlineEditor.classList.contains("hidden")) return;
+          positionInlinePopover(currentInlineTarget);
+        }
+
         function updatePaxSummary() {
           const total = paxState.adults + paxState.children + paxState.infants;
           const text = total === 1 ? "1 пассажир" : `${total} пассажиров`;
@@ -732,6 +770,8 @@
           if (main) main.textContent = text;
           const sub = $("#paxSubText");
           if (sub) sub.textContent = cabinText;
+          const inlineSummary = $("#inlinePaxSummary");
+          if (inlineSummary) inlineSummary.textContent = `${text}, ${cabinText}`;
           const adultsSelect = $("#adults");
           if (adultsSelect) {
             adultsSelect.value = String(paxState.adults);
@@ -2582,15 +2622,22 @@
           if (!working.length) return [];
           const medianPrice = getMedianPrice(working);
           const picks = [];
+          const seen = new Set();
+
+          const tryAdd = (candidate, meta) => {
+            if (!candidate || seen.has(candidate.id)) return;
+            seen.add(candidate.id);
+            picks.push({ ...candidate, ...meta });
+          };
 
           const balanced = [...working].sort((a, b) => (b.rating || 0) - (a.rating || 0) || (a.price || 0) - (b.price || 0))[0];
           if (balanced && (!medianPrice || balanced.price <= medianPrice * 1.3)) {
-            picks.push({ ...balanced, topLabel: "ЗОЛОТАЯ СЕРЕДИНА", topType: "golden" });
+            tryAdd(balanced, { topLabel: "ЗОЛОТАЯ СЕРЕДИНА", topType: "golden" });
           }
 
           const cheapest = [...working].sort((a, b) => (a.price || Infinity) - (b.price || Infinity))[0];
           if (cheapest) {
-            picks.push({ ...cheapest, topLabel: "САМЫЙ ДЁШЕВЫЙ", topType: "cheap" });
+            tryAdd(cheapest, { topLabel: "САМЫЙ ДЁШЕВЫЙ", topType: "cheap" });
           }
 
           const fastest = [...working].sort(
@@ -2598,21 +2645,7 @@
               (a.outbound?.durationMinutes || a.durationMinutes || Infinity) - (b.outbound?.durationMinutes || b.durationMinutes || Infinity)
           )[0];
           if (fastest) {
-            picks.push({ ...fastest, topLabel: "САМЫЙ БЫСТРЫЙ", topType: "fast" });
-          }
-
-          const minimalTransfers = [...working].sort(
-            (a, b) => (a.transfers || 0) - (b.transfers || 0) || (a.durationMinutes || Infinity) - (b.durationMinutes || Infinity)
-          )[0];
-          if (minimalTransfers) {
-            picks.push({ ...minimalTransfers, topLabel: "МИНИМУМ ПЕРЕСАДОК", topType: "minimal_transfers" });
-          }
-
-          const lowStress = [...working].sort(
-            (a, b) => (a.stressPoints || Infinity) - (b.stressPoints || Infinity) || (a.price || 0) - (b.price || 0)
-          )[0];
-          if (lowStress) {
-            picks.push({ ...lowStress, topLabel: "НИЗКИЙ СТРЕСС", topType: "low_stress" });
+            tryAdd(fastest, { topLabel: "САМЫЙ БЫСТРЫЙ", topType: "fast" });
           }
 
           return picks;
@@ -2995,8 +3028,10 @@
                 <div class="muted">${durationDetails}</div>
               </div>
               <div class="topcard-price-row">
-                <div class="topcard-price">${formatCurrency(flight.price, flight.currency || lastCurrency)}</div>
-                <div class="stress-chip">${stressText}</div>
+                <div class="topcard-price-col">
+                  <div class="topcard-price">${formatCurrency(flight.price, flight.currency || lastCurrency)}</div>
+                  <div class="stress-chip">${stressText}</div>
+                </div>
               </div>
               <div class="topcard-actions">
                 <button type="button" class="btn-utility btn-sm" data-action="open">Открыть в выдаче</button>
@@ -3365,6 +3400,9 @@ allResults = flightsRaw
         }
 
         function attachGeneralHandlers() {
+          window.addEventListener("resize", repositionInlinePopover);
+          mobileInlineQuery?.addEventListener?.("change", repositionInlinePopover);
+          window.addEventListener("scroll", repositionInlinePopover, true);
           swapBtn?.addEventListener("click", (event) => {
             event.preventDefault();
             const tmp = originInput.value;
@@ -3465,6 +3503,21 @@ allResults = flightsRaw
           });
         }
 
+        function positionTooltipPopover(trigger, popover) {
+          if (!trigger || !popover) return;
+          const width = Math.min(340, Math.max(280, popover.offsetWidth || 320));
+          popover.style.width = `${width}px`;
+          popover.classList.add("floating");
+          if (popover.parentElement !== document.body) {
+            document.body.appendChild(popover);
+          }
+          const rect = trigger.getBoundingClientRect();
+          const margin = 12;
+          const left = Math.max(margin, Math.min(window.innerWidth - width - margin, rect.left + rect.width / 2 - width / 2));
+          popover.style.left = `${left}px`;
+          popover.style.top = `${rect.bottom + 8}px`;
+        }
+
         function initTooltips() {
           document.addEventListener("click", (event) => {
             const trigger = event.target.closest?.(".tooltip-trigger");
@@ -3475,6 +3528,7 @@ allResults = flightsRaw
               const isOpen = popover?.classList.contains("visible");
               closeAllTooltips();
               if (popover && !isOpen) {
+                positionTooltipPopover(trigger, popover);
                 popover.classList.add("visible");
                 trigger.classList.add("active");
               }

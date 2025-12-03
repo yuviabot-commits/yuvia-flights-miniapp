@@ -41,9 +41,6 @@
                     <input id="inlineOrigin" placeholder="Москва" autocomplete="off" />
                   </div>
                 </div>
-                <div class="inline-swap">
-                  <button type="button" class="pill" id="inlineSwap" aria-label="Поменять местами города">⇆</button>
-                </div>
                 <div class="field destination-field">
                   <div class="label">Куда</div>
                   <div class="suggest-wrapper">
@@ -69,13 +66,13 @@
                   <div class="label">Дата возвращения</div>
                   <input id="inlineRet" type="date" />
                 </div>
-              </div>
-              <div class="oneway-row inline-oneway-row">
-                <label class="oneway-toggle" for="inlineOnewayToggle">
-                  <input type="checkbox" id="inlineOnewayToggle" />
-                  <span class="oneway-switch" aria-hidden="true"></span>
-                  <span class="oneway-text">Только в одну сторону</span>
-                </label>
+                <div class="inline-oneway-row">
+                  <label class="oneway-toggle" for="inlineOnewayToggle">
+                    <input type="checkbox" id="inlineOnewayToggle" />
+                    <span class="oneway-switch" aria-hidden="true"></span>
+                    <span class="oneway-text">Только в одну сторону</span>
+                  </label>
+                </div>
               </div>
               <div class="search-inline-actions">
                 <button type="button" class="btn-ghost" data-inline-action="cancel">Отмена</button>
@@ -86,60 +83,45 @@
 
             <div id="inlinePaxEditor" class="inline-editor hidden" data-target="pax">
               <div class="inline-editor-heading">Пассажиры и класс</div>
-              <div class="field pax-field">
-                <div class="label">Пассажиры и класс</div>
-                <button type="button" class="pax-trigger" id="inlinePaxTrigger">
-                  <div class="pax-main" id="paxMainText">1 пассажир</div>
-                  <div class="pax-sub" id="paxSubText">эконом</div>
-                  <span class="pax-chevron">▾</span>
-                </button>
-                <select id="adults" style="display: none">
-                  <option>1</option>
-                  <option>2</option>
-                  <option>3</option>
-                  <option>4</option>
-                  <option>5</option>
-                  <option>6</option>
-                </select>
-                <div class="pax-panel hidden" id="paxPanel">
-                  <div class="pax-row">
-                    <div class="pax-label-wrap">
-                      <div class="pax-title">Взрослые</div>
-                      <div class="pax-note">от 12 лет</div>
-                    </div>
-                    <div class="pax-counter">
-                      <button class="pax-btn" type="button" data-kind="adults" data-delta="-1">−</button>
-                      <div class="pax-count" data-kind="adults">1</div>
-                      <button class="pax-btn" type="button" data-kind="adults" data-delta="1">+</button>
-                    </div>
+              <div class="pax-summary-line" id="inlinePaxSummary">1 пассажир, эконом</div>
+              <div class="pax-grid">
+                <div class="pax-row">
+                  <div class="pax-label-wrap">
+                    <div class="pax-title">Взрослые</div>
+                    <div class="pax-note">от 12 лет</div>
                   </div>
-                  <div class="pax-row">
-                    <div class="pax-label-wrap">
-                      <div class="pax-title">Дети</div>
-                      <div class="pax-note">от 2 до 12 лет</div>
-                    </div>
-                    <div class="pax-counter">
-                      <button class="pax-btn" type="button" data-kind="children" data-delta="-1">−</button>
-                      <div class="pax-count" data-kind="children">0</div>
-                      <button class="pax-btn" type="button" data-kind="children" data-delta="1">+</button>
-                    </div>
-                  </div>
-                  <div class="pax-row">
-                    <div class="pax-label-wrap">
-                      <div class="pax-title">Младенцы</div>
-                      <div class="pax-note">до 2 лет (без места)</div>
-                    </div>
-                    <div class="pax-counter">
-                      <button class="pax-btn" type="button" data-kind="infants" data-delta="-1">−</button>
-                      <div class="pax-count" data-kind="infants">0</div>
-                      <button class="pax-btn" type="button" data-kind="infants" data-delta="1">+</button>
-                    </div>
-                  </div>
-                  <div class="pax-cabin">
-                    <button type="button" class="pax-cabin-btn active" data-cabin="eco">Эконом</button>
-                    <button type="button" class="pax-cabin-btn" data-cabin="business">Бизнес</button>
+                  <div class="pax-counter">
+                    <button class="pax-btn" type="button" data-kind="adults" data-delta="-1">−</button>
+                    <div class="pax-count" data-kind="adults">1</div>
+                    <button class="pax-btn" type="button" data-kind="adults" data-delta="1">+</button>
                   </div>
                 </div>
+                <div class="pax-row">
+                  <div class="pax-label-wrap">
+                    <div class="pax-title">Дети</div>
+                    <div class="pax-note">от 2 до 12 лет</div>
+                  </div>
+                  <div class="pax-counter">
+                    <button class="pax-btn" type="button" data-kind="children" data-delta="-1">−</button>
+                    <div class="pax-count" data-kind="children">0</div>
+                    <button class="pax-btn" type="button" data-kind="children" data-delta="1">+</button>
+                  </div>
+                </div>
+                <div class="pax-row">
+                  <div class="pax-label-wrap">
+                    <div class="pax-title">Младенцы</div>
+                    <div class="pax-note">до 2 лет (без места)</div>
+                  </div>
+                  <div class="pax-counter">
+                    <button class="pax-btn" type="button" data-kind="infants" data-delta="-1">−</button>
+                    <div class="pax-count" data-kind="infants">0</div>
+                    <button class="pax-btn" type="button" data-kind="infants" data-delta="1">+</button>
+                  </div>
+                </div>
+              </div>
+              <div class="pax-cabin pax-cabin-inline">
+                <button type="button" class="pax-cabin-btn active" data-cabin="eco">Эконом</button>
+                <button type="button" class="pax-cabin-btn" data-cabin="business">Бизнес</button>
               </div>
               <div class="search-inline-actions pax-inline-actions">
                 <button type="button" class="btn-ghost" data-inline-action="cancel">Отмена</button>
