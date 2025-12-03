@@ -1040,34 +1040,53 @@ button:focus,
         text-decoration: none;
         cursor: default;
       }
-      .search-summary {
-        margin: 0 0 14px;
-        padding: 0;
-        border-radius: 12px;
-        background: linear-gradient(135deg, rgba(7, 94, 84, 0.05), rgba(13, 148, 136, 0.08));
-        color: #0f4f43;
-        font-size: 14px;
-        box-shadow: 0 8px 18px rgba(7, 94, 84, 0.08);
-        border: 1px solid rgba(148, 163, 184, 0.25);
-        position: relative;
-      }
-      .search-summary--clickable {
-        width: 100%;
-        display: flex;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 8px;
-        padding: 9px 12px;
-        border-radius: inherit;
-        transition: box-shadow 0.16s ease, background 0.16s ease, transform 0.16s ease;
-      }
-      .search-summary--clickable:hover,
-      .search-summary--clickable:focus-visible {
-        cursor: default;
-        background: linear-gradient(135deg, rgba(7, 94, 84, 0.08), rgba(13, 148, 136, 0.12));
-        box-shadow: 0 12px 26px rgba(7, 94, 84, 0.18);
-        outline: none;
-      }
+     .search-summary {
+  margin: 0 0 14px;
+  padding: 0;
+  border-radius: 999px;
+  background: radial-gradient(circle at 0% 0%, rgba(7, 94, 84, 0.06), transparent 45%),
+              radial-gradient(circle at 100% 100%, rgba(111, 74, 216, 0.04), transparent 45%),
+              #f4faf8;
+  color: #0f4f43;
+  font-size: 14px;
+  box-shadow: 0 10px 26px rgba(7, 94, 84, 0.08);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  position: relative;
+}
+
+.search-summary--clickable {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 8px 18px;
+  border-radius: inherit;
+  transition: box-shadow 0.16s ease, background 0.16s ease, transform 0.16s ease;
+}
+
+.search-summary--clickable:hover,
+.search-summary--clickable:focus-visible {
+  cursor: default;
+  background: radial-gradient(circle at 0% 0%, rgba(7, 94, 84, 0.08), transparent 45%),
+              radial-gradient(circle at 100% 100%, rgba(111, 74, 216, 0.05), transparent 45%),
+              #f3fbf8;
+  box-shadow: 0 14px 32px rgba(7, 94, 84, 0.12);
+  outline: none;
+}
+.search-summary--clickable::before {
+  content: "Текущий поиск";
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(5, 50, 39, 0.65);
+  margin-right: 6px;
+  padding-right: 10px;
+  border-right: 1px solid rgba(148, 163, 184, 0.45);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
       .search-summary-segment {
         display: inline-flex;
         align-items: center;
@@ -1088,10 +1107,11 @@ button:focus,
         box-shadow: 0 6px 16px rgba(7, 94, 84, 0.14);
         outline: none;
       }
-      .search-summary-divider {
-        color: rgba(15, 79, 67, 0.55);
-        font-weight: 600;
-      }
+.search-summary-divider {
+  color: #9ca3af;
+  font-weight: 600;
+}
+
       .search-inline-editor {
         margin-bottom: 0;
       }
