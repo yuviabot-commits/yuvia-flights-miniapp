@@ -149,13 +149,14 @@
         background: #ffffff;
       }
       input:focus,
-      select:focus,
-      button:focus,
-      .btn:focus {
-        outline: none;
-        border-color: rgba(34, 197, 133, 0.9);
-        box-shadow: 0 0 0 1px rgba(34, 197, 133, 0.4);
-      }
+select:focus,
+button:focus,
+.btn:focus {
+  outline: none;
+  border-color: rgba(7, 94, 84, 0.7);          /* темно-зелёный, без ядовитости */
+  box-shadow: 0 0 0 1px rgba(7, 94, 84, 0.35); /* мягкая обводка */
+}
+
       button,
       .btn {
         cursor: pointer;
