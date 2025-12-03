@@ -136,7 +136,7 @@
         <div class="filters-mobile-toggle" id="filtersToggleWrap">
           <button type="button" class="btn-outline" id="filtersToggle">Фильтры</button>
         </div>
-        <div class="card filters-block" id="filtersBlock">
+        <div class="card filters-block filters-scroll-container" id="filtersBlock">
           <div class="filters-header">
             <div class="section-title" style="margin-top: 0">Фильтры</div>
             <button type="button" class="filters-close" id="filtersClose" aria-label="Закрыть фильтры">
@@ -226,13 +226,15 @@
               <button type="button" class="link-btn" id="durationReset">Сбросить</button>
             </div>
             <div class="duration-wrap">
-              <input type="range" id="durMax" min="1" max="36" step="0.5" value="36" />
+              <input type="range" id="durMax" min="1" max="12" step="0.5" value="12" />
               <div class="duration-scale" aria-hidden="true">
+                <span>1 ч</span>
+                <span>2 ч</span>
                 <span>3 ч</span>
+                <span>4 ч</span>
                 <span>6 ч</span>
-                <span>12 ч</span>
-                <span>24 ч</span>
-                <span>36 ч+</span>
+                <span>8 ч</span>
+                <span>12+ ч</span>
               </div>
               <div class="duration-current" id="durationCurrent">Сейчас: без ограничения по длительности</div>
               <div class="muted duration-note">Считаем общую длительность маршрута с учётом пересадок.</div>
