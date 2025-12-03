@@ -564,36 +564,38 @@
         flex-direction: column;
         gap: 6px;
       }
+      /* Ползунок длительности рейса — лёгкий, мятный */
       #durMax {
         width: 100%;
         accent-color: #0b3d31;
         height: 4px;
+        background: transparent;
       }
       #durMax::-webkit-slider-runnable-track {
         height: 4px;
         border-radius: 999px;
         background: linear-gradient(
           90deg,
-          rgba(7, 94, 84, 0.10),
-          rgba(7, 94, 84, 0.03)
-        );
+          rgba(7, 94, 84, 0.08),
+          rgba(7, 94, 84, 0.02)
+        ); /* очень светлый трек */
       }
       #durMax::-webkit-slider-thumb {
         width: 14px;
         height: 14px;
         border-radius: 999px;
         background: #ffffff;
-        border: 2px solid rgba(7, 94, 84, 0.45); /* более мягкий контур */
-        box-shadow: 0 3px 8px rgba(7, 94, 84, 0.18);
-        margin-top: -5px; /* центрируем по треку */
+        border: 2px solid rgba(7, 94, 84, 0.35); /* мягкий контур */
+        box-shadow: 0 3px 8px rgba(7, 94, 84, 0.16);
+        margin-top: -5px; /* по центру трека */
       }
       #durMax::-moz-range-track {
         height: 4px;
         border-radius: 999px;
         background: linear-gradient(
           90deg,
-          rgba(7, 94, 84, 0.10),
-          rgba(7, 94, 84, 0.03)
+          rgba(7, 94, 84, 0.08),
+          rgba(7, 94, 84, 0.02)
         );
       }
       #durMax::-moz-range-thumb {
@@ -601,8 +603,8 @@
         height: 14px;
         border-radius: 999px;
         background: #ffffff;
-        border: 2px solid rgba(7, 94, 84, 0.45);
-        box-shadow: 0 3px 8px rgba(7, 94, 84, 0.18);
+        border: 2px solid rgba(7, 94, 84, 0.35);
+        box-shadow: 0 3px 8px rgba(7, 94, 84, 0.16);
       }
       .duration-scale {
         display: flex;
@@ -627,9 +629,10 @@
         margin-left: 6px;
       }
       .duration-current {
-        font-size: 14px;
+        font-size: 15px;
         font-weight: 400;
         color: #0b3d31;
+        font-style: italic; /* курсив для строки “Сейчас: …” */
       }
       .duration-current strong {
         font-weight: 600;
