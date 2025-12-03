@@ -475,7 +475,7 @@
         box-shadow: 0 16px 40px rgba(7, 94, 84, 0.14);
         backdrop-filter: blur(18px);
         position: relative;
-        padding-top: 28px;
+        padding-top: 48px;
       }
       .topblock::before {
         content: "";
@@ -484,33 +484,39 @@
         background: radial-gradient(circle at 18% 16%, rgba(250, 244, 232, 0.32), transparent 32%);
         pointer-events: none;
       }
-      .recommendations-signature {
+      .recommendations-emblem {
         position: absolute;
-        top: -22px;
+        top: -30px;
         left: 50%;
         transform: translateX(-50%);
         display: flex;
+        flex-direction: column;
         align-items: center;
-        gap: 8px;
-        padding: 8px 16px;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.96);
-        border: 1px solid rgba(7, 94, 84, 0.15);
-        box-shadow: 0 12px 26px rgba(7, 94, 84, 0.16);
+        gap: 6px;
         z-index: 15;
       }
-      .recommendations-signature__icon {
-        width: 30px;
-        height: 30px;
-        object-fit: contain;
-        filter: drop-shadow(0 4px 10px rgba(7, 94, 84, 0.25));
+      .recommendations-emblem__seal {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: #ffffff;
+        border: 1px solid rgba(5, 50, 39, 0.28);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 14px 30px rgba(7, 94, 84, 0.18);
       }
-      .recommendations-signature__text {
+      .recommendations-emblem__icon {
+        width: 32px;
+        height: 32px;
+        object-fit: contain;
+      }
+      .recommendations-emblem__text {
         font-size: 15px;
         font-style: italic;
-        font-weight: 600;
+        font-weight: 650;
         letter-spacing: 0.04em;
-        color: #064e3b;
+        color: #053227;
       }
       .topblock-header {
         display: flex;
@@ -552,6 +558,8 @@
       .topblock .tooltip-trigger {
         color: var(--accent);
         text-decoration: none;
+        position: relative;
+        z-index: 1045;
       }
       .topblock .tooltip-trigger:hover {
         text-decoration: none;
@@ -559,11 +567,11 @@
       .topcard {
         border-radius: 16px;
         border: 1px solid rgba(148, 163, 184, 0.6);
-        padding: 12px 14px;
-        background: rgba(255, 255, 255, 0.96);
+        padding: 14px 16px;
+        background: rgba(255, 255, 255, 0.98);
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 10px;
         transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
       }
       .topcard:hover {
@@ -571,72 +579,60 @@
         box-shadow: 0 12px 28px rgba(15, 23, 42, 0.16);
         border-color: rgba(7, 94, 84, 0.7);
       }
-      .topcard-main {
-        display: flex;
-        justify-content: space-between;
-        gap: 10px;
-        align-items: baseline;
+      .topcard-label {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #8b7351;
       }
       .topcard-route {
-        font-size: 15px;
-        font-weight: 650;
+        font-size: 17px;
+        font-weight: 750;
+        color: var(--accent);
       }
-      .topcard-label {
-        display: inline-flex;
+      .topcard-subline {
+        font-size: 13px;
+        color: rgba(5, 50, 39, 0.78);
+      }
+      .topcard-duration {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        font-size: 13px;
+        color: #0f3f35;
+      }
+      .topcard-duration .muted {
+        color: rgba(5, 50, 39, 0.7);
+        font-size: 12.5px;
+      }
+      .topcard-price-row {
+        display: flex;
+        justify-content: space-between;
         align-items: center;
-        padding: 4px 10px;
-        border-radius: 999px;
-        font-size: 11px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.14em;
-        border: 1px solid transparent;
-      }
-      .topcard-label--golden {
-        background: linear-gradient(135deg, rgba(246, 196, 83, 0.18), rgba(223, 247, 240, 0.9));
-        border-color: rgba(246, 196, 83, 0.7);
-        color: #92400e;
-      }
-      .topcard-label--cheap {
-        background: rgba(22, 163, 74, 0.08);
-        border-color: rgba(22, 163, 74, 0.6);
-        color: #047857;
-      }
-      .topcard-label--fast {
-        background: rgba(56, 189, 248, 0.08);
-        border-color: rgba(56, 189, 248, 0.6);
-        color: #0369a1;
+        gap: 10px;
       }
       .topcard-price {
-        font-weight: 700;
-        font-size: 16px;
+        font-weight: 750;
+        font-size: 18px;
+        color: #0b3d31;
       }
-      .topcard-meta {
+      .stress-chip {
+        background: #f3fcf8;
+        color: var(--accent);
+        border: 1px solid rgba(7, 94, 84, 0.3);
+        border-radius: 999px;
+        padding: 4px 10px;
         font-size: 12px;
-        color: rgba(5, 50, 39, 0.85);
-        display: flex;
-        gap: 10px;
-        align-items: center;
-        flex-wrap: wrap;
-      }
-      .topcard-footnote {
-        font-size: 12px;
-        color: rgba(5, 50, 39, 0.7);
-        line-height: 1.45;
-        margin-top: 2px;
-      }
-      .topcard-footnote strong {
         font-weight: 600;
-      }
-      .topcard-footnote + .topcard-footnote {
-        margin-top: 4px;
+        text-transform: lowercase;
       }
       .topcard-actions {
         display: flex;
         justify-content: space-between;
         align-items: center;
         gap: 8px;
-        margin-top: 4px;
+        margin-top: 2px;
       }
       .topcard button.btn-sm,
       .topcard .btn-sm {
@@ -754,11 +750,13 @@
       }
       .brand-subline {
         font-size: 13px;
-        color: #8b5cf6;
+        color: var(--accent);
         text-transform: none;
-        letter-spacing: 0.06em;
+        letter-spacing: 0.01em;
         margin-top: 1px;
         font-weight: 700;
+        text-decoration: none;
+        cursor: default;
       }
       .search-summary {
         margin: 0 0 16px;
@@ -820,11 +818,16 @@
         font-weight: 600;
       }
       .search-inline-editor {
-        margin-bottom: 14px;
+        margin-bottom: 0;
       }
       .inline-editor {
         display: grid;
         gap: 12px;
+      }
+      .inline-editor-heading {
+        font-weight: 700;
+        color: #0f4f43;
+        font-size: 16px;
       }
       .search-inline-grid {
         display: grid;
@@ -877,6 +880,45 @@
       }
       .search-inline-actions .actions-spacer {
         flex: 1;
+      }
+      .search-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.25);
+        z-index: 1100;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+      .search-overlay-card {
+        background: #ffffff;
+        border-radius: var(--radius-lg);
+        border: 1px solid rgba(148, 163, 184, 0.55);
+        box-shadow: 0 18px 45px rgba(7, 94, 84, 0.16);
+        padding: 16px 18px 18px;
+        width: min(520px, 100%);
+        max-height: 90vh;
+        overflow: auto;
+        position: relative;
+      }
+      .search-overlay-title {
+        font-size: 18px;
+        font-weight: 750;
+        margin-bottom: 8px;
+        color: #0b3d31;
+        text-align: center;
+      }
+      .search-overlay-handle {
+        display: none;
+        width: 60px;
+        height: 5px;
+        border-radius: 999px;
+        background: rgba(5, 50, 39, 0.18);
+        margin: 0 auto 10px;
+      }
+      body.overlay-locked {
+        overflow: hidden;
       }
       .search-inline-actions .btn-primary {
         padding-left: 18px;
@@ -1750,6 +1792,7 @@
         align-items: center;
         gap: 6px;
         cursor: pointer;
+        z-index: 1040;
       }
       .tooltip-trigger {
         appearance: none;
@@ -1796,7 +1839,7 @@
         font-size: 13px;
         line-height: 1.55;
         color: #1f2937;
-        z-index: 30;
+        z-index: 1050;
         display: none;
       }
       .tooltip-popover.visible {
@@ -1809,6 +1852,24 @@
           right: 12px;
           top: auto;
           bottom: 20px;
+        }
+      }
+      @media (max-width: 720px) {
+        .search-overlay {
+          align-items: flex-end;
+          padding: 10px;
+        }
+        .search-overlay-card {
+          width: 100%;
+          max-height: 80vh;
+          border-radius: 18px 18px 0 0;
+          padding: 14px 16px 16px;
+        }
+        .search-overlay-handle {
+          display: block;
+        }
+        .search-overlay-title {
+          margin-top: 2px;
         }
       }
       .results-disclaimer {
