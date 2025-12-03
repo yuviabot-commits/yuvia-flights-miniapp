@@ -1041,30 +1041,31 @@ button:focus,
         cursor: default;
       }
 .search-summary {
-  margin: 0 0 18px;
+  margin: 0 0 14px;
   padding: 0;
-  background: transparent;        /* убираем заливку по всей ширине */
-  border: none;                   /* убираем рамку-колбасу */
-  box-shadow: none;               /* убираем тень по всей ширине */
+  border-radius: 0;
+  background: transparent;
+  color: #0f4f43;
+  font-size: 14px;
+  box-shadow: none;
+  border: none;
   position: relative;
 }
+
 .search-summary--clickable {
   display: inline-flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
 
-  /* визуально — прозрачный контейнер */
   padding: 0;
+  border-radius: 0;
   background: transparent;
   border: none;
   box-shadow: none;
-  border-radius: 0;
-
   transition: none;
 }
 
-/* наведение больше не подчёркиваем рамкой/тенью */
 .search-summary--clickable:hover,
 .search-summary--clickable:focus-visible {
   cursor: default;
@@ -1073,6 +1074,7 @@ button:focus,
   transform: none;
   outline: none;
 }
+
 
 
 /* маленький тонкий заголовок слева */
