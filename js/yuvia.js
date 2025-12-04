@@ -3001,9 +3001,10 @@
             const durationDetails = hasReturnSegment
               ? `Туда: ${primaryDurationText} · Обратно: ${formatDuration(returnSlice.durationMinutes)} · ${transfersText}`
               : `В пути: ${primaryDurationText} · ${transfersText}`;
-            const airportLineParts = [formatAirport(outboundSlice.originAirport), formatAirport(outboundSlice.destAirport)]
-              .filter(Boolean)
-              .join(" → ");
+            const airportLineParts = [
+              formatAirport(outboundSlice.originAirport),
+              formatAirport(outboundSlice.destAirport),
+            ].filter(Boolean);
             const airlineCode =
               Array.isArray(flight.airlinesAll) && flight.airlinesAll.length
                 ? flight.airlinesAll[0]
@@ -3014,10 +3015,9 @@
                 ? `${airlineName} (${airlineCode})`
                 : airlineName
               : airlineCode || "";
-            const airportAirlineLine = [airportLineParts, airlineLabel].filter(Boolean).join(", ");
-            const airportRouteParts = airportLineParts ? airportLineParts.split(" → ") : [];
-            const originDisplay = routeOriginCity || searchOriginCity || airportRouteParts[0];
-            const destDisplay = routeDestCity || searchDestCity || airportRouteParts[1];
+            const airportAirlineLine = [airportLineParts.join(" · "), airlineLabel].filter(Boolean).join(", ");
+            const originDisplay = routeOriginCity || formState.originName || searchOriginCity;
+            const destDisplay = routeDestCity || formState.destName || searchDestCity;
             const routeLine = [originDisplay, destDisplay].filter(Boolean).join(" → ") || "Маршрут";
             card.innerHTML = `
               <div class="topcard-label">${(flight.topLabel || "Рекомендация").toUpperCase()}</div>
