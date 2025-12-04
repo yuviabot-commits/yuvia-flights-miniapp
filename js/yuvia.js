@@ -1622,10 +1622,21 @@
             const outbound = flight.outbound;
             const inbound = flight.return;
 
-            const originCity = outbound?.start?.originCity || flight.originCity || "";
+            const originCity =
+              outbound?.start?.originCity ||
+              flight.originCity ||
+              flight.originName ||
+              formState.originName ||
+              "";
             const originCode = formatAirport(outbound?.start?.originAirport || flight.originAirport);
-            const destCity = outbound?.end?.destCity || flight.destCity || "";
+            const destCity =
+              outbound?.end?.destCity ||
+              flight.destCity ||
+              flight.destName ||
+              formState.destName ||
+              "";
             const destCode = formatAirport(outbound?.end?.destAirport || flight.destAirport);
+            const routeTitle = [originCity, destCity].filter(Boolean).join(" → ") || "Маршрут";
 
             const airlinesAll = Array.isArray(flight.airlinesAll) ? flight.airlinesAll : [];
             const airlineMetaMap = new Map(
@@ -1694,7 +1705,7 @@
             });
             const stressBadge = renderBadgeWithTooltip({
               label: getStressText(flight.stressLevel),
-              className: stressClass,
+              className: `${stressClass} result-stress`,
               tooltipKey: "stressLevel",
             });
             const transfersBadge = `<span class="badge badge-chip badge-transfers">${formatTransfers(flight.transfers)}</span>`;
@@ -1703,16 +1714,16 @@
               flight.aviasalesSearchUrl ||
               flight.deeplink ||
               null;
-                const aviasalesButtons = ticketUrl
-                  ? `
+            const aviasalesButtons = ticketUrl
+              ? `
                 <a href="${ticketUrl}"
-                   class="btn btn-primary btn-primary-hero btn-sm aviasales-btn-ticket"
+                   class="btn btn-primary btn-sm aviasales-btn-ticket"
                    target="_blank"
                    rel="noopener noreferrer">
                   Купить на Aviasales
                 </a>
               `
-                  : `<button class="btn-primary btn-sm" disabled>Нет ссылки</button>`;
+              : `<button class="btn-primary btn-sm" disabled>Нет ссылки</button>`;
             const topBadges = [];
             if (flight.isTop) {
               topBadges.push('<span class="badge badge-yuvia">Рекомендация Yuvia</span>');
@@ -1731,12 +1742,13 @@
               <div class="result-header">
                 <div class="result-header-left">
                   <div class="result-route">
-                    <div class="result-route-cities">${[originCity, destCity].filter(Boolean).join(" ⇄ ") || "Маршрут"}</div>
+                    <div class="result-route-cities">${routeTitle}</div>
                     <div class="result-route-airports">${[originCode, destCode].filter(Boolean).join(" · ")}</div>
                   </div>
                 </div>
                 <div class="result-price-block">
-                  <div class="price">${formatCurrency(flight.price, flight.currency || lastCurrency)}</div>
+                  <div class="result-price">${formatCurrency(flight.price, flight.currency || lastCurrency)}</div>
+                  ${stressBadge}
                   <div class="airline-logo-wrap">
                   <div class="airline-logo">${primaryAirlineCode}</div>
                     <div class="airline-info">
@@ -1744,7 +1756,6 @@
                       ${flightNumberLine}
                     </div>
                   </div>
-                  ${aviasalesButtons}
                 </div>
               </div>
               <div class="result-segments">
@@ -1752,49 +1763,18 @@
               </div>
               <div class="result-chips">
                 ${ratingBadge}
-                ${stressBadge}
                 ${transfersBadge}
                 ${topBadges.join("")}
               </div>
               <div class="result-footer">
                 <div class="result-footer-actions">
-                  <button type="button" class="btn-secondary btn-sm btn-fav" data-id="${flight.id}">
-                    ${favoritesIds.has(flight.id) ? "Убрать из избранного" : "В избранное"}
-                  </button>
-                  <button type="button" class="btn-secondary btn-sm btn-compare" data-id="${flight.id}">
-                    ${compareIds.has(flight.id) ? "Убрать из сравнения" : "Сравнить"}
-                  </button>
+                  <button type="button" class="btn-outline btn-sm" data-action="open-result">Открыть в выдаче</button>
+                  ${aviasalesButtons}
                 </div>
               </div>
             `;
-            const favBtn = card.querySelector(".btn-fav");
-            updateFavButtonState(favBtn, flight.id);
-            favBtn?.addEventListener("click", () => {
-              if (favoritesIds.has(flight.id)) {
-                favoritesIds.delete(flight.id);
-              } else {
-                favoritesIds.add(flight.id);
-              }
-              persistFavorites();
-              updateFavButtonState(favBtn, flight.id);
-              renderFavoritesBlock();
-            });
-
-            const compareBtn = card.querySelector(".btn-compare");
-            updateCompareButtonState(compareBtn, flight.id);
-            compareBtn?.addEventListener("click", () => {
-              if (compareIds.has(flight.id)) {
-                compareIds.delete(flight.id);
-              } else {
-                compareIds.add(flight.id);
-              }
-              persistCompare();
-              updateCompareButtonState(compareBtn, flight.id);
-              renderCompareBlock();
-              if (compareIds.size >= 2) {
-                openCompareModal();
-              }
-            });
+            const openBtn = card.querySelector('[data-action="open-result"]');
+            openBtn?.addEventListener("click", () => highlightResultCard(flight.id));
             resultsBlock.appendChild(card);
           });
           const flightsWithLinks = list || filteredResults || [];
@@ -2999,14 +2979,14 @@
             const routeOriginCity =
               outboundSlice.originCity ||
               flight.originCity ||
-              flight.originName ||
               formState.originName ||
+              flight.originName ||
               "";
             const routeDestCity =
               outboundSlice.destCity ||
               flight.destCity ||
-              flight.destName ||
               formState.destName ||
+              flight.destName ||
               "";
             const searchOriginCity = getOriginValue();
             const searchDestCity = getDestinationValue();
