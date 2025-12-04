@@ -712,15 +712,15 @@ button:focus,
         background: #f4fbf8;
       }
       .topblock {
-        margin-top: 12px;
-        margin-bottom: 12px;
+        margin: 12px auto;
+        max-width: 960px;
         border-radius: 18px;
         background: linear-gradient(180deg, rgba(252, 250, 246, 0.96), rgba(241, 249, 247, 0.94)), #ffffff;
         border: 1px solid rgba(213, 223, 219, 0.9);
         box-shadow: 0 16px 40px rgba(7, 94, 84, 0.14);
         backdrop-filter: blur(18px);
         position: relative;
-        padding: 20px 18px 18px;
+        padding: 18px 18px 16px;
       }
       .topblock::before {
         content: "";
@@ -732,12 +732,12 @@ button:focus,
       .topblock-header {
         display: flex;
         align-items: flex-start;
-        justify-content: space-between;
+        justify-content: flex-start;
         gap: 16px;
       }
       .topblock-heading {
         text-align: left;
-        max-width: 70%;
+        max-width: 68%;
       }
       .topblock-title,
       .topblock .section-title {
@@ -754,13 +754,17 @@ button:focus,
         max-width: 760px;
       }
       .topblock-seal-wrap {
+        position: absolute;
+        top: -26px;
+        right: -18px;
         display: inline-flex;
+        flex-direction: row-reverse;
         align-items: center;
         gap: 8px;
-        align-self: flex-start;
+        z-index: 5;
       }
       .topblock-seal {
-        width: 64px;
+        width: 80px;
         height: auto;
         display: block;
       }
@@ -768,13 +772,13 @@ button:focus,
         font-size: 13px;
         letter-spacing: 0.12em;
         text-transform: uppercase;
-        color: rgba(5, 50, 39, 0.7);
+        color: rgba(5, 50, 39, 0.75);
         white-space: nowrap;
       }
       .topblock-list {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 16px;
+        gap: 14px;
         margin-top: 12px;
         position: relative;
         z-index: 1;
@@ -797,7 +801,7 @@ button:focus,
       .topcard {
         border-radius: 14px;
         border: 1px solid rgba(148, 163, 184, 0.45);
-        padding: 14px 16px 12px;
+        padding: 12px 14px 10px;
         background: rgba(255, 255, 255, 0.98);
         display: grid;
         gap: 8px;
@@ -816,12 +820,12 @@ button:focus,
         color: #8d7552;
       }
       .topcard-route {
-        font-size: 19px;
+        font-size: 18px;
         font-weight: 760;
         color: #0b3d31;
       }
       .topcard-subline {
-        font-size: 13px;
+        font-size: 12.5px;
         color: rgba(5, 50, 39, 0.78);
       }
       .topcard-duration {
@@ -1889,12 +1893,20 @@ button:focus,
         color: var(--muted);
       }
       .result-price-block {
-        min-width: 170px;
+        min-width: 160px;
         text-align: right;
         display: flex;
         flex-direction: column;
-        gap: 6px;
+        gap: 4px;
         align-items: flex-end;
+      }
+      .result-price {
+        font-size: 18px;
+        font-weight: 750;
+        color: #0b3d31;
+      }
+      .result-stress {
+        margin-top: 2px;
       }
       .airline-logo-wrap {
         display: flex;
@@ -2189,9 +2201,14 @@ button:focus,
       }
       .result-footer-actions {
         display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
+        gap: 8px;
         justify-content: flex-end;
+      }
+      .result-footer-actions .btn-primary,
+      .result-footer-actions .btn-outline {
+        flex: 1 1 0;
+        max-width: none;
+        justify-content: center;
       }
       .btn-fav:hover,
       .btn-compare:hover {
