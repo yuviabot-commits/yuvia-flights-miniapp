@@ -720,7 +720,7 @@ button:focus,
         box-shadow: 0 16px 40px rgba(7, 94, 84, 0.14);
         backdrop-filter: blur(18px);
         position: relative;
-        padding: 18px 18px 16px;
+        padding: 16px 18px 14px;
       }
       .topblock::before {
         content: "";
@@ -758,7 +758,7 @@ button:focus,
         top: -26px;
         right: -18px;
         display: inline-flex;
-        flex-direction: row-reverse;
+        flex-direction: row;
         align-items: center;
         gap: 8px;
         z-index: 5;
@@ -779,7 +779,7 @@ button:focus,
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 14px;
-        margin-top: 12px;
+        margin-top: 10px;
         position: relative;
         z-index: 1;
       }
@@ -2227,7 +2227,7 @@ button:focus,
           justify-content: flex-start;
         }
         .topblock {
-          padding: 20px 14px 16px;
+          padding: 18px 14px 14px;
         }
         .topblock-header {
           flex-direction: column-reverse;
@@ -2238,6 +2238,9 @@ button:focus,
         }
         .topblock-seal-wrap {
           align-self: flex-end;
+        }
+        .topblock-seal-text {
+          white-space: normal;
         }
         .recommendations-overlay-title {
           left: 50%;
