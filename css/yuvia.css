@@ -889,6 +889,11 @@ button:focus,
         flex: 1 1 0;
         max-width: none;
         justify-content: center;
+        padding: 10px 12px;
+      }
+      .topcard-actions .aviasales-btn-ticket {
+        text-transform: none;
+        letter-spacing: 0;
       }
       .matrix-calendar {
         display: grid;

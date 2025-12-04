@@ -3019,6 +3019,7 @@
             const originDisplay = routeOriginCity || formState.originName || searchOriginCity;
             const destDisplay = routeDestCity || formState.destName || searchDestCity;
             const routeLine = [originDisplay, destDisplay].filter(Boolean).join(" → ") || "Маршрут";
+            const currency = flight.currency || lastCurrency;
             card.innerHTML = `
               <div class="topcard-label">${(flight.topLabel || "Рекомендация").toUpperCase()}</div>
               <div class="topcard-route">${routeLine}</div>
@@ -3029,8 +3030,8 @@
               </div>
               <div class="topcard-price-row">
                 <div class="topcard-price-col">
-                  <div class="topcard-price">${formatCurrency(flight.price, flight.currency || lastCurrency)}</div>
-                  <div class="stress-chip">${stressText}</div>
+                  <div class="topcard-price">${formatCurrency(flight.price, currency)}</div>
+                  <span class="stress-chip">${stressText}</span>
                 </div>
               </div>
               <div class="topcard-actions">
