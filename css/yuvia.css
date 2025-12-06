@@ -754,16 +754,17 @@ button:focus,
         margin-top: 6px;
         max-width: 760px;
       }
-      .topblock-seal-wrap {
-        position: absolute;
-        top: -26px;
-        right: -18px;
-        display: inline-flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 8px;
-        z-index: 5;
-      }
+     .topblock-seal-wrap {
+  position: absolute;
+  top: -32px;      /* сильнее вытаскиваем вверх — ~1/4 круга за рамкой */
+  right: -32px;    /* и вправо тоже, чтобы висел прямо на углу */
+  display: inline-flex;
+  flex-direction: row-reverse; /* печать в самом углу, текст левее */
+  align-items: center;
+  gap: 10px;
+  z-index: 6;
+}
+
       .topblock-seal {
         width: 80px;
         height: auto;
@@ -2322,4 +2323,10 @@ button:focus,
 .search-summary-segment {
   font-weight: 600;
   font-style: italic;
+}
+/* Приподнять блок «Yuvia рекомендует» до уровня фильтров — только на десктопе */
+@media (min-width: 960px) {
+  .topblock {
+    margin-top: -10px;   /* было: 0 или 12px; стало: -10px, блок поднимается вверх */
+  }
 }
