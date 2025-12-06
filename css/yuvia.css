@@ -731,15 +731,14 @@ button:focus,
         pointer-events: none;
       }
       .topblock-header {
-        display: flex;
-        align-items: flex-start;
-        justify-content: flex-start;
-        gap: 16px;
-      }
-      .topblock-heading {
-        text-align: left;
-        max-width: 68%;
-      }
+  /* заголовок и текст идут обычной колонкой на всю ширину */
+  position: relative; /* можно вообще оставить пустым, это не критично */
+}
+
+.topblock-heading {
+  text-align: left;
+  max-width: 100%;   /* или просто убери max-width строку */
+}
       .topblock-title,
       .topblock .section-title {
         font-size: 20px;
@@ -748,12 +747,12 @@ button:focus,
         color: #0b3d31;
         margin: 0;
       }
-      .topblock-subtitle {
-        font-size: 14px;
-        color: rgba(5, 50, 39, 0.78);
-        margin-top: 6px;
-        max-width: 760px;
-      }
+.topblock-subtitle {
+  font-size: 14px;
+  color: rgba(5, 50, 39, 0.78);
+  margin-top: 6px;
+  max-width: 100%;   /* или убери max-width совсем */
+}
      .topblock-seal-wrap {
   position: absolute;
   top: -24px;      /* сильнее вытаскиваем вверх — ~1/4 круга за рамкой */
@@ -777,7 +776,7 @@ button:focus,
         color: rgba(5, 50, 39, 0.75);
         white-space: nowrap;
         margin-left: 8px;
-        margin-top: 4px;
+        margin-top: 30px;
       }
       .topblock-list {
         display: grid;
