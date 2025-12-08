@@ -712,7 +712,7 @@ button:focus,
         background: #f4fbf8;
       }
       .topblock {
-  margin: 0 auto 12px; /* убрали верхний отступ, оставили нижний */
+  margin: 0 auto 10px; /* убрали верхний отступ, оставили нижний */
   max-width: 960px;
   border-radius: 18px;
   background: linear-gradient(180deg, rgba(252, 250, 246, 0.96), rgba(241, 249, 247, 0.94)), #ffffff;
@@ -720,7 +720,7 @@ button:focus,
   box-shadow: 0 16px 40px rgba(7, 94, 84, 0.14);
   backdrop-filter: blur(18px);
   position: relative;
-  padding: 16px 18px 14px;
+  padding: 10px 16px 10px;
 }
 
       .topblock::before {
@@ -735,22 +735,22 @@ button:focus,
   position: relative; /* можно вообще оставить пустым, это не критично */
 }
 
-.topblock-heading {
+      .topblock-heading {
   text-align: left;
   max-width: 100%;   /* или просто убери max-width строку */
 }
       .topblock-title,
       .topblock .section-title {
-        font-size: 20px;
-        font-weight: 780;
+        font-size: 17px;
+        font-weight: 760;
         letter-spacing: 0.01em;
         color: #0b3d31;
         margin: 0;
       }
 .topblock-subtitle {
-  font-size: 14px;
+  font-size: 13px;
   color: rgba(5, 50, 39, 0.78);
-  margin-top: 6px;
+  margin-top: 4px;
   max-width: 100%;   /* или убери max-width совсем */
 }
      .topblock-seal-wrap {
@@ -804,10 +804,10 @@ button:focus,
       .topcard {
         border-radius: 14px;
         border: 1px solid rgba(148, 163, 184, 0.45);
-        padding: 12px 14px 10px;
+        padding: 8px 12px 8px;
         background: rgba(255, 255, 255, 0.98);
         display: grid;
-        gap: 8px;
+        gap: 6px;
         transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
       }
       .topcard:hover {
@@ -823,19 +823,19 @@ button:focus,
         color: #8d7552;
       }
       .topcard-route {
-        font-size: 17.5px;
-        font-weight: 760;
+        font-size: 15px;
+        font-weight: 700;
         color: #0b3d31;
       }
       .topcard-subline {
-        font-size: 12.5px;
+        font-size: 12px;
         color: rgba(5, 50, 39, 0.78);
       }
       .topcard-duration {
         display: flex;
         flex-direction: column;
         gap: 4px;
-        font-size: 13px;
+        font-size: 12px;
         color: #0f3f35;
         flex: 1 1 auto;
       }
@@ -859,7 +859,7 @@ button:focus,
       }
       .topcard-price {
         font-weight: 780;
-        font-size: 18.5px;
+        font-size: 16px;
         color: #0b3d31;
       }
       .stress-chip {
@@ -876,8 +876,8 @@ button:focus,
         display: flex;
         justify-content: flex-start;
         align-items: center;
-        gap: 10px;
-        margin-top: 8px;
+        gap: 8px;
+        margin-top: 4px;
         flex-wrap: nowrap;
       }
       .topcard button.btn-sm,
@@ -892,7 +892,7 @@ button:focus,
         flex: 1 1 0;
         max-width: none;
         justify-content: center;
-        padding: 10px 12px;
+        padding: 8px 10px;
       }
       .topcard-actions .aviasales-btn-ticket {
         text-transform: none;
