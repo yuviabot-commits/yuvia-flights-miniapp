@@ -755,8 +755,8 @@ button:focus,
 }
      .topblock-seal-wrap {
   position: absolute;
-  top: -24px;      /* сильнее вытаскиваем вверх — ~1/4 круга за рамкой */
-  right: -24px;    /* и вправо тоже, чтобы висел прямо на углу */
+  top: -40px;      /* сильнее вытаскиваем вверх — ~1/4 круга за рамкой */
+  right: -40px;    /* и вправо тоже, чтобы висел прямо на углу */
   display: inline-flex;
   flex-direction: row-reverse; /* печать в самом углу, текст левее */
   align-items: center;
