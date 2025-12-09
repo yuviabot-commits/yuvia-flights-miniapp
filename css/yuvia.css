@@ -819,213 +819,153 @@ button:focus,
       .topblock .tooltip-trigger:hover {
         text-decoration: none;
       }
-.topcard {
-  border-radius: 16px;
-  border: 1px solid rgba(148, 163, 184, 0.45);
-  padding: 10px 12px;
-  background: #ffffff;
-  position: relative;
-  overflow: hidden;
-  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+/* === Yuvia: топ-рекомендации (билеты) === */
+
+#yuviaTopBlock {
+  margin-bottom: 24px;
 }
 
-/* Внутренний лейаут билета */
-.topcard-inner {
+#yuviaTopList {
   display: grid;
-  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1.1fr);
-  gap: 10px;
-  align-items: stretch;
-  position: relative;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
 }
 
-/* «Перфорация» по центру билета */
+.topcard {
+  position: relative;
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: 0 16px 40px rgba(5, 50, 39, 0.08);
+  overflow: hidden;
+}
+
+.topcard-inner {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  align-items: stretch;
+  min-height: 140px;
+}
+
+/* вертикальная перфорация между половинками */
 .topcard-inner::after {
   content: "";
   position: absolute;
-  top: 8px;
-  bottom: 8px;
-  left: calc(100% * 1.7 / (1.7 + 1.1)); /* примерно граница колонок */
-  border-left: 1px dashed rgba(148, 163, 184, 0.6);
+  top: 10px;
+  bottom: 10px;
+  left: calc(100% * 1.5 / (1.5 + 1));
+  width: 0;
+  border-left: 1px dashed rgba(5, 50, 39, 0.28);
   pointer-events: none;
 }
 
-/* Левая часть билета */
 .topcard-main {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  padding: 14px 18px 16px;
 }
 
-/* Правая часть билета */
 .topcard-meta {
+  padding: 14px 18px 16px;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
   justify-content: space-between;
-  gap: 6px;
+  background: radial-gradient(
+    130% 160% at 0% 0%,
+    var(--accent-soft) 0%,
+    #f8fffb 40%,
+    #ffffff 100%
+  );
 }
 
-/* Чуть меньше типографика, чтобы всё стало компактнее */
 .topcard-label {
-  font-size: 10px;
-  font-weight: 750;
-  letter-spacing: 0.13em;
+  font-size: 11px;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #8d7552;
+  color: var(--muted);
+  margin-bottom: 4px;
 }
 
 .topcard-route {
+  font-weight: 600;
   font-size: 16px;
-  font-weight: 760;
-  color: #0b3d31;
 }
 
-.topcard-subline {
-  font-size: 12px;
-  color: rgba(5, 50, 39, 0.78);
-}
-
-.topcard-duration {
-  font-size: 12px;
-  color: #0f3f35;
-}
-
-.topcard-duration .muted {
-  font-size: 11.5px;
-}
-
-/* Цена и стресс-чип */
-.topcard-price {
-  font-weight: 780;
-  font-size: 17px;
-  color: #0b3d31;
-}
-
-.topcard-meta .stress-chip {
-  align-self: flex-end;
-}
-
-/* Кнопки в билете — компактные */
-.topcard-actions {
-  display: flex;
-  width: 100%;
-  justify-content: flex-end;
-  gap: 6px;
+.topcard-airports {
   margin-top: 4px;
+  font-size: 13px;
+  color: var(--muted);
 }
 
-.topcard-actions .btn-primary,
-.topcard-actions .btn-utility {
-  flex: 1 1 0;
-  padding: 8px 10px;
+.topcard-meta-row {
+  margin-top: 10px;
+}
+
+.topcard-duration-main {
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.topcard-duration-sub {
+  margin-top: 2px;
   font-size: 12px;
+  color: var(--muted);
 }
 
-/* На узких экранах билет становится колонкой и перфорация отключается */
+.topcard-meta-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.topcard-price {
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.stress-chip {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  font-size: 11px;
+}
+
+.topcard-airline {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.topcard-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+}
+
+.topcard-actions .btn-utility {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.topcard-actions .btn-primary {
+  flex: 1 1 auto;
+}
+
+/* На узких экранах билет становится колонкой, перфорация исчезает */
 @media (max-width: 900px) {
   .topcard-inner {
     grid-template-columns: 1fr;
   }
+
   .topcard-inner::after {
     display: none;
   }
-  .topcard-meta {
-    align-items: flex-start;
-  }
-  .topcard-actions {
-    justify-content: flex-start;
+
+  #yuviaTopList {
+    grid-template-columns: 1fr;
   }
 }
 
-      .topcard:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.16);
-        border-color: rgba(7, 94, 84, 0.7);
-      }
-      .topcard-label {
-        font-size: 11px;
-        font-weight: 750;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: #8d7552;
-      }
-      .topcard-route {
-        font-size: 15px;
-        font-weight: 700;
-        color: #0b3d31;
-      }
-      .topcard-subline {
-        font-size: 12px;
-        color: rgba(5, 50, 39, 0.78);
-      }
-      .topcard-duration {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        font-size: 12px;
-        color: #0f3f35;
-        flex: 1 1 auto;
-      }
-      .topcard-duration .muted {
-        color: rgba(5, 50, 39, 0.7);
-        font-size: 12.5px;
-      }
-      .topcard-price-row {
-        display: flex;
-        align-items: flex-start;
-        gap: 12px;
-        flex-wrap: wrap;
-      }
-      .topcard-price-col {
-        margin-left: auto;
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        align-items: flex-end;
-        text-align: right;
-      }
-      .topcard-price {
-        font-weight: 780;
-        font-size: 16px;
-        color: #0b3d31;
-      }
-      .stress-chip {
-        background: #f3fcf8;
-        color: var(--accent);
-        border: 1px solid rgba(7, 94, 84, 0.3);
-        border-radius: 999px;
-        padding: 4px 10px;
-        font-size: 12px;
-        font-weight: 600;
-        text-transform: lowercase;
-      }
-      .topcard-actions {
-        display: flex;
-        justify-content: flex-start;
-        align-items: center;
-        gap: 8px;
-        margin-top: 4px;
-        flex-wrap: nowrap;
-      }
-      .topcard button.btn-sm,
-      .topcard .btn-sm {
-        font-size: 12px;
-        padding-left: 12px;
-        padding-right: 12px;
-        width: auto;
-      }
-      .topcard-actions .btn-primary,
-      .topcard-actions .btn-utility {
-        flex: 1 1 0;
-        max-width: none;
-        justify-content: center;
-        padding: 8px 10px;
-      }
-      .topcard-actions .aviasales-btn-ticket {
-        text-transform: none;
-        letter-spacing: 0;
-      }
-      .matrix-calendar {
+.matrix-calendar {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
         gap: 8px;

@@ -2945,166 +2945,146 @@
         }
 
         function renderYuviaTop(list, presetTop) {
-  if (!yuviaTopBlock || !yuviaTopList || !yuviaTopSubtitle) return;
+          if (!yuviaTopBlock || !yuviaTopList || !yuviaTopSubtitle) return;
+          if (!list.length) {
+            yuviaTopBlock.classList.add("hidden");
+            yuviaTopList.innerHTML = "";
+            currentTopFlights = [];
+            return;
+          }
 
-  if (!list.length) {
-    yuviaTopBlock.classList.add("hidden");
-    yuviaTopList.innerHTML = "";
-    currentTopFlights = [];
-    return;
-  }
+          const top = presetTop?.length ? presetTop : getYuviaTop3(list);
+          currentTopFlights = top;
+          if (!top.length) {
+            yuviaTopBlock.classList.add("hidden");
+            yuviaTopList.innerHTML = "";
+            return;
+          }
 
-  const top = presetTop?.length ? presetTop : getYuviaTop3(list);
-  currentTopFlights = top;
+          yuviaTopBlock.classList.remove("hidden");
+          yuviaTopSubtitle.textContent = yuviaTopSubtitleText;
+          yuviaTopList.innerHTML = "";
 
-  if (!top.length) {
-    yuviaTopBlock.classList.add("hidden");
-    yuviaTopList.innerHTML = "";
-    return;
-  }
+          top.forEach((flight) => {
+            const card = document.createElement("article");
+            card.className = "topcard";
+            card.dataset.id = flight.id;
 
-  yuviaTopBlock.classList.remove("hidden");
-  yuviaTopSubtitle.textContent = yuviaTopSubtitleText;
-  yuviaTopList.innerHTML = "";
+            const outboundSlice = getDirectionSlice(flight, "outbound");
+            const hasReturnSegment = Boolean(flight.return && flight.return.durationMinutes);
+            const returnSlice = hasReturnSegment ? getDirectionSlice(flight, "return") : null;
 
-  top.forEach((flight) => {
-    const card = document.createElement("div");
-    card.className = "topcard";
+            const originCity =
+              getCityName(outboundSlice.originAirport) ||
+              outboundSlice.originCity ||
+              flight.originCity ||
+              formState.originName ||
+              "";
+            const destCity =
+              getCityName(outboundSlice.destAirport) ||
+              outboundSlice.destCity ||
+              flight.destCity ||
+              formState.destName ||
+              "";
 
-    const ticketUrl =
-      flight.aviasalesTicketUrl ||
-      flight.aviasalesSearchUrl ||
-      flight.deeplink ||
-      null;
+            const routeLine = [originCity, destCity].filter(Boolean).join(" → ") || "Маршрут";
 
-    const outboundDuration = flight.outbound?.durationMinutes || flight.durationMinutes;
-    const stressText = getStressText(flight.stressLevel);
-    const transfersText = formatTransfers(flight.transfers);
+            const airportLine = [
+              formatAirport(outboundSlice.originAirport),
+              formatAirport(outboundSlice.destAirport),
+            ]
+              .filter(Boolean)
+              .join(" · ");
 
-    const outboundSlice = getDirectionSlice(flight, "outbound");
-    const hasReturnSegment = Boolean(flight.return && flight.return.durationMinutes);
-    const returnSlice = hasReturnSegment ? getDirectionSlice(flight, "return") : null;
+            const outboundDuration = outboundSlice.durationMinutes;
+            const returnDuration = hasReturnSegment ? returnSlice.durationMinutes : null;
+            const primaryDurationText = formatDuration(outboundDuration);
+            const totalDurationMinutes =
+              outboundDuration && returnDuration ? outboundDuration + returnDuration : null;
+            const transfersText = formatTransfers(outboundSlice.transfers);
 
-    // --- Город в заголовке ---
-    const routeOriginCity =
-      outboundSlice.originCity ||
-      flight.originCity ||
-      formState.originName ||
-      flight.originName ||
-      "";
+            const airlineCode =
+              Array.isArray(flight.airlinesAll) && flight.airlinesAll.length
+                ? flight.airlinesAll[0]
+                : flight.airlineCode || flight.airline;
+            const airlineName = resolveAirlineName(
+              airlineCode,
+              flight.airlineName,
+              flight.airlineName || flight.airline
+            );
+            const airlineLine = airlineName
+              ? airlineCode
+                ? `${airlineName} (${airlineCode})`
+                : airlineName
+              : airlineCode || "";
 
-    const routeDestCity =
-      outboundSlice.destCity ||
-      flight.destCity ||
-      formState.destName ||
-      flight.destName ||
-      "";
+            const ticketUrl =
+              flight.aviasalesTicketUrl ||
+              flight.aviasalesSearchUrl ||
+              flight.deeplink ||
+              null;
 
-    const searchOriginCity = getOriginValue();
-    const searchDestCity = getDestinationValue();
+            const stressText = getStressText(flight.stressLevel);
+            const currency = flight.currency || lastCurrency;
 
-    const originDisplay = routeOriginCity || formState.originName || searchOriginCity;
-    const destDisplay = routeDestCity || formState.destName || searchDestCity;
-    const routeLine = [originDisplay, destDisplay].filter(Boolean).join(" → ") || "Маршрут";
-
-    // --- Аэропорты и авиакомпания в подстроке ---
-    const originAirportDisplay = formatAirport(
-      outboundSlice.originAirport || flight.originAirport
-    );
-    const destAirportDisplay = formatAirport(
-      outboundSlice.destAirport || flight.destAirport
-    );
-
-    const airportsLine = [originAirportDisplay, destAirportDisplay]
-      .filter(Boolean)
-      .join(" → ");
-
-    const airlineCode =
-      (Array.isArray(flight.airlinesAll) && flight.airlinesAll.length
-        ? flight.airlinesAll[0]
-        : flight.airlineCode || flight.airline) || "";
-
-    const airlineName = resolveAirlineName(
-      airlineCode,
-      flight.airlineName,
-      flight.airlineName || flight.airline
-    );
-
-    let airlineLine = "";
-    if (airlineName || airlineCode) {
-      airlineLine =
-        airlineName && airlineCode
-          ? `${airlineName} (${airlineCode})`
-          : (airlineName || airlineCode);
-    }
-
-    const sublineParts = [];
-    if (airportsLine) sublineParts.push(airportsLine);
-    if (airlineLine) sublineParts.push(airlineLine);
-    const routeSubline = sublineParts.join(" · ");
-
-    // --- Длительность ---
-    const totalDurationMinutes =
-      hasReturnSegment && outboundDuration && returnSlice?.durationMinutes
-        ? outboundDuration + returnSlice.durationMinutes
-        : null;
-
-    const primaryDurationText = formatDuration(outboundDuration);
-    const totalDurationLine = totalDurationMinutes
-      ? `В пути туда и обратно: ${formatDuration(totalDurationMinutes)}`
-      : null;
-
-    const durationDetails = hasReturnSegment
-      ? `Туда: ${primaryDurationText} · Обратно: ${formatDuration(
-          returnSlice.durationMinutes
-        )} · ${transfersText}`
-      : `В пути: ${primaryDurationText} · ${transfersText}`;
-
-    const currency = flight.currency || lastCurrency;
-
-    // --- Разметка «авиабилет» ---
-    card.innerHTML = `
+            card.innerHTML = `
       <div class="topcard-inner">
         <div class="topcard-main">
           <div class="topcard-label">${(flight.topLabel || "Рекомендация").toUpperCase()}</div>
           <div class="topcard-route">${routeLine}</div>
-          ${routeSubline ? `<div class="topcard-subline">${routeSubline}</div>` : ""}
-          <div class="topcard-duration">
-            ${totalDurationLine || `В пути: ${primaryDurationText}`}
-            <div class="muted">${durationDetails}</div>
+          ${airportLine ? `<div class="topcard-airports">${airportLine}</div>` : ""}
+          <div class="topcard-meta-row">
+            <div class="topcard-duration-main">
+              ${totalDurationMinutes
+                ? `В пути туда и обратно: ${formatDuration(totalDurationMinutes)}`
+                : `В пути: ${primaryDurationText}`}
+            </div>
+            <div class="topcard-duration-sub">
+              ${
+                hasReturnSegment
+                  ? `Туда: ${formatDuration(outboundDuration)} · Обратно: ${formatDuration(
+                      returnDuration
+                    )}`
+                  : `В пути: ${primaryDurationText}`
+              } · ${transfersText}
+            </div>
           </div>
         </div>
+
         <div class="topcard-meta">
-          <div class="topcard-price">${formatCurrency(flight.price, currency)}</div>
-          <div class="stress-chip">${stressText}</div>
+          <div class="topcard-meta-top">
+            <div class="topcard-price">${formatCurrency(flight.price, currency)}</div>
+            <span class="stress-chip">${stressText}</span>
+          </div>
+          ${airlineLine ? `<div class="topcard-airline">${airlineLine}</div>` : ""}
           <div class="topcard-actions">
-            <button type="button" class="btn-utility btn-sm" data-action="open">
+            <button type="button"
+                    class="btn-utility btn-sm"
+                    data-action="open">
               Открыть в выдаче
             </button>
             ${
               ticketUrl
-                ? `
-                  <a href="${ticketUrl}"
-                     class="btn btn-primary btn-primary-hero btn-sm aviasales-btn-ticket"
-                     target="_blank"
-                     rel="noopener noreferrer">
-                    Купить на Aviasales
-                  </a>
-                `
-                : `
-                  <button class="btn-primary btn-sm" disabled>Нет ссылки</button>
-                `
+                ? `<a href="${ticketUrl}"
+                       class="btn btn-primary btn-sm aviasales-btn-ticket"
+                       target="_blank"
+                       rel="noopener noreferrer">
+                     Купить на Aviasales
+                   </a>`
+                : `<button class="btn-primary btn-sm" disabled>Нет ссылки</button>`
             }
           </div>
         </div>
       </div>
     `;
 
-    const openBtn = card.querySelector('[data-action="open"]');
-    openBtn?.addEventListener("click", () => highlightResultCard(flight.id));
-    yuviaTopList.appendChild(card);
-  });
-}
+            const openBtn = card.querySelector('[data-action="open"]');
+            openBtn?.addEventListener("click", () => highlightResultCard(flight.id));
+
+            yuviaTopList.appendChild(card);
+          });
+        }
+
 
 
 
