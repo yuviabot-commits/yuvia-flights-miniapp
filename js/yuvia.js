@@ -3319,58 +3319,66 @@
       const stressText = getStressText(flight.stressLevel);
       const currency = flight.currency || lastCurrency;
 
-      card.innerHTML = `
-      <div class="topcard-inner">
-        <div class="topcard-main">
-          <div class="topcard-label">${(flight.topLabel || "Рекомендация").toUpperCase()}</div>
-          <div class="topcard-route">${routeLine}</div>
-          ${airportLine ? `<div class="topcard-airports">${airportLine}</div>` : ""}
-          <div class="topcard-meta-row">
-            <div class="topcard-duration-main">
-              ${
-                totalDurationMinutes
-                  ? `В пути туда и обратно: ${formatDuration(totalDurationMinutes)}`
-                  : `В пути: ${primaryDurationText}`
-              }
-            </div>
-            <div class="topcard-duration-sub">
-              ${
-                hasReturnSegment
-                  ? `Туда: ${formatDuration(outboundDuration)} · Обратно: ${formatDuration(
-                      returnDuration,
-                    )}`
-                  : `В пути: ${primaryDurationText}`
-              } · ${transfersText}
-            </div>
-          </div>
-        </div>
+     card.innerHTML = `
+      <div class="ticket-card">
+        <!-- четыре круглых выреза по углам билета -->
+        <div class="ticket-corner ticket-corner--tl"></div>
+        <div class="ticket-corner ticket-corner--tr"></div>
+        <div class="ticket-corner ticket-corner--bl"></div>
+        <div class="ticket-corner ticket-corner--br"></div>
 
-        <div class="topcard-meta">
-          <div class="topcard-meta-top">
-            <div class="topcard-price">${formatCurrency(flight.price, currency)}</div>
-            <span class="stress-chip">${stressText}</span>
-          </div>
-          ${airlineLine ? `<div class="topcard-airline">${airlineLine}</div>` : ""}
-          <div class="topcard-actions">
-            <button type="button"
-                    class="btn-utility btn-sm"
-                    data-action="open">
-              Открыть в выдаче
-            </button>
-            ${
-              ticketUrl
-                ? `<a href="${ticketUrl}"
-                       class="btn btn-primary btn-sm aviasales-btn-ticket"
-                       target="_blank"
-                       rel="noopener noreferrer">
-                     Купить на Aviasales
-                   </a>`
-                : `<button class="btn-primary btn-sm" disabled>Нет ссылки</button>`
-            }
+        <!-- собственно содержимое билета -->
+        <div class="ticket-body">
+          <div class="topcard-inner">
+            <div class="topcard-main">
+              <div class="topcard-label">${(flight.topLabel || "Рекомендация").toUpperCase()}</div>
+              <div class="topcard-route">${routeLine}</div>
+              ${airportLine ? `<div class="topcard-airports">${airportLine}</div>` : ""}
+              <div class="topcard-meta-row">
+                <div class="topcard-duration-main">
+                  ${totalDurationMinutes
+                    ? `В пути туда и обратно: ${formatDuration(totalDurationMinutes)}`
+                    : `В пути: ${primaryDurationText}`}
+                </div>
+                <div class="topcard-duration-sub">
+                  ${
+                    hasReturnSegment
+                      ? `Туда: ${formatDuration(outboundDuration)} · Обратно: ${formatDuration(returnDuration)}`
+                      : `В пути: ${primaryDurationText}`
+                  } · ${transfersText}
+                </div>
+              </div>
+            </div>
+
+            <div class="topcard-meta">
+              <div class="topcard-meta-top">
+                <div class="topcard-price">${formatCurrency(flight.price, currency)}</div>
+                <span class="stress-chip">${stressText}</span>
+              </div>
+              ${airlineLine ? `<div class="topcard-airline">${airlineLine}</div>` : ""}
+              <div class="topcard-actions">
+                <button type="button"
+                        class="btn-utility btn-sm"
+                        data-action="open">
+                  Открыть в выдаче
+                </button>
+                ${
+                  ticketUrl
+                    ? `<a href="${ticketUrl}"
+                           class="btn btn-primary btn-sm aviasales-btn-ticket"
+                           target="_blank"
+                           rel="noopener noreferrer">
+                         Купить на Aviasales
+                       </a>`
+                    : `<button class="btn-primary btn-sm" disabled>Нет ссылки</button>`
+                }
+              </div>
+            </div>
           </div>
         </div>
       </div>
     `;
+
 
       const openBtn = card.querySelector('[data-action="open"]');
       openBtn?.addEventListener("click", () => highlightResultCard(flight.id));
