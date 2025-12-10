@@ -873,41 +873,56 @@ button:focus,
   min-height: 140px; /* чтобы был объём даже без текста */
 }
 
-/* Общий стиль круглых «уголков» билета */
-.topcard::before,
-.topcard::after,
-.topcard-inner::before,
-.topcard-inner::after {
-  content: "";
+/* === Билетный шаблон для блока «Комфортный старт» === */
+
+.ticket-card {
+  position: relative;
+  background-color: #ffffff;
+  border-radius: 18px;
+  overflow: hidden;
+  /* можно оставить твой текущий шэдоу, чтобы карточка вписалась в стиль Yuvia */
+  box-shadow: 0 16px 40px rgba(5, 50, 39, 0.08);
+}
+
+/* внутренний блок с контентом билета — аналог .spacer из примера */
+.ticket-body {
+  padding: 24px 22px 20px 22px; /* как у WizzAir: 25/20/20/20, чуть подогнано под Yuvia */
+}
+
+/* четыре круглых выреза по углам — перевод .top/.bottom/.left/.right из твоего примера */
+.ticket-corner {
   position: absolute;
   width: 18px;
   height: 18px;
-  border-radius: 50%;
-  /* фон — как фон блока с результатами, можно подогнать */
-  background: #f3f7f5;
-  /* «рамка» круга — цвет можно потом поменять под бренд */
-  box-shadow: 0 0 0 1px rgba(213, 223, 219, 0.9);
+  border-radius: 100%;
+  /* цвет подбираем под фон блока результатов */
+  background-color: #f3f7f5;
 }
 
-/* Верхние уголки */
-.topcard::before {
-  top: -9px;
-  left: -9px;
-}
-.topcard::after {
-  top: -9px;
-  right: -9px;
+/* верхний левый угол */
+.ticket-corner--tl {
+  top: -10px;
+  left: -10px;
 }
 
-/* Нижние уголки */
-.topcard-inner::before {
-  bottom: -9px;
-  left: -9px;
+/* верхний правый угол */
+.ticket-corner--tr {
+  top: -10px;
+  right: -10px;
 }
-.topcard-inner::after {
-  bottom: -9px;
-  right: -9px;
+
+/* нижний левый угол */
+.ticket-corner--bl {
+  bottom: -10px;
+  left: -10px;
 }
+
+/* нижний правый угол */
+.ticket-corner--br {
+  bottom: -10px;
+  right: -10px;
+}
+
 
 
 .matrix-calendar {
