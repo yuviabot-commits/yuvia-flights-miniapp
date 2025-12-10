@@ -861,8 +861,32 @@ button:focus,
   border-radius: 18px;
   background: var(--surface);
   box-shadow: 0 16px 40px rgba(5, 50, 39, 0.08);
-  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  overflow: visible; /* даём вылезти «дыркам» */
 }
+
+/* «Пробивка» по бокам, как у билета */
+.topcard::before,
+.topcard::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--bg); /* цвет фона страницы */
+  box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.45);
+}
+
+.topcard::before {
+  left: -9px;
+}
+
+.topcard::after {
+  right: -9px;
+}
+
 
 .topcard-inner {
   position: relative;
@@ -885,11 +909,11 @@ button:focus,
 }
 
 .topcard-main {
-  padding: 14px 18px 16px;
+  padding: 16px 18px 14px;
 }
 
 .topcard-meta {
-  padding: 14px 18px 16px;
+  padding: 16px 18px 14px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -901,13 +925,23 @@ button:focus,
   );
 }
 
+
 .topcard-label {
-  font-size: 11px;
-  letter-spacing: 0.14em;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+
+  font-size: 10px;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 4px;
+
+  color: #7c4a0b; /* тёплый «золотой» */
+  background: rgba(246, 196, 83, 0.12); /* мягкий фон */
+  border: 1px solid rgba(246, 196, 83, 0.7);
+  margin-bottom: 10px;
 }
+
 
 .topcard-route {
   font-weight: 600;
