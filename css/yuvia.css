@@ -856,6 +856,80 @@ button:focus,
   gap: 16px;
 }
 
+/* Билет WizzAir как шаблон для «Комфортного старта» */
+
+.topcard {
+  display: flex;
+  justify-content: center;
+}
+
+.yuvia-ticket {
+  /* просто обёртка, чтобы не мешать другим элементам */
+}
+
+.yuvia-ticket .container {
+  margin: 0 auto;
+  width: 300px;
+  background-color: #ffffff;
+  position: relative;
+  overflow: hidden;
+}
+
+.yuvia-ticket .first {
+  margin-top: 0;
+  height: 300px; /* как в оригинале, можно потом подогнать под контент */
+}
+
+.yuvia-ticket .second {
+  margin-top: 0;
+  height: 120px;
+  border-top: 1px solid #3b2e8f; /* пока оставляем оригинальный цвет */
+}
+
+.yuvia-ticket .top {
+  top: -10px;
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 100%;
+  background-color: #3b2e8f;
+}
+
+.yuvia-ticket .bottom {
+  bottom: -10px;
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 100%;
+  background-color: #3b2e8f;
+}
+
+.yuvia-ticket .left {
+  left: -10px;
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 100%;
+  background-color: #3b2e8f;
+}
+
+.yuvia-ticket .right {
+  right: -10px;
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 100%;
+  background-color: #3b2e8f;
+}
+
+.yuvia-ticket .spacer {
+  padding: 25px 20px 20px 20px;
+}
+
+.yuvia-ticket .spacer2 {
+  padding: 15px 20px 20px 20px;
+}
+
 /* Карточка-билет Yuvia: пока пустой скелет */
 
 .topcard {
