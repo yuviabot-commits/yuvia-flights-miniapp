@@ -742,7 +742,7 @@ button:focus,
 
 .topblock-title,
 .topblock .section-title {
-  font-size: 17px;
+  font-size: 19px;
   font-weight: 760;
   letter-spacing: 0.01em;
   color: #0b3d31;
@@ -758,8 +758,8 @@ button:focus,
 
 .topblock-seal-wrap {
   position: absolute;
-  top: -32px;
-  right: -32px;
+  top: -42px;
+  right: -42px;
   display: inline-flex;
   flex-direction: row-reverse;
   align-items: center;
