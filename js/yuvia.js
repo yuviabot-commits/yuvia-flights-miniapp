@@ -1324,16 +1324,19 @@
             const outboundSegments = Array.isArray(flight.outbound?.segments)
               ? flight.outbound.segments
               : [];
-          const returnSegments = Array.isArray(flight.return?.segments) ? flight.return.segments : [];
-          const connectionGroups = [outboundSegments, returnSegments].filter(
-            (group) => Array.isArray(group) && group.length,
-          );
-          if (
-            tripState.triggers.no_overnight &&
-            connectionGroups.length &&
-            connectionGroups.some((group) => hasOvernightLayover(group))
-          )
+            const returnSegments = Array.isArray(flight.return?.segments)
+              ? flight.return.segments
+              : [];
+            const connectionGroups = [outboundSegments, returnSegments].filter(
+              (group) => Array.isArray(group) && group.length,
+            );
+            if (
+              tripState.triggers.no_overnight &&
+              connectionGroups.length &&
+              connectionGroups.some((group) => hasOvernightLayover(group))
+            ) {
               return false;
+            }
 
             return true;
           });
@@ -1402,14 +1405,14 @@
             return baseList
               .map((flight) => {
                 const score = (flight.rating || 0) / (flight.price || 1);
-                return { ...flight, _valueScore: score };
+                return { flight, _valueScore: score };
               })
               .sort(
                 (a, b) =>
                   (b._valueScore || 0) - (a._valueScore || 0) ||
-                  (a.price || 0) - (b.price || 0)
+                  (a.flight.price || 0) - (b.flight.price || 0)
               )
-              .map(({ _valueScore, ...rest }) => rest);
+              .map(({ flight }) => flight);
           }
           if (tripState.style === "cheap") {
             return baseList.sort((a, b) => (a.price || 0) - (b.price || 0));
@@ -2744,7 +2747,9 @@
             const balanced = top.find((flight) => (flight.topLabel || "").includes("Золотая"));
             return balanced || top[0];
           }
-          return [...flights].sort((a, b) => (b.rating || 0) - (a.rating || 0) || a.price - b.price)[0] || null;
+          return flights
+            .slice()
+            .sort((a, b) => (b.rating || 0) - (a.rating || 0) || (a.price || 0) - (b.price || 0))[0] || null;
         }
 
         function renderFavoritesBlock() {
@@ -3227,33 +3232,31 @@
             }
 
             const context = {
-  origin: originIATA,
-  destination: destIATA,
-  originCity,
-  destCity,
-  departDate,
-  returnDate,
-  currency: lastCurrency,
-  passengers,
-  oneway,
-};
+              origin: originIATA,
+              destination: destIATA,
+              originCity,
+              destCity,
+              departDate,
+              returnDate,
+              currency: lastCurrency,
+              passengers,
+              oneway,
+            };
 
-// ВАЖНО: используем ту же схему, что работала раньше — json.data это массив рейсов
-const flightsRaw = Array.isArray(searchPayload && searchPayload.data)
-  ? searchPayload.data
-  : [];
+            const flightsRaw = Array.isArray(searchPayload && searchPayload.data)
+              ? searchPayload.data
+              : [];
 
-// Если хочешь один-единственный лог, чтобы увидеть, что API вообще что-то прислал:
-console.log("[Yuvia] flightsRaw length =", flightsRaw.length);
+            console.log("[Yuvia] flightsRaw length =", flightsRaw.length);
 
-allResults = flightsRaw
-  .map((item, index) =>
-    normalizeFlight(item, {
-      ...context,
-      fallbackId: `${originIATA}-${destIATA}-${index}`,
-    })
-  )
-  .filter((flight) => flight && flight.price > 0);
+            allResults = flightsRaw
+              .map((item, index) =>
+                normalizeFlight(item, {
+                  ...context,
+                  fallbackId: `${originIATA}-${destIATA}-${index}`,
+                })
+              )
+              .filter((flight) => flight && flight.price > 0);
 
             recalculateScores(allResults);
 
@@ -3866,626 +3869,4 @@ allResults = flightsRaw
         }
 
         init();
-      })();
-
-      (function () {
-        const birdEl = document.getElementById('yuviaBird');
-
-        function setBirdState(state) {
-          if (!birdEl) return;
-          const states = ['idle', 'listen', 'think', 'confirm', 'oops'];
-          states.forEach(s => birdEl.classList.remove(`yuvia-bird--${s}`));
-          const safeState = states.includes(state) ? state : 'idle';
-          birdEl.classList.add(`yuvia-bird--${safeState}`);
-        }
-
-        // Экспортируем в глобальную область для дальнейшей игровой логики
-        window.YuviaBird = {
-          setState: setBirdState,
-        };
-
-        // По умолчанию — idle
-        setBirdState('idle');
-      })();
-
-      (function () {
-        const scenes = {
-          intent: {
-            id: 'intent',
-            type: 'choice',
-            birdState: 'listen',
-            titleVariants: [
-              'С чем ты сегодня ко мне?',
-              'Поймём, с чего начнём поездку',
-              'Определимся с твоим запросом',
-            ],
-            text: 'Выбери, что тебе ближе сейчас — и я поведу по подходящему маршруту.',
-            options: [
-              {
-                id: 'fast-search',
-                label: 'Я знаю, куда и когда — сразу к конкретике',
-                intent: 'fast-search',
-              },
-              {
-                id: 'need-help',
-                label: 'Хочу, чтобы ты помогла с маршрутом и датами',
-                intent: 'need-help',
-              },
-              {
-                id: 'ideas',
-                label: 'Я пришёл за идеями, билеты потом',
-                intent: 'ideas',
-              },
-            ],
-          },
-          origin: {
-            id: 'origin',
-            type: 'input',
-            birdState: 'listen',
-            titleVariants: [
-              'Откуда вылетаем или выезжаем?',
-              'Город старта — откуда поедем?',
-              'Начнём с точки отправления',
-            ],
-            placeholder: 'Например: из Москвы / из Петербурга / из Казани',
-            field: 'origin',
-          },
-          destination: {
-            id: 'destination',
-            type: 'input',
-            birdState: 'listen',
-            titleVariants: [
-              'Куда хочется добраться на этот раз?',
-              'Финиш маршрута — куда тянет?',
-              'Город или место назначения',
-            ],
-            placeholder: 'Например: в Стамбул / в Сочи / к Байкалу',
-            field: 'destination',
-          },
-        };
-
-        let gameState = {
-          currentSceneId: 'intent',
-          intent: null,
-          origin: null,
-          destination: null,
-          dates: null,
-          duration: null,
-          transport: null,
-          format: null,
-          weekendTrip: false,
-        };
-
-        function updateGameState(partial = {}) {
-          gameState = { ...gameState, ...partial };
-        }
-
-        function parseFreeText(value, field) {
-          const text = (value || '').toLowerCase();
-
-          if (field === 'origin' || field === 'destination') {
-            let city = null;
-
-            if (text.includes('моск')) {
-              city = 'Москва';
-            } else if (text.includes('санкт') || text.includes('питер') || text.includes('спб')) {
-              city = 'Санкт-Петербург';
-            }
-
-            if (city) {
-              gameState[field] = city;
-            } else {
-              gameState[field] = value.trim();
-            }
-
-            if (text.includes('выходн')) {
-              gameState.weekendTrip = true;
-            }
-          }
-        }
-
-        function goToScene(id) {
-          if (!id || !scenes[id]) return;
-          gameState.currentSceneId = id;
-          renderScene();
-        }
-
-        function showSceneMessage(message) {
-          const container = document.getElementById('yuviaGameScreen');
-          const messageEl = container?.querySelector('[data-role="game-message"]');
-          if (messageEl) {
-            messageEl.textContent = message || '';
-          }
-        }
-
-        function handleIntentSelection(intent) {
-          updateGameState({ intent });
-
-          if (intent === 'fast-search') {
-            if (window.YuviaBird) window.YuviaBird.setState('confirm');
-            setTimeout(() => {
-              window.location.href = 'search.html';
-            }, 450);
-            return;
-          }
-
-          if (intent === 'need-help') {
-            goToScene('origin');
-            return;
-          }
-
-          if (intent === 'ideas') {
-            window.location.href = 'ideas.html';
-          }
-        }
-
-        function attachSceneListeners(scene) {
-          const container = document.getElementById('yuviaGameScreen');
-          if (!container || !scene) return;
-
-          if (scene.type === 'choice') {
-            container.querySelectorAll('[data-scene-option]').forEach(btn => {
-              btn.addEventListener('click', () => {
-                const intent = btn.getAttribute('data-intent') || '';
-                handleIntentSelection(intent);
-              });
-            });
-          } else if (scene.type === 'input') {
-            const form = container.querySelector('.game-input-form');
-            const input = form?.querySelector('input');
-
-            form?.addEventListener('submit', event => {
-              event.preventDefault();
-              const rawValue = input?.value?.trim() || '';
-
-              if (!rawValue) {
-                if (window.YuviaBird) window.YuviaBird.setState('oops');
-                showSceneMessage('Кажется, я не нашла город, давай ещё раз, можно просто “из Москвы”.');
-                return;
-              }
-
-              if (window.YuviaBird) window.YuviaBird.setState('think');
-
-              setTimeout(() => {
-                parseFreeText(rawValue, scene.field);
-
-                if (scene.id === 'origin') {
-                  goToScene('destination');
-                  return;
-                }
-
-                if (scene.id === 'destination') {
-                  if (gameState.origin && gameState.destination) {
-                    if (window.YuviaBird) window.YuviaBird.setState('confirm');
-                    setTimeout(() => {
-                      const params = new URLSearchParams();
-                      if (gameState.origin) params.set('from', gameState.origin);
-                      if (gameState.destination) params.set('to', gameState.destination);
-                      if (gameState.weekendTrip) params.set('weekend', '1');
-                      const qs = params.toString();
-                      window.location.href = qs ? `search.html?${qs}` : 'search.html';
-                    }, 650);
-                    return;
-                  }
-
-                  goToScene('intent');
-                }
-              }, 450);
-            });
-          }
-        }
-
-        function renderScene() {
-          const container = document.getElementById('yuviaGameScreen');
-          if (!container) return;
-          const scene = scenes[gameState.currentSceneId];
-          if (!scene) return;
-
-          if (window.YuviaBird && scene.birdState) {
-            window.YuviaBird.setState(scene.birdState);
-          }
-
-          const title = scene.titleVariants
-            ? scene.titleVariants[Math.floor(Math.random() * scene.titleVariants.length)]
-            : '';
-
-          if (scene.type === 'choice') {
-            container.innerHTML = `
-      <div class="game-scene game-scene--choice">
-        <h2 class="game-scene__title">${title}</h2>
-        <p class="game-scene__text">${scene.text || ''}</p>
-        <div class="game-scene__options">
-          ${scene.options
-            .map(
-              opt => `
-                <button type="button"
-                        class="game-option-chip"
-                        data-scene-option="${opt.id}"
-                        data-intent="${opt.intent || ''}">
-                  ${opt.label}
-                </button>
-              `
-            )
-            .join('')}
-        </div>
-        <div class="game-input-message" data-role="game-message" aria-live="polite"></div>
-      </div>
-    `;
-          } else if (scene.type === 'input') {
-            container.innerHTML = `
-      <div class="game-scene game-scene--input">
-        <h2 class="game-scene__title">${title}</h2>
-        <p class="game-scene__text">Можешь написать свободным текстом.</p>
-        <form class="game-input-form" data-scene-id="${scene.id}">
-          <label class="visually-hidden" for="gameInput">${scene.placeholder || ''}</label>
-          <input id="gameInput"
-                 type="text"
-                 name="gameInput"
-                 autocomplete="off"
-                 placeholder="${scene.placeholder || ''}">
-          <button type="submit">Продолжить</button>
-        </form>
-        <div class="game-input-message" data-role="game-message" aria-live="polite"></div>
-      </div>
-    `;
-          }
-
-          attachSceneListeners(scene);
-        }
-
-        function startGame() {
-          gameState.currentSceneId = 'intent';
-          renderScene();
-        }
-
-        const intentChips = document.querySelectorAll('.home-intent-chip');
-        intentChips.forEach(chip => {
-          chip.addEventListener('click', () => {
-            const intent = chip.getAttribute('data-intent') || '';
-            handleIntentSelection(intent);
-          });
-        });
-
-        startGame();
-
-        window.YuviaGame = {
-          startGame,
-          goToScene,
-          updateGameState,
-          parseFreeText,
-        };
-      })();
-
-      (function () {
-        function initTravelSandbox() {
-          const sandbox = document.getElementById('travelSandbox');
-          if (!sandbox) return;
-
-          const sandboxState = {
-            intent: null,
-            mood: null,
-            duration: null,
-            transport: [],
-            format: null,
-            from: null,
-          };
-
-          const conciergeLine = document.getElementById('sandboxConciergeLine');
-          const intentButtons = Array.from(document.querySelectorAll('.intent-chip'));
-          const compassSectors = Array.from(document.querySelectorAll('.compass-sector'));
-          const timelinePoints = Array.from(document.querySelectorAll('.timeline-point'));
-          const transportChips = Array.from(document.querySelectorAll('.transport-chip'));
-          const formatChips = Array.from(document.querySelectorAll('.format-chip'));
-          const summaryFrom = document.getElementById('summaryFrom');
-          const summaryMood = document.getElementById('summaryMood');
-          const summaryDuration = document.getElementById('summaryDuration');
-          const summaryTransport = document.getElementById('summaryTransport');
-          const summaryFormat = document.getElementById('summaryFormat');
-          const compassMarker = document.getElementById('compassBirdMarker');
-          const freeformForm = document.getElementById('sandboxFreeformForm');
-          const freeformInput = document.getElementById('sandboxFreeformInput');
-          const summaryToSearch = document.getElementById('summaryToSearch');
-          const summaryToIdeas = document.getElementById('summaryToIdeas');
-          const intentPill = document.getElementById('sandboxIntentButton');
-          const intentsBlock = document.getElementById('sandboxIntents');
-
-          const intentLines = {
-            'fast-search': 'Если ты спешишь — давай соберём только самое важное и сразу уйдём к билетам.',
-            'route-help': 'Окей, берём время и примерный маршрут, а дальше я помогу с деталями.',
-            'ideas-first': 'Тогда сначала определимся с настроением поездки, а билеты подстроим под это.',
-          };
-
-          const moodPhrases = {
-            sea: 'хочется к морю',
-            mountains: 'настроение на горы и тропы',
-            city: 'хочется городов и прогулок',
-            nearby: 'что-то недалеко от дома',
-            far: 'хочется уехать подальше',
-          };
-
-          const moodConcierge = {
-            sea: 'Вижу, тянет к морю. По длительности уже определились?',
-            mountains: 'Хочется гор и троп. Сколько дней закладываем?',
-            city: 'Хорошо, фокус на городских прогулках. Сколько времени есть?',
-            nearby: 'Хочется чего-то рядом. Скажи, на сколько дней это задумали?',
-            far: 'Тянет уехать подальше. Определимся с длительностью?',
-          };
-
-          const durationPhrases = {
-            evening: 'на один вечер',
-            weekend: 'на выходные',
-            '3-4': 'на 3–4 дня',
-            week: 'на неделю и больше',
-          };
-
-          const formatPhrases = {
-            solo: 'одиночная поездка',
-            couple: 'поездка парой',
-            family: 'семейная поездка',
-            friends: 'поездка компанией',
-          };
-
-          const transportLabels = {
-            plane: 'самолёт',
-            train: 'поезд',
-            bus: 'автобус',
-            suburban: 'электричка',
-          };
-
-          function updateConciergeLine(text) {
-            if (conciergeLine && text) {
-              conciergeLine.textContent = text;
-            }
-          }
-
-          function setActiveGroup(items, activeEl) {
-            items.forEach(el => {
-              el.classList.toggle('is-active', el === activeEl);
-            });
-          }
-
-          function updateSummaryLinks() {
-            const query = sandboxState.from ? `?from=${encodeURIComponent(sandboxState.from)}` : '';
-            if (summaryToSearch) {
-              summaryToSearch.href = `search.html${query}`;
-            }
-            if (summaryToIdeas) {
-              summaryToIdeas.href = `ideas.html${query}`;
-            }
-          }
-
-          function handleIntentClick(button) {
-            const intent = button.getAttribute('data-intent');
-            sandboxState.intent = intent;
-            setActiveGroup(intentButtons, button);
-            const line = intent && intentLines[intent];
-            if (line) {
-              updateConciergeLine(line);
-            }
-          }
-
-          function handleMoodClick(button) {
-            const mood = button.getAttribute('data-mood');
-            sandboxState.mood = mood;
-            setActiveGroup(compassSectors, button);
-            const phrase = mood ? moodPhrases[mood] : '';
-            if (summaryMood) {
-              summaryMood.textContent = phrase || 'пока присматриваемся';
-            }
-            if (compassMarker) {
-              compassMarker.className = 'compass-bird-marker';
-              if (mood) {
-                compassMarker.classList.add(`marker-${mood}`);
-              }
-            }
-            if (mood && moodConcierge[mood]) {
-              updateConciergeLine(moodConcierge[mood]);
-            }
-          }
-
-          function handleDurationClick(button) {
-            const duration = button.getAttribute('data-duration');
-            sandboxState.duration = duration;
-            setActiveGroup(timelinePoints, button);
-            if (summaryDuration) {
-              const phrase = duration ? durationPhrases[duration] : '';
-              summaryDuration.textContent = phrase || 'без привязки';
-            }
-          }
-
-          function handleTransportClick(button) {
-            const value = button.getAttribute('data-transport');
-            if (!value) return;
-            const hasValue = sandboxState.transport.includes(value);
-            if (hasValue) {
-              sandboxState.transport = sandboxState.transport.filter(item => item !== value);
-            } else {
-              sandboxState.transport = [...sandboxState.transport, value];
-            }
-            button.classList.toggle('is-active', !hasValue);
-            if (summaryTransport) {
-              if (!sandboxState.transport.length) {
-                summaryTransport.textContent = 'любой';
-              } else {
-                const labels = sandboxState.transport
-                  .map(key => transportLabels[key])
-                  .filter(Boolean);
-                summaryTransport.textContent = labels.join(', ');
-              }
-            }
-          }
-
-          function handleFormatClick(button) {
-            const value = button.getAttribute('data-format');
-            sandboxState.format = value;
-            setActiveGroup(formatChips, button);
-            if (summaryFormat) {
-              summaryFormat.textContent = value && formatPhrases[value] ? formatPhrases[value] : 'не выбрали';
-            }
-          }
-
-          function handleFreeformSubmit(event) {
-            event.preventDefault();
-            const text = freeformInput?.value?.trim();
-            if (!text) return;
-            sandboxState.from = text;
-            if (summaryFrom) {
-              summaryFrom.textContent = text;
-            }
-            updateConciergeLine(`Приняла: ${text}. Дальше подстрою под это настроение и длительность.`);
-            updateSummaryLinks();
-          }
-
-          intentButtons.forEach(button => {
-            button.addEventListener('click', () => handleIntentClick(button));
-          });
-
-          compassSectors.forEach(button => {
-            button.addEventListener('click', () => handleMoodClick(button));
-          });
-
-          timelinePoints.forEach(button => {
-            button.addEventListener('click', () => handleDurationClick(button));
-          });
-
-          transportChips.forEach(button => {
-            button.addEventListener('click', () => handleTransportClick(button));
-          });
-
-          formatChips.forEach(button => {
-            button.addEventListener('click', () => handleFormatClick(button));
-          });
-
-          if (freeformForm) {
-            freeformForm.addEventListener('submit', handleFreeformSubmit);
-          }
-
-          if (intentPill) {
-            intentPill.addEventListener('click', () => {
-              if (intentsBlock) {
-                intentsBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              }
-              if (intentButtons[0]) {
-                intentButtons[0].focus();
-              }
-            });
-          }
-
-          updateSummaryLinks();
-        }
-
-        function initHomeScene() {
-          const stage = document.querySelector('.sky-stage');
-          if (!stage) return;
-
-          const birdAnchor = $('#birdAnchor', stage);
-          const moodClouds = $$('.mood-cloud', stage);
-          const selectionNote = $('#cloudSelectionNote', stage);
-          const cloudsLayer = $('.sky-parallax-clouds', stage);
-          const mapLinesLayer = $('.sky-parallax-lines', stage);
-          const birdVideo = stage.querySelector('.yuvia-bird');
-          const birdFallback = stage.querySelector('.yuvia-bird-fallback');
-          let baseBirdCenter = null;
-
-          if (birdVideo && birdFallback) {
-            birdVideo.addEventListener('loadeddata', () => {
-              birdVideo.style.opacity = '1';
-              birdFallback.style.opacity = '0';
-            });
-            birdVideo.addEventListener('error', () => {
-              birdVideo.style.opacity = '0';
-              birdFallback.style.opacity = '1';
-            });
-          }
-
-          let flightTimer = null;
-
-          function captureBaseBirdCenter() {
-            if (!birdAnchor) return;
-            const rect = birdAnchor.getBoundingClientRect();
-            baseBirdCenter = {
-              x: rect.left + rect.width / 2,
-              y: rect.top + rect.height / 2,
-            };
-          }
-
-          function moveBird(cloud) {
-            if (!birdAnchor || !cloud) return;
-            if (!baseBirdCenter) {
-              captureBaseBirdCenter();
-            }
-
-            const cloudRect = cloud.getBoundingClientRect();
-            const cloudCenter = {
-              x: cloudRect.left + cloudRect.width / 2,
-              y: cloudRect.top + cloudRect.height / 2,
-            };
-
-            const deltaX = cloudCenter.x - (baseBirdCenter?.x || cloudCenter.x);
-            const deltaY = cloudCenter.y - (baseBirdCenter?.y || cloudCenter.y);
-
-            birdAnchor.style.setProperty('--bird-shift-x', `${deltaX}px`);
-            birdAnchor.style.setProperty('--bird-shift-y', `${deltaY}px`);
-
-            birdAnchor.classList.add('bird-anchor--in-flight');
-            clearTimeout(flightTimer);
-            flightTimer = setTimeout(() => {
-              birdAnchor.classList.remove('bird-anchor--in-flight');
-            }, 800);
-          }
-
-          function selectCloud(target) {
-            moodClouds.forEach(cloud => {
-              cloud.classList.remove('cloud-selected', 'cloud-dimmed');
-              if (cloud !== target) {
-                cloud.classList.add('cloud-dimmed');
-              }
-            });
-
-            target.classList.add('cloud-selected');
-            moveBird(target);
-
-            if (selectionNote) {
-              selectionNote.classList.add('is-visible');
-            }
-          }
-
-          moodClouds.forEach(cloud => {
-            cloud.addEventListener('click', () => selectCloud(cloud));
-          });
-
-          setTimeout(captureBaseBirdCenter, 0);
-
-          function handleParallax(event) {
-            const bounds = stage.getBoundingClientRect();
-            const relX = (event.clientX - bounds.left) / bounds.width - 0.5;
-            const relY = (event.clientY - bounds.top) / bounds.height - 0.5;
-            const moveX = relX * 6;
-            const moveY = relY * 6;
-
-            if (mapLinesLayer) {
-              mapLinesLayer.style.transform = `translate3d(${moveX}px, ${moveY}px, 0)`;
-            }
-            if (cloudsLayer) {
-              cloudsLayer.style.transform = `translate3d(${moveX * 1.2}px, ${moveY * 1.2}px, 0)`;
-            }
-          }
-
-          stage.addEventListener('mousemove', handleParallax);
-        }
-
-        window.initTravelSandbox = initTravelSandbox;
-
-        document.addEventListener('DOMContentLoaded', () => {
-          const sandbox = document.getElementById('travelSandbox');
-          const homeStage = document.querySelector('.sky-stage');
-
-          if (sandbox) {
-            initTravelSandbox();
-          }
-
-          if (homeStage) {
-            initHomeScene();
-          }
-        });
       })();
