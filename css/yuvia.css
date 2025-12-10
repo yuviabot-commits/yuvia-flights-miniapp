@@ -844,7 +844,7 @@ button:focus,
     grid-template-columns: 1fr;
   }
 }
-/* === Yuvia: топ-рекомендации (билеты) === */
+/* === Yuvia: топ-рекомендации (билеты) — НОВЫЙ ШАБЛОН АВИАБИЛЕТА === */
 
 #yuviaTopBlock {
   margin-bottom: 24px;
@@ -852,149 +852,188 @@ button:focus,
 
 #yuviaTopList {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 16px;
 }
 
-/* Билет WizzAir как шаблон для «Комфортного старта» */
-
+/* Обёртка карточки в сетке */
 .topcard {
   display: flex;
   justify-content: center;
 }
 
+/* Внутренний блок билета (точная копия структуры WizzAir, но под нашим фоном) */
 .yuvia-ticket {
-  /* просто обёртка, чтобы не мешать другим элементам */
+  position: relative;
+  width: 320px;           /* билет уже, чем старая карточка */
+  max-width: 100%;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--ink);
 }
 
+/* Две части билета: верхняя (основная) и нижняя (отрывной талон) */
 .yuvia-ticket .container {
-  margin: 0 auto;
-  width: 300px;
+  margin: 0;
+  width: 100%;
   background-color: #ffffff;
   position: relative;
   overflow: hidden;
+  border-radius: 18px;
+  box-shadow: 0 16px 40px rgba(5, 50, 39, 0.08);
 }
 
 .yuvia-ticket .first {
   margin-top: 0;
-  height: 300px; /* как в оригинале, можно потом подогнать под контент */
+  min-height: 180px;
+  border-radius: 18px 18px 12px 12px;
 }
 
 .yuvia-ticket .second {
-  margin-top: 0;
-  height: 120px;
-  border-top: 1px solid #3b2e8f; /* пока оставляем оригинальный цвет */
+  margin-top: 6px;
+  min-height: 70px;
+  border-radius: 12px 12px 18px 18px;
+  border-top: 1px dashed rgba(148, 163, 184, 0.5);
+}
+
+/* УГОЛКИ-БОКОВЫЕ ВЫРЕЗЫ: в два раза меньше и «прозрачные» под фон блока */
+
+.yuvia-ticket .top,
+.yuvia-ticket .bottom,
+.yuvia-ticket .left,
+.yuvia-ticket .right {
+  position: absolute;
+  width: 9px;   /* было 18px — теперь в два раза меньше */
+  height: 9px;
+  border-radius: 100%;
+  /* цвет = фон страницы, чтобы казалось, что это вырезы, а не фиолетовые точки */
+  background-color: #ecf4f1; /* при необходимости можно поменять под общий фон страницы */
 }
 
 .yuvia-ticket .top {
-  top: -10px;
-  position: absolute;
-  width: 18px;
-  height: 18px;
-  border-radius: 100%;
-  background-color: #3b2e8f;
+  top: -4.5px;
 }
 
 .yuvia-ticket .bottom {
-  bottom: -10px;
-  position: absolute;
-  width: 18px;
-  height: 18px;
-  border-radius: 100%;
-  background-color: #3b2e8f;
+  bottom: -4.5px;
 }
 
 .yuvia-ticket .left {
-  left: -10px;
-  position: absolute;
-  width: 18px;
-  height: 18px;
-  border-radius: 100%;
-  background-color: #3b2e8f;
+  left: -4.5px;
 }
 
 .yuvia-ticket .right {
-  right: -10px;
-  position: absolute;
-  width: 18px;
-  height: 18px;
-  border-radius: 100%;
-  background-color: #3b2e8f;
+  right: -4.5px;
 }
 
+/* Внутренние отступы как в исходном шаблоне билета */
+
 .yuvia-ticket .spacer {
-  padding: 25px 20px 20px 20px;
+  padding: 18px 18px 16px 18px;
 }
 
 .yuvia-ticket .spacer2 {
-  padding: 15px 20px 20px 20px;
+  padding: 10px 18px 14px 18px;
 }
 
-/* Карточка-билет Yuvia: пока пустой скелет */
+/* ===== ТИПОГРАФИКА И КОНТЕНТ ВЕРХНЕЙ ЧАСТИ БИЛЕТА ===== */
 
-.topcard {
-  position: relative;
-  background: #ffffff;
-  border-radius: 18px;
-  box-shadow: 0 16px 40px rgba(5, 50, 39, 0.08);
-  overflow: visible; /* даём углам вылезти наружу */
+.topcard-main {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-/* Внутренний блок — сейчас пустой, потом сюда разложим контент */
-.topcard-inner {
-  position: relative;
-  padding: 24px 20px 20px;
-  min-height: 140px; /* чтобы был объём даже без текста */
+.topcard-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #b5892e; /* золотистый лейбл */
 }
 
-/* === Билетный шаблон для блока «Комфортный старт» === */
-
-.ticket-card {
-  position: relative;
-  background-color: #ffffff;
-  border-radius: 18px;
-  overflow: hidden;
-  /* можно оставить твой текущий шэдоу, чтобы карточка вписалась в стиль Yuvia */
-  box-shadow: 0 16px 40px rgba(5, 50, 39, 0.08);
+.topcard-route {
+  font-size: 16px;
+  font-weight: 600;
+  color: #053227;
 }
 
-/* внутренний блок с контентом билета — аналог .spacer из примера */
-.ticket-body {
-  padding: 24px 22px 20px 22px; /* как у WizzAir: 25/20/20/20, чуть подогнано под Yuvia */
+.topcard-airports {
+  font-size: 12px;
+  color: rgba(5, 50, 39, 0.75);
 }
 
-/* четыре круглых выреза по углам — перевод .top/.bottom/.left/.right из твоего примера */
-.ticket-corner {
-  position: absolute;
-  width: 18px;
-  height: 18px;
-  border-radius: 100%;
-  /* цвет подбираем под фон блока результатов */
-  background-color: #f3f7f5;
+.topcard-meta-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12px;
+  color: rgba(5, 50, 39, 0.9);
 }
 
-/* верхний левый угол */
-.ticket-corner--tl {
-  top: -10px;
-  left: -10px;
+.topcard-duration-main {
+  font-weight: 600;
 }
 
-/* верхний правый угол */
-.ticket-corner--tr {
-  top: -10px;
-  right: -10px;
+.topcard-transfers {
+  font-size: 12px;
 }
 
-/* нижний левый угол */
-.ticket-corner--bl {
-  bottom: -10px;
-  left: -10px;
+.topcard-stress {
+  font-size: 12px;
+  color: rgba(5, 50, 39, 0.8);
 }
 
-/* нижний правый угол */
-.ticket-corner--br {
-  bottom: -10px;
-  right: -10px;
+/* Цена и валюта */
+
+.topcard-price-row {
+  margin-top: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.topcard-price {
+  font-size: 18px;
+  font-weight: 700;
+  color: #053227;
+}
+
+.topcard-airline {
+  font-size: 11px;
+  color: rgba(5, 50, 39, 0.75);
+}
+
+/* ===== НИЖНЯЯ ЧАСТЬ БИЛЕТА — КНОПКИ ===== */
+
+.topcard-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.topcard-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.topcard-actions .btn-primary,
+.topcard-actions .btn-outline {
+  flex: 1 1 0;
+  justify-content: center;
+}
+
+/* Адаптив: на узких экранах билет растягиваем на всю ширину колонки */
+
+@media (max-width: 900px) {
+  #yuviaTopList {
+    grid-template-columns: 1fr;
+  }
+
+  .yuvia-ticket {
+    width: 100%;
+  }
 }
 
 
