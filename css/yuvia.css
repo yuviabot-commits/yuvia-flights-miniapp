@@ -856,6 +856,58 @@ button:focus,
   gap: 16px;
 }
 
+/* Карточка-билет Yuvia: пока пустой скелет */
+
+.topcard {
+  position: relative;
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 16px 40px rgba(5, 50, 39, 0.08);
+  overflow: visible; /* даём углам вылезти наружу */
+}
+
+/* Внутренний блок — сейчас пустой, потом сюда разложим контент */
+.topcard-inner {
+  position: relative;
+  padding: 24px 20px 20px;
+  min-height: 140px; /* чтобы был объём даже без текста */
+}
+
+/* Общий стиль круглых «уголков» билета */
+.topcard::before,
+.topcard::after,
+.topcard-inner::before,
+.topcard-inner::after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  /* фон — как фон блока с результатами, можно подогнать */
+  background: #f3f7f5;
+  /* «рамка» круга — цвет можно потом поменять под бренд */
+  box-shadow: 0 0 0 1px rgba(213, 223, 219, 0.9);
+}
+
+/* Верхние уголки */
+.topcard::before {
+  top: -9px;
+  left: -9px;
+}
+.topcard::after {
+  top: -9px;
+  right: -9px;
+}
+
+/* Нижние уголки */
+.topcard-inner::before {
+  bottom: -9px;
+  left: -9px;
+}
+.topcard-inner::after {
+  bottom: -9px;
+  right: -9px;
+}
 
 
 .matrix-calendar {
