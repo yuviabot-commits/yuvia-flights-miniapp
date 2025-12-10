@@ -3319,83 +3319,98 @@
       const stressText = getStressText(flight.stressLevel);
       const currency = flight.currency || lastCurrency;
 
-    card.innerHTML = `
-      <div class="yuvia-ticket">
-        <div class="container first">
-          <div class="top left corner"></div>
-          <div class="top right corner"></div>
-          <div class="bottom left corner"></div>
-          <div class="bottom right corner"></div>
-          <div class="spacer">
-            <!-- СЮДА ПЕРЕНОСИМ СТАРЫЙ ШАБЛОН topcard-inner -->
-            <div class="topcard-inner">
+      card.innerHTML = `
+        <div class="yuvia-ticket">
+          <!-- ВЕРХНЯЯ ЧАСТЬ БИЛЕТА -->
+          <div class="container first">
+            <div class="top left corner"></div>
+            <div class="top right corner"></div>
+            <div class="bottom left corner"></div>
+            <div class="bottom right corner"></div>
+
+            <div class="spacer">
               <div class="topcard-main">
                 <div class="topcard-label">
                   ${(flight.topLabel || "Рекомендация").toUpperCase()}
                 </div>
+
                 <div class="topcard-route">${routeLine}</div>
-                ${airportLine ? `<div class="topcard-airports">${airportLine}</div>` : ""}
+
+                ${airportLine
+                  ? `<div class="topcard-airports">${airportLine}</div>`
+                  : ""}
+
                 <div class="topcard-meta-row">
                   <div class="topcard-duration-main">
                     ${totalDurationMinutes
-                      ? `В пути туда и обратно: ${formatDuration(totalDurationMinutes)}`
+                      ? `Туда: ${primaryDurationText} · Обратно: ${formatDuration(
+                          totalDurationMinutes - outboundDuration,
+                        )}`
                       : `В пути: ${primaryDurationText}`}
                   </div>
-                  <div class="topcard-duration-sub">
-                    ${
-                      hasReturnSegment
-                        ? `Туда: ${formatDuration(outboundDuration)} · Обратно: ${formatDuration(returnDuration)}`
-                        : `В пути: ${primaryDurationText}`
-                    } · ${transfersText}
+                  <div class="topcard-transfers">
+                    ${transfersText}
                   </div>
+                  ${
+                    stressText
+                      ? `<div class="topcard-stress">стресс: ${stressText}</div>`
+                      : ""
+                  }
                 </div>
-              </div>
 
-              <div class="topcard-meta">
-                <div class="topcard-meta-top">
+                <div class="topcard-price-row">
                   <div class="topcard-price">
                     ${formatCurrency(flight.price, currency)}
                   </div>
-                  <span class="stress-chip">${stressText}</span>
+                  ${
+                    airlineLine
+                      ? `<div class="topcard-airline">${airlineLine}</div>`
+                      : ""
+                  }
                 </div>
-                ${airlineLine ? `<div class="topcard-airline">${airlineLine}</div>` : ""}
+              </div>
+            </div>
+          </div>
+
+          <!-- НИЖНЯЯ ЧАСТЬ БИЛЕТА (ОТРЫВНОЙ КУПОН С КНОПКАМИ) -->
+          <div class="container second">
+            <div class="top left corner"></div>
+            <div class="top right corner"></div>
+            <div class="bottom left corner"></div>
+            <div class="bottom right corner"></div>
+
+            <div class="spacer2">
+              <div class="topcard-bottom">
                 <div class="topcard-actions">
                   <button
                     type="button"
-                    class="btn-utility btn-sm"
-                    data-action="open">
+                    class="btn-outline"
+                    data-action="open-in-results"
+                  >
                     Открыть в выдаче
                   </button>
+
                   ${
                     ticketUrl
-                      ? `<a href="${ticketUrl}"
-                             class="btn btn-primary btn-sm aviasales-btn-ticket"
-                             target="_blank"
-                             rel="noopener noreferrer">
+                      ? `<a
+                           class="btn-primary"
+                           href="${ticketUrl}"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                         >
                            Купить на Aviasales
                          </a>`
-                      : `<button class="btn-primary btn-sm" disabled>Нет ссылки</button>`
+                      : ""
                   }
                 </div>
               </div>
             </div>
           </div>
         </div>
-
-        <div class="container second">
-          <div class="top left"></div>
-          <div class="top right"></div>
-          <div class="bottom left"></div>
-          <div class="bottom right"></div>
-          <div class="spacer2">
-            <!-- нижняя часть билета, пока пустая -->
-          </div>
-        </div>
-      </div>
-    `;
+      `;
 
 
-      const openBtn = card.querySelector('[data-action="open"]');
+      const openBtn = card.querySelector('[data-action="open-in-results"]');
       openBtn?.addEventListener("click", () => highlightResultCard(flight.id));
 
       yuviaTopList.appendChild(card);
