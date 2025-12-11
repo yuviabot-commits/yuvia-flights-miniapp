@@ -858,20 +858,19 @@ button:focus,
 /* === Авиабилет в блоке "Комфортный старт" === */
 .topcard .container {
   margin: 0 auto;
-  width: 200px;
+  width: 300px;
   background-color: #ffffff;
   position: relative;
   overflow: hidden;
 }
 .topcard .first {
-  margin-top: 0;
-  height: 180px;
-  display: flex;          /* включаем флекс-режим */
-  flex-direction: column; /* элементы идут сверху вниз */
+  min-height: 150px;  /* верхняя часть билета */
+  height: auto;       /* даём вырасти под текст */
 }
+
 .topcard .second {
-  margin-top: 0;
-  height: 80px;
+  min-height: 60px;   /* «хвостик» / stub */
+  height: auto;
   border-top: 2px solid rgba(241, 249, 247, 0.94);
 }
 /* Общие правила для всех кружочков-уголков билета */
@@ -931,7 +930,7 @@ button:focus,
 
 /* Крупные коды городов: BUD / LTN */
 .topcard .ticket-city-code {
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 600;
   letter-spacing: 0.06em;
   color: var(--ink);        /* тёмно-зелёный */
@@ -939,13 +938,13 @@ button:focus,
 
 /* Подписи под кодами: Budapest / Luton Airport */
 .topcard .ticket-city-name {
-  font-size: 6px;
+  font-size: 12px;
   color: rgba(5, 50, 39, 0.75); /* тот же зелёный, но посветлее и прозрачнее */
 }
 
 /* Самолётик по центру */
 .topcard .ticket-plane {
-  font-size: 15px;
+  font-size: 18px;
   line-height: 1;
   color: var(--ink);        /* тёмно-зелёный самолёт */
   display: flex;
