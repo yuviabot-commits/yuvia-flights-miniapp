@@ -896,18 +896,18 @@ button:focus,
 }
 /* 3) Отступы внутри контейнера */
 .topcard .spacer {
-  padding: 25px 20px 20px 20px;
+  padding: 7px 10px 10px 10px;
 }
 .topcard .spacer2 {
   padding: 15px 20px 20px 20px;
 }
 /* Лейбл сверху билета (ЗОЛОТАЯ СЕРЕДИНА и т.п.) */
 .topcard .ticket-label {
-  font-size: 11px;           /* мелкий текст */
+  font-size: 10px;           /* мелкий текст */
   letter-spacing: 0.16em;    /* буквы чуть "расползлись" — как печать */
   text-transform: uppercase; /* на всякий случай, если забудем .toUpperCase() */
   font-weight: 700;          /* пожирнее */
-  color: var(--sun);         /* наш золотой цвет из палитры */
+  color: #a27927;         /* наш золотой цвет из палитры */
   margin-bottom: 16px;       /* отступ вниз, чтобы отделить от городов */
 }
 
