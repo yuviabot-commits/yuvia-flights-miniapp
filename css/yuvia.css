@@ -711,139 +711,7 @@ button:focus,
       .toolbar select option:hover {
         background: #f4fbf8;
       }
-.topblock {
-  margin: 0 auto 16px;
-  max-width: 960px;
-  border-radius: 18px;
-  background: linear-gradient(180deg, rgba(252, 250, 246, 0.96), rgba(241, 249, 247, 0.94)), #ffffff;
-  border: 1px solid rgba(213, 223, 219, 0.9);
-  box-shadow: 0 14px 34px rgba(7, 94, 84, 0.13);
-  backdrop-filter: blur(18px);
-  position: relative;
-  padding: 16px 18px 14px;
-}
 
-.topblock::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 18% 16%, rgba(250, 244, 232, 0.32), transparent 32%);
-  pointer-events: none;
-}
-
-.topblock-header {
-  position: relative;
-}
-
-.topblock-heading {
-  text-align: left;
-  max-width: 100%;
-}
-
-.topblock-title,
-.topblock .section-title {
-  font-size: 19px;
-  font-weight: 760;
-  letter-spacing: 0.01em;
-  color: #0b3d31;
-  margin: 0;
-}
-
-.topblock-subtitle {
-  font-size: 13px;
-  color: rgba(5, 50, 39, 0.78);
-  margin-top: 4px;
-  max-width: 100%;
-}
-
-.topblock-seal-wrap {
-  position: absolute;
-  top: -42px;
-  right: -42px;
-  display: inline-flex;
-  flex-direction: row-reverse;
-  align-items: center;
-  gap: 10px;
-  z-index: 6;
-}
-
-.topblock-seal {
-  width: 80px;
-  height: auto;
-  display: block;
-}
-
-.topblock-seal-text {
-  font-size: 13px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: rgba(5, 50, 39, 0.75);
-  white-space: nowrap;
-  margin-left: 8px;
-  margin-top: 30px;
-}
-
-.topblock-list {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  margin-top: 8px;
-  position: relative;
-  z-index: 1;
-}
-
-.topblock-meta {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 14px;
-  padding-right: 4px;
-}
-
-.topblock .tooltip-trigger {
-  color: var(--accent);
-  text-decoration: none;
-  position: relative;
-  z-index: 1045;
-}
-
-.topblock .tooltip-trigger:hover {
-  text-decoration: none;
-}
-
-@media (max-width: 1100px) {
-  .topblock-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 900px) {
-  .topblock {
-    padding: 18px 14px 14px;
-  }
-
-  .topblock-header {
-    display: flex;
-    flex-direction: column-reverse;
-    align-items: flex-start;
-  }
-
-  .topblock-heading {
-    max-width: 100%;
-  }
-
-  .topblock-seal-wrap {
-    align-self: flex-end;
-  }
-
-  .topblock-seal-text {
-    white-space: normal;
-    margin-top: 12px;
-  }
-
-  .topblock-list {
-    grid-template-columns: 1fr;
-  }
-}
 /* === Yuvia: топ-рекомендации (билеты) — НОВЫЙ ШАБЛОН АВИАБИЛЕТА === */
 
 #yuviaTopBlock {
@@ -858,25 +726,25 @@ button:focus,
 /* === Авиабилет в блоке "Комфортный старт" === */
 .topcard .container {
   margin: 0 auto;
-  width: 300px;
+  width: 200px;
   background-color: #ffffff;
   position: relative;
   overflow: hidden;
 }
 .topcard .first {
   margin-top: 0;
-  height: 300px;
+  height: 180px;
 }
 .topcard .second {
   margin-top: 0;
-  height: 120px;
-  border-top: 1px solid rgba(241, 249, 247, 0.94);
+  height: 80px;
+  border-top: 2px solid rgba(241, 249, 247, 0.94);
 }
 /* Общие правила для всех кружочков-уголков билета */
 .topcard .corner {
   position: absolute;   /* приклеиваем поверх контейнера */
-  width: 18px;          /* ширина кружочка */
-  height: 18px;         /* высота кружочка (равна ширине → круг) */
+  width: 17px;          /* ширина кружочка */
+  height: 17px;         /* высота кружочка (равна ширине → круг) */
   border-radius: 50%;   /* из квадрата делаем круг */
 }
 .topcard .corner.top    { top: -10px; }
