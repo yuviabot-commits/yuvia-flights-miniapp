@@ -855,6 +855,52 @@ button:focus,
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 16px;
 }
+/* === Авиабилет в блоке "Комфортный старт" === */
+.topcard .container {
+  margin: 0 auto;
+  width: 300px;
+  background-color: #ffffff;
+  position: relative;
+  overflow: hidden;
+}
+.topcard .first {
+  margin-top: 0;
+  height: 300px;
+}
+.topcard .second {
+  margin-top: 0;
+  height: 120px;
+  border-top: 1px solid rgba(241, 249, 247, 0.94);
+}
+/* Общие правила для всех кружочков-уголков билета */
+.topcard .corner {
+  position: absolute;   /* приклеиваем поверх контейнера */
+  width: 18px;          /* ширина кружочка */
+  height: 18px;         /* высота кружочка (равна ширине → круг) */
+  border-radius: 50%;   /* из квадрата делаем круг */
+}
+.topcard .corner.top    { top: -10px; }
+.topcard .corner.bottom { bottom: -10px; }
+.topcard .corner.left   { left: -10px; }
+.topcard .corner.right  { right: -10px; }
+/* 1) Шампань только для верхних двух кружочков верхнего блока */
+.topcard .first .top.corner {
+  background-color: rgba(252, 250, 246, 0.96); /* шампань */
+}
+
+/* 2) Мята для всех остальных кружочков */
+.topcard .first .bottom.corner,
+.topcard .second .top.corner,
+.topcard .second .bottom.corner {
+  background-color: rgba(241, 249, 247, 0.94); /* мятный */
+}
+/* 3) Отступы внутри контейнера */
+.topcard .spacer {
+  padding: 25px 20px 20px 20px;
+}
+.topcard .spacer2 {
+  padding: 15px 20px 20px 20px;
+}
 
 
 .matrix-calendar {
