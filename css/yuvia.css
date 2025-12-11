@@ -769,6 +769,15 @@ button:focus,
 .topcard .spacer2 {
   padding: 15px 20px 20px 20px;
 }
+/* Лейбл сверху билета (ЗОЛОТАЯ СЕРЕДИНА и т.п.) */
+.topcard .ticket-label {
+  font-size: 11px;           /* мелкий текст */
+  letter-spacing: 0.16em;    /* буквы чуть "расползлись" — как печать */
+  text-transform: uppercase; /* на всякий случай, если забудем .toUpperCase() */
+  font-weight: 700;          /* пожирнее */
+  color: var(--sun);         /* наш золотой цвет из палитры */
+  margin-bottom: 16px;       /* отступ вниз, чтобы отделить от городов */
+}
 
 
 .matrix-calendar {
