@@ -911,6 +911,46 @@ button:focus,
   margin-bottom: 16px;       /* отступ вниз, чтобы отделить от городов */
 }
 
+/* Строка с городами и самолётиком */
+.topcard .ticket-route-row {
+  display: flex;            /* ставим элементы в ряд: город – самолёт – город */
+  align-items: flex-end;    /* выравниваем по нижней линии, как в макете */
+  justify-content: space-between; /* левый и правый города по краям */
+  gap: 12px;                /* запас на случай, если билеты ужмём */
+  margin-bottom: 18px;      /* отступ вниз, дальше пойдет текст про аэропорты и т.д. */
+}
+
+/* Общий стиль для блоков города */
+.topcard .ticket-city {
+  display: flex;
+  flex-direction: column;   /* сверху крупный код, под ним мелкий текст */
+  gap: 4px;
+}
+
+/* Крупные коды городов: BUD / LTN */
+.topcard .ticket-city-code {
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--ink);        /* тёмно-зелёный */
+}
+
+/* Подписи под кодами: Budapest / Luton Airport */
+.topcard .ticket-city-name {
+  font-size: 11px;
+  color: rgba(5, 50, 39, 0.75); /* тот же зелёный, но посветлее и прозрачнее */
+}
+
+/* Самолётик по центру */
+.topcard .ticket-plane {
+  font-size: 22px;
+  line-height: 1;
+  color: var(--ink);        /* тёмно-зелёный самолёт */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;           /* немного воздуха слева/справа */
+}
 
 .matrix-calendar {
         display: grid;
