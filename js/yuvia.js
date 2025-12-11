@@ -1649,27 +1649,35 @@
       card.dataset.id = flight.id;
       card.style.animationDelay = `${index * 40}ms`;
 
-      const outbound = flight.outbound;
-      const inbound = flight.return;
+         const outbound = flight.outbound;
+    const inbound = flight.return;
 
- const originCity =
-  outboundSlice.originCity ||      // 1. город из нормализованных данных
-  flight.originCity ||             // 2. город на уровне рейса
-  formState.originName ||          // 3. то, что ввёл пользователь в форме
-  getCityName(outboundSlice.originAirport) || // 4. только если совсем ничего нет
-  "";
-      const originCode = formatAirport(
-        outbound?.start?.originAirport || flight.originAirport,
-      );
-const destCity =
-  outboundSlice.destCity ||
-  flight.destCity ||
-  formState.destName ||
-  getCityName(outboundSlice.destAirport) ||
-  "";
-      const destCode = formatAirport(
-        outbound?.end?.destAirport || flight.destAirport,
-      );
+    // Город вылета
+    const originCity =
+      outbound?.start?.originCity ||                      // 1. город из слайса "туда"
+      flight.originCity ||                                // 2. город на уровне рейса
+      formState.originName ||                             // 3. что ввёл пользователь
+      getCityName(outbound?.start?.originAirport ||       // 4. вытаскиваем из IATA-кода
+                  flight.originAirport) ||
+      "";
+
+    const originCode = formatAirport(
+      outbound?.start?.originAirport || flight.originAirport,
+    );
+
+    // Город назначения
+    const destCity =
+      outbound?.end?.destCity ||                          // 1. город из слайса "туда"
+      flight.destCity ||                                  // 2. город на уровне рейса
+      formState.destName ||                               // 3. что ввёл пользователь
+      getCityName(outbound?.end?.destAirport ||           // 4. из IATA-кода
+                  flight.destAirport) ||
+      "";
+
+    const destCode = formatAirport(
+      outbound?.end?.destAirport || flight.destAirport,
+    );
+
       const routeTitle =
         [originCity, destCity].filter(Boolean).join(" → ") || "Маршрут";
 
@@ -3261,18 +3269,24 @@ const destCity =
         ? getDirectionSlice(flight, "return")
         : null;
 
-      const originCity =
-        getCityName(outboundSlice.originAirport) ||
-        outboundSlice.originCity ||
-        flight.originCity ||
-        formState.originName ||
-        "";
-      const destCity =
-        getCityName(outboundSlice.destAirport) ||
-        outboundSlice.destCity ||
-        flight.destCity ||
-        formState.destName ||
-        "";
+     // Город вылета
+const originCity =
+  outboundSlice.originCity ||                           // 1. город из нормализованных данных
+  flight.originCity ||                                  // 2. город на уровне рейса
+  formState.originName ||                               // 3. что писал пользователь в форме
+  getCityName(outboundSlice.originAirport ||            // 4. крайний случай: пытаемся по коду
+              flight.originAirport) ||
+  "";
+
+// Город прилёта
+const destCity =
+  outboundSlice.destCity ||                             // 1. город из нормализованных данных
+  flight.destCity ||                                    // 2. город на уровне рейса
+  formState.destName ||                                 // 3. что писал пользователь
+  getCityName(outboundSlice.destAirport ||              // 4. в самом конце — по коду
+              flight.destAirport) ||
+  "";
+
       const originCode = outboundSlice.originAirport || flight.originAirport || "";
 const destCode = outboundSlice.destAirport || flight.destAirport || "";
 
