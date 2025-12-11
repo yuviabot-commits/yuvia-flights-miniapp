@@ -3273,6 +3273,9 @@
         flight.destCity ||
         formState.destName ||
         "";
+      const originCode = outboundSlice.originAirport || flight.originAirport || "";
+const destCode = outboundSlice.destAirport || flight.destAirport || "";
+
 
       const routeLine =
         [originCity, destCity].filter(Boolean).join(" → ") || "Маршрут";
@@ -3327,7 +3330,9 @@ card.innerHTML = `
     <div class="bottom right corner"></div>
 
     <div class="spacer">
-      <!-- верхняя часть билета, наполнение добавим позже -->
+     <div class="ticket-label">
+      ${(flight.topLabel || "Рекомендация Yuvia").toUpperCase()}
+      </div>
     </div>
   </div>
 
