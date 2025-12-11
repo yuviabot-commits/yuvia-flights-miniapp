@@ -1652,21 +1652,21 @@
       const outbound = flight.outbound;
       const inbound = flight.return;
 
-      const originCity =
-        outbound?.start?.originCity ||
-        flight.originCity ||
-        flight.originName ||
-        formState.originName ||
-        "";
+ const originCity =
+  outboundSlice.originCity ||      // 1. город из нормализованных данных
+  flight.originCity ||             // 2. город на уровне рейса
+  formState.originName ||          // 3. то, что ввёл пользователь в форме
+  getCityName(outboundSlice.originAirport) || // 4. только если совсем ничего нет
+  "";
       const originCode = formatAirport(
         outbound?.start?.originAirport || flight.originAirport,
       );
-      const destCity =
-        outbound?.end?.destCity ||
-        flight.destCity ||
-        flight.destName ||
-        formState.destName ||
-        "";
+const destCity =
+  outboundSlice.destCity ||
+  flight.destCity ||
+  formState.destName ||
+  getCityName(outboundSlice.destAirport) ||
+  "";
       const destCode = formatAirport(
         outbound?.end?.destAirport || flight.destAirport,
       );
