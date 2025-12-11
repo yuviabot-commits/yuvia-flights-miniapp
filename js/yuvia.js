@@ -3330,8 +3330,25 @@ card.innerHTML = `
     <div class="bottom right corner"></div>
 
     <div class="spacer">
+     <!-- 1. Лейбл (ЗОЛОТАЯ СЕРЕДИНА / САМЫЙ БЫСТРЫЙ и т.п.) -->
      <div class="ticket-label">
       ${(flight.topLabel || "Рекомендация Yuvia").toUpperCase()}
+      
+  <!-- 2. Города + самолётик -->
+  <div class="ticket-route-row">
+    <!-- Левый город (откуда) -->
+    <div class="ticket-city ticket-city--from">
+      <div class="ticket-city-code">${originCode || "—"}</div>
+      <div class="ticket-city-name">${originCity}</div>
+    </div>
+
+    <!-- Самолётик по центру -->
+    <div class="ticket-plane">✈</div>
+
+    <!-- Правый город (куда) -->
+    <div class="ticket-city ticket-city--to">
+      <div class="ticket-city-code">${destCode || "—"}</div>
+      <div class="ticket-city-name">${destCity}</div>
       </div>
     </div>
   </div>
