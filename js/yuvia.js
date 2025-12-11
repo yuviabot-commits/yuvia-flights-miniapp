@@ -3319,95 +3319,30 @@
       const stressText = getStressText(flight.stressLevel);
       const currency = flight.currency || lastCurrency;
 
-      card.innerHTML = `
-        <div class="yuvia-ticket">
-          <!-- ВЕРХНЯЯ ЧАСТЬ БИЛЕТА -->
-          <div class="container first">
-            <div class="top left corner"></div>
-            <div class="top right corner"></div>
-            <div class="bottom left corner"></div>
-            <div class="bottom right corner"></div>
+card.innerHTML = `
+  <div class="container first">
+    <div class="top left corner"></div>
+    <div class="top right corner"></div>
+    <div class="bottom left corner"></div>
+    <div class="bottom right corner"></div>
 
-            <div class="spacer">
-              <div class="topcard-main">
-                <div class="topcard-label">
-                  ${(flight.topLabel || "Рекомендация").toUpperCase()}
-                </div>
+    <div class="spacer">
+      <!-- верхняя часть билета, наполнение добавим позже -->
+    </div>
+  </div>
 
-                <div class="topcard-route">${routeLine}</div>
+  <div class="container second">
+    <div class="top left corner"></div>
+    <div class="top right corner"></div>
+    <div class="bottom left corner"></div>
+    <div class="bottom right corner"></div>
 
-                ${airportLine
-                  ? `<div class="topcard-airports">${airportLine}</div>`
-                  : ""}
+    <div class="spacer2">
+      <!-- нижняя часть билета (stub), наполнение тоже потом -->
+    </div>
+  </div>
+`;
 
-                <div class="topcard-meta-row">
-                  <div class="topcard-duration-main">
-                    ${totalDurationMinutes
-                      ? `Туда: ${primaryDurationText} · Обратно: ${formatDuration(
-                          totalDurationMinutes - outboundDuration,
-                        )}`
-                      : `В пути: ${primaryDurationText}`}
-                  </div>
-                  <div class="topcard-transfers">
-                    ${transfersText}
-                  </div>
-                  ${
-                    stressText
-                      ? `<div class="topcard-stress">стресс: ${stressText}</div>`
-                      : ""
-                  }
-                </div>
-
-                <div class="topcard-price-row">
-                  <div class="topcard-price">
-                    ${formatCurrency(flight.price, currency)}
-                  </div>
-                  ${
-                    airlineLine
-                      ? `<div class="topcard-airline">${airlineLine}</div>`
-                      : ""
-                  }
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- НИЖНЯЯ ЧАСТЬ БИЛЕТА (ОТРЫВНОЙ КУПОН С КНОПКАМИ) -->
-          <div class="container second">
-            <div class="top left corner"></div>
-            <div class="top right corner"></div>
-            <div class="bottom left corner"></div>
-            <div class="bottom right corner"></div>
-
-            <div class="spacer2">
-              <div class="topcard-bottom">
-                <div class="topcard-actions">
-                  <button
-                    type="button"
-                    class="btn-outline"
-                    data-action="open-in-results"
-                  >
-                    Открыть в выдаче
-                  </button>
-
-                  ${
-                    ticketUrl
-                      ? `<a
-                           class="btn-primary"
-                           href="${ticketUrl}"
-                           target="_blank"
-                           rel="noopener noreferrer"
-                         >
-                           Купить на Aviasales
-                         </a>`
-                      : ""
-                  }
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
 
 
       const openBtn = card.querySelector('[data-action="open-in-results"]');
