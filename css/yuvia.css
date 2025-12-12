@@ -883,7 +883,7 @@ button:focus,
   overflow: hidden;
   z-index: 1;
   box-shadow: 0 10px 30px rgba(8, 52, 40, 0.08);
-  border: 1px solid rgba(10, 60, 46, 0.08);
+  border: none;
 }
 .topcard .first {
   min-height: 150px;  /* верхняя часть билета */
@@ -903,10 +903,12 @@ button:focus,
   height: 17px;         /* высота кружочка (равна ширине → круг) */
   border-radius: 50%;   /* из квадрата делаем круг */
 }
-.topcard .corner.top    { top: -10px; }
-.topcard .corner.bottom { bottom: -10px; }
-.topcard .corner.left   { left: -10px; }
-.topcard .corner.right  { right: -10px; }
+.topcard .corner.top    { top: -7px; }
+.topcard .corner.bottom { bottom: -7px; }
+.topcard .corner.left   { left: -7px; }
+.topcard .corner.right  { right: -7px; }
+.topcard .corner { z-index: 2; }
+
 /* 1) Шампань только для верхних двух кружочков верхнего блока */
 .topcard .first .top.corner {
   background-color: rgba(252, 250, 246, 0.96); /* шампань */
@@ -932,7 +934,7 @@ button:focus,
   text-transform: uppercase; /* на всякий случай, если забудем .toUpperCase() */
   font-weight: 700;          /* пожирнее */
   color: #a27927;         /* наш золотой цвет из палитры */
-  margin-bottom: 6px;       /* отступ вниз, чтобы отделить от городов */
+  margin-bottom: 16px;       /* отступ вниз, чтобы отделить от городов */
 }
 
 /* Строка с городами и самолётиком */
@@ -947,8 +949,9 @@ button:focus,
 /* Общий стиль для блоков города */
 .topcard .ticket-city {
   display: flex;
+  align-items: center;
   flex-direction: column;   /* сверху крупный код, под ним мелкий текст */
-  gap: 4px;
+  gap: 1px;
 }
 
 /* Крупные коды городов: BUD / LTN */
