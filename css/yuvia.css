@@ -961,7 +961,7 @@ button:focus,
   font-weight: 800;
   align-items: center;
   letter-spacing: 0.06em;
-  color: rgba(5, 50, 39, 0.72);        /* тёмно-зелёный */
+  color: rgb(11 61 49);        /* тёмно-зелёный */
 }
 
 /* Подписи под кодами: Budapest / Luton Airport */
