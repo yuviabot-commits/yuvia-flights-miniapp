@@ -943,7 +943,7 @@ button:focus,
   align-items: center;     /* выравниваем по центру  */
   grid-template-columns: 1fr auto 1fr; 
   gap: 6px;                /* запас на случай, если билеты ужмём */
-  margin-bottom: 8px;      /* отступ вниз, дальше пойдет текст про аэропорты и т.д. */
+  margin-bottom: 18px;      /* отступ вниз, дальше пойдет текст про аэропорты и т.д. */
 }
 
 /* Общий стиль для блоков города */
@@ -961,21 +961,22 @@ button:focus,
   font-weight: 800;
   align-items: center;
   letter-spacing: 0.06em;
-  color: rgb(11 61 49);        /* тёмно-зелёный */
+  color: rgb(53 77 58);        /* тёмно-зелёный */
 }
 
 /* Подписи под кодами: Budapest / Luton Airport */
 .topcard .ticket-city-name {
   font-size: 12px;
   align-items: center;
-  color: rgba(5, 50, 39, 0.75); /* тот же зелёный, но посветлее и прозрачнее */
+  font-weight: 500;
+  color: rgba(5, 50, 39, 0.78); /* тот же зелёный, но посветлее и прозрачнее */
 }
 
 /* Самолётик по центру */
 .topcard .ticket-plane {
   font-size: 18px;
   line-height: 1;
-  color: var(--ink);        /* тёмно-зелёный самолёт */
+  color: rgb(53 77 58);        /* тёмно-зелёный самолёт */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -997,14 +998,14 @@ button:focus,
 }
 
 .topcard .ticket-leg-label {
-  color: rgba(5, 50, 39, 0.72);
+  color: rgb(53 77 58);
   font-weight: 650;
   font-size: 12px;
 }
 
 .topcard .ticket-leg-text {
-  color: rgba(5, 50, 39, 0.58);
-  font-weight: 500;
+  color: rgba(5, 50, 39, 0.78);
+  font-weight: 400;
   font-size: 12px;
 }
 
