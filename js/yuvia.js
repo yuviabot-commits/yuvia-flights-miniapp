@@ -3314,48 +3314,57 @@
       };
 
       const renderDirectionColumn = (title, segment) => {
+        if (!segment) return "";
+
         const durationText = segment?.durationMinutes
           ? formatDuration(segment.durationMinutes)
           : "";
+
+        const rows = [
+          {
+            key: "Пересадки",
+            value: formatTransferShort(segment?.transfers || 0),
+          },
+          durationText
+            ? {
+                key: "В пути",
+                value: durationText,
+              }
+            : null,
+          {
+            key: "Авиакомпании",
+            value: getDirectionAirlines(segment) || "",
+          },
+        ].filter(Boolean);
+
+        if (!rows.length) return "";
+
+        const rowsHtml = rows
+          .map(
+            ({ key, value }) => `
+                <div class="ticket-info-row">
+                  <span class="ticket-info-k">${key}</span>
+                  <span class="ticket-info-v">${escapeHtml(value)}</span>
+                </div>`,
+          )
+          .join("");
+
         return `
-              <div class="ticket-direction">
-                <div class="direction-title">${title}</div>
-                <div class="direction-row">
-                  <span class="direction-key">Пересадки</span>
-                  <span class="direction-value">${escapeHtml(
-                    formatTransferShort(segment?.transfers || 0),
-                  )}</span>
-                </div>
-                ${
-                  durationText
-                    ? `
-                <div class="direction-row">
-                  <span class="direction-key">В пути</span>
-                  <span class="direction-value">${escapeHtml(
-                    durationText,
-                  )}</span>
-                </div>
-                `
-                    : ""
-                }
-                <div class="direction-row">
-                  <span class="direction-key">Авиакомпании</span>
-                  <span class="direction-value">${escapeHtml(
-                    getDirectionAirlines(segment) || "",
-                  )}</span>
-                </div>
+              <div class="ticket-info-col">
+                <div class="ticket-info-title">${title}</div>
+                ${rowsHtml}
               </div>`;
       };
 
-      const directionColumns = [
+      const infoColumns = [
         renderDirectionColumn("Туда", outboundSlice),
         hasReturnSegment ? renderDirectionColumn("Обратно", returnSlice) : "",
       ]
         .filter(Boolean)
         .join("");
 
-      const directionsBlock = directionColumns
-        ? `<div class="ticket-directions">${directionColumns}</div>`
+      const directionsBlock = infoColumns
+        ? `<div class="ticket-info-grid">${infoColumns}</div>`
         : "";
 
         // Город вылета
@@ -3470,9 +3479,9 @@
           <div class="bottom right corner"></div>
 
           <div class="spacer2">
-            <div class="ticket-actions">
+            <div class="ticket-stub">
               <div class="ticket-price">${escapeHtml(priceText)}</div>
-              <div class="ticket-buttons">
+              <div class="ticket-actions">
                 <button type="button" class="btn btn-secondary btn-sm" data-action="open-in-results">
                   Открыть в выдаче
                 </button>
