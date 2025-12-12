@@ -753,7 +753,8 @@ button:focus,
 .topblock-subtitle {
   font-size: 13px;
   color: rgba(5, 50, 39, 0.78);
-  margin-top: 4px;
+  margin-top: 8px;
+  margin-bottom: 18px;
   max-width: 100%;
 }
 
