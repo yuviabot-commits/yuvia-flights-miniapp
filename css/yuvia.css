@@ -1144,21 +1144,30 @@ button:focus,
   box-shadow: 0 12px 26px rgba(7, 94, 84, 0.2);
 }
 
-.topcard .ticket-actions .btn-spark {
-  --cut: 0.1em;
+.topcard .ticket-actions .btn-spark{
+  --cut: 0.12em;
   --active: 0;
-  --bg:
-    radial-gradient(40% 50% at center 100%, hsl(270 0% 72% / 0.05), transparent),
-    radial-gradient(80% 100% at center 120%, hsl(260 0% 70% / 0.1), transparent),
-    hsl(260 0% 12%);
 
-  background: var(--bg);
-  font-weight: 600;
+  /* defaults (будут переопределены модификаторами) */
+  --bg:
+    linear-gradient(180deg, rgba(255,255,255,0.72), rgba(255,255,255,0.55));
+  --border: rgba(148,163,184,0.35);
+  --shadow: 0 10px 22px rgba(7,94,84,0.10);
+
+  --text1: rgba(11,61,49,0.92);
+  --text2: rgba(11,61,49,0.72);
+  --text1h: rgba(11,61,49,0.98);
+  --text2h: rgba(11,61,49,0.78);
+
+  --spark-color: rgba(11,61,49,0.50);
+
+  background: transparent;
   border: 0;
   cursor: pointer;
 
-  font-size: 13px;
-  padding: 10px 14px;
+  font-size: 12px;                 /* меньше */
+  line-height: 1.1;
+  padding: 9px 12px;               /* компактнее */
 
   display: grid;
   place-items: center;
@@ -1167,91 +1176,124 @@ button:focus,
   border-radius: 999px;
   position: relative;
   overflow: hidden;
-
-  box-shadow:
-    0 0.05em 0 0 hsl(260 0% 50%) inset,
-    0 -0.05em 0 0 hsl(260 0% 0%) inset;
-
-  transition: box-shadow var(--transition), transform var(--transition), background var(--transition);
-  transform: scale(calc(1 + (var(--active) * 0.06)));
-  color: #fff;
+  transform: scale(1);
+  transition: transform 0.18s ease, filter 0.18s ease, box-shadow 0.18s ease;
   text-decoration: none;
 }
 
-.topcard .ticket-actions .btn-spark:active {
-  transform: scale(1);
+.topcard .ticket-actions .btn-spark .backdrop{
+  position: absolute;
+  inset: var(--cut);
+  background: var(--bg);
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  transition: filter 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
 
+.topcard .ticket-actions .btn-spark .text{
+  position: relative;
+  z-index: 2;
+  letter-spacing: 0.01ch;
+  background: linear-gradient(90deg, var(--text1), var(--text2));
+  -webkit-background-clip: text;
+  color: transparent;
+  transition: background 0.18s ease;
+}
+
+/* hover / focus */
 .topcard .ticket-actions .btn-spark:hover,
-.topcard .ticket-actions .btn-spark:focus-visible {
-  --active: 1;
+.topcard .ticket-actions .btn-spark:focus-visible{
+  transform: translateY(-1px);
 }
 
-.topcard .ticket-actions .btn-spark .spark {
+.topcard .ticket-actions .btn-spark:hover .backdrop,
+.topcard .ticket-actions .btn-spark:focus-visible .backdrop{
+  filter: brightness(1.03);
+  box-shadow: 0 12px 26px rgba(7,94,84,0.14);
+}
+
+.topcard .ticket-actions .btn-spark:hover .text,
+.topcard .ticket-actions .btn-spark:focus-visible .text{
+  background: linear-gradient(90deg, var(--text1h), var(--text2h));
+}
+
+/* ===== spark effect ===== */
+.topcard .ticket-actions .btn-spark .spark{
   position: absolute;
   inset: 0;
   border-radius: 999px;
   rotate: 0deg;
   overflow: hidden;
-  mask: linear-gradient(white, transparent 50%);
-  animation: flip calc(var(--spark) * 2) infinite steps(2, end);
+  mask: linear-gradient(white, transparent 55%);
+  animation: topcard-spark-flip calc(var(--spark) * 2) infinite steps(2, end);
+  pointer-events: none;
 }
 
-@keyframes flip {
-  to {
-    rotate: 360deg;
-  }
-}
+@keyframes topcard-spark-flip{ to{ rotate: 360deg; } }
 
-.topcard .ticket-actions .btn-spark .spark:before {
+.topcard .ticket-actions .btn-spark .spark:before{
   content: "";
   position: absolute;
-  width: 200%;
+  width: 220%;
   aspect-ratio: 1;
   inset: 0 auto auto 50%;
-  z-index: -1;
-  translate: -50% -15%;
+  translate: -50% -18%;
   transform: rotate(-90deg);
-  opacity: 1;
-  background: conic-gradient(from 0deg, transparent 0 340deg, white 360deg);
-  transition: opacity var(--transition);
-  animation: rotate var(--spark) linear infinite both;
+  opacity: 0.55; /* мягче, не кричит */
+  background: conic-gradient(
+    from 0deg,
+    transparent 0 330deg,
+    var(--spark-color) 360deg
+  );
+  animation: topcard-spark-rotate var(--spark) linear infinite both;
 }
 
-@keyframes rotate {
-  to {
-    transform: rotate(90deg);
-  }
-}
+@keyframes topcard-spark-rotate{ to{ transform: rotate(90deg); } }
 
-.topcard .ticket-actions .btn-spark .spark:after {
+.topcard .ticket-actions .btn-spark .spark:after{
   content: "";
   position: absolute;
   inset: var(--cut);
   border-radius: 999px;
 }
 
-.topcard .ticket-actions .btn-spark .backdrop {
-  position: absolute;
-  inset: var(--cut);
-  background: var(--bg);
-  border-radius: 999px;
-  transition: background var(--transition), opacity var(--transition);
+/* ===== variants ===== */
+
+/* Champagne: “Открыть в выдаче” */
+.topcard .ticket-actions .btn-spark--champagne{
+  --bg: linear-gradient(
+    180deg,
+    rgba(252,250,246,0.92),
+    rgba(250,244,232,0.72)
+  );
+  --border: rgba(162,121,39,0.28);
+  --shadow: 0 12px 26px rgba(162,121,39,0.10);
+
+  --text1: rgba(122,78,18,0.92);
+  --text2: rgba(122,78,18,0.72);
+  --text1h: rgba(122,78,18,0.98);
+  --text2h: rgba(122,78,18,0.78);
+
+  --spark-color: rgba(162,121,39,0.55);
 }
 
-.topcard .ticket-actions .btn-spark .text {
-  position: relative;
-  z-index: 2;
-  translate: 2% -6%;
-  letter-spacing: 0.01ch;
-  background: linear-gradient(
-    90deg,
-    hsl(0 0% calc((var(--active) * 100%) + 65%)),
-    hsl(0 0% calc((var(--active) * 100%) + 26%))
+/* Mint: “Купить на Aviasales” */
+.topcard .ticket-actions .btn-spark--mint{
+  --bg: linear-gradient(
+    180deg,
+    rgba(241,249,247,0.96),
+    rgba(223,247,240,0.72)
   );
-  -webkit-background-clip: text;
-  color: transparent;
-  transition: background var(--transition);
+  --border: rgba(7,94,84,0.22);
+  --shadow: 0 12px 26px rgba(7,94,84,0.12);
+
+  --text1: rgba(5,50,39,0.95);
+  --text2: rgba(5,50,39,0.72);
+  --text1h: rgba(5,50,39,1);
+  --text2h: rgba(5,50,39,0.78);
+
+  --spark-color: rgba(7,94,84,0.55);
 }
 
 .matrix-calendar {

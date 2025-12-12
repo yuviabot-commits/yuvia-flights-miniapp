@@ -3482,14 +3482,14 @@
             <div class="ticket-stub">
               <div class="ticket-price">${escapeHtml(priceText)}</div>
               <div class="ticket-actions action-bar">
-                <a class="btn btn-spark" href="#" data-action="open-in-results">
+                <a class="btn btn-spark btn-spark--champagne" href="#" data-action="open-in-results">
                   <span class="spark"></span>
                   <span class="backdrop"></span>
                   <span class="text">Открыть в выдаче</span>
                 </a>
                 ${
                   ticketUrl
-                    ? `<a class="btn btn-spark" href="${ticketUrl}" target="_blank" rel="noopener noreferrer">
+                    ? `<a class="btn btn-spark btn-spark--mint" href="${ticketUrl}" target="_blank" rel="noopener noreferrer">
                         <span class="spark"></span>
                         <span class="backdrop"></span>
                         <span class="text">Купить на Aviasales</span>
