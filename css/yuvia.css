@@ -281,8 +281,7 @@ button:focus,
       }
 
       .btn-sm {
-        padding: 7px 12px;
-        font-size: 13px;
+        font-size: 10px;
         line-height: 1.25;
         border-radius: calc(var(--radius-pill) - 4px);
       }
