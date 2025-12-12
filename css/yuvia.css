@@ -894,7 +894,7 @@ button:focus,
 .topcard .second {
   min-height: 60px;   /* «хвостик» / stub */
   height: 80px;
-  border-top: 3px solid rgba(241, 249, 247, 0.94);
+  border-top: 3px solid rgb(234 242 239);
 }
 /* Общие правила для всех кружочков-уголков билета */
 .topcard .corner {
@@ -903,22 +903,22 @@ button:focus,
   height: 17px;         /* высота кружочка (равна ширине → круг) */
   border-radius: 50%;   /* из квадрата делаем круг */
 }
-.topcard .corner.top    { top: -7px; }
-.topcard .corner.bottom { bottom: -7px; }
-.topcard .corner.left   { left: -7px; }
-.topcard .corner.right  { right: -7px; }
+.topcard .corner.top    { top: -8px; }
+.topcard .corner.bottom { bottom: -8px; }
+.topcard .corner.left   { left: -8px; }
+.topcard .corner.right  { right: -8px; }
 .topcard .corner { z-index: 2; }
 
 /* 1) Шампань только для верхних двух кружочков верхнего блока */
 .topcard .first .top.corner {
-  background-color: rgba(252, 250, 246, 0.96); /* шампань */
+  background-color: rgb(244 246 242); /* шампань */
 }
 
 /* 2) Мята для всех остальных кружочков */
 .topcard .first .bottom.corner,
 .topcard .second .top.corner,
 .topcard .second .bottom.corner {
-  background-color: rgba(241, 249, 247, 0.94); /* мятный */
+  background-color: rgb(234 242 239); /* мятный */
 }
 /* 3) Отступы внутри контейнера */
 .topcard .spacer {
@@ -941,7 +941,7 @@ button:focus,
 .topcard .ticket-route-row {
   display: flex;            /* ставим элементы в ряд: город – самолёт – город */
   align-items: center;     /* выравниваем по центру  */
-  justify-content: space-between; /* левый и правый города по краям */
+  grid-template-columns: 1fr auto 1fr; 
   gap: 6px;                /* запас на случай, если билеты ужмём */
   margin-bottom: 8px;      /* отступ вниз, дальше пойдет текст про аэропорты и т.д. */
 }
@@ -950,6 +950,7 @@ button:focus,
 .topcard .ticket-city {
   display: flex;
   align-items: center;
+  text-align: center;
   flex-direction: column;   /* сверху крупный код, под ним мелкий текст */
   gap: 1px;
 }
