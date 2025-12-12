@@ -279,6 +279,13 @@ button:focus,
         border: 1px solid rgba(7, 94, 84, 0.28);
         box-shadow: none;
       }
+
+      .btn-sm {
+        padding: 7px 12px;
+        font-size: 13px;
+        line-height: 1.25;
+        border-radius: calc(var(--radius-pill) - 4px);
+      }
       .btn-utility:hover {
         background: #e8f3ef;
         color: #053227;
@@ -288,11 +295,6 @@ button:focus,
         background: transparent;
         color: var(--accent);
         border-color: rgba(148, 163, 184, 0.6);
-      }
-      .btn-sm {
-        padding: 6px 10px;
-        font-size: 13px;
-        border-radius: 999px;
       }
       .aviasales-all-wrap {
         margin: 24px auto 0;
@@ -877,7 +879,7 @@ button:focus,
 
 .topcard .second {
   min-height: 60px;   /* «хвостик» / stub */
-  height: 60px;
+  height: auto;
   border-top: 2px solid rgba(241, 249, 247, 0.94);
 }
 /* Общие правила для всех кружочков-уголков билета */
@@ -960,6 +962,68 @@ button:focus,
   align-items: center;
   justify-content: center;
   padding: 0 6px;           /* немного воздуха слева/справа */
+}
+
+.topcard .ticket-directions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.topcard .ticket-direction {
+  flex: 1 1 48%;
+  border: 1px dashed rgba(7, 94, 84, 0.28);
+  background: #f3fbf8;
+  border-radius: 10px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.topcard .direction-title {
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: #064e3b;
+}
+
+.topcard .direction-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.topcard .direction-key {
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.topcard .direction-value {
+  color: #0f3f33;
+  text-align: right;
+}
+
+.topcard .ticket-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.topcard .ticket-price {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0b3d31;
+}
+
+.topcard .ticket-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .matrix-calendar {
