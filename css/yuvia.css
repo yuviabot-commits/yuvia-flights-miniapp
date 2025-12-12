@@ -951,8 +951,12 @@ button:focus,
   display: flex;
   align-items: center;
   text-align: center;
-  flex-direction: column;   /* сверху крупный код, под ним мелкий текст */
+  flex-direction: column;
   gap: 1px;
+
+  justify-self: stretch;       /* NEW: равная ширина в grid */
+  width: 100%;                 /* NEW: не сжиматься по контенту */
+  justify-content: flex-start; /* NEW: код/город всегда “сверху”, а не плавают */
 }
 
 /* Крупные коды городов: BUD / LTN */
@@ -961,16 +965,29 @@ button:focus,
   font-weight: 800;
   align-items: center;
   letter-spacing: 0.06em;
-  color: rgb(53 77 58);        /* тёмно-зелёный */
+  color: rgb(53 77 58);
+
+  line-height: 1.1; /* NEW: фикс “полки” кода, чтобы SVO/LED были на одной высоте */
 }
+
 
 /* Подписи под кодами: Budapest / Luton Airport */
 .topcard .ticket-city-name {
   font-size: 12px;
   align-items: center;
   font-weight: 500;
-  color: rgba(5, 50, 39, 0.78); /* тот же зелёный, но посветлее и прозрачнее */
+  color: rgba(5, 50, 39, 0.78);
+
+  line-height: 1.2;
+  min-height: 2.4em;
+
+  display: -webkit-box;        /* NEW */
+  -webkit-box-orient: vertical;/* NEW */
+  -webkit-line-clamp: 2;       /* NEW: максимум 2 строки */
+  overflow: hidden;            /* NEW */
 }
+
+
 
 /* Самолётик по центру */
 .topcard .ticket-plane {
