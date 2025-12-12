@@ -3482,12 +3482,18 @@
             <div class="ticket-stub">
               <div class="ticket-price">${escapeHtml(priceText)}</div>
               <div class="ticket-actions action-bar">
-                <button type="button" class="btn btn-secondary btn-sm" data-action="open-in-results">
-                  Открыть в выдаче
-                </button>
+                <a class="btn btn-spark" href="#" data-action="open-in-results">
+                  <span class="spark"></span>
+                  <span class="backdrop"></span>
+                  <span class="text">Открыть в выдаче</span>
+                </a>
                 ${
                   ticketUrl
-                    ? `<a class="btn btn-primary btn-sm" href="${ticketUrl}" target="_blank" rel="noopener noreferrer">Купить на Aviasales</a>`
+                    ? `<a class="btn btn-spark" href="${ticketUrl}" target="_blank" rel="noopener noreferrer">
+                        <span class="spark"></span>
+                        <span class="backdrop"></span>
+                        <span class="text">Купить на Aviasales</span>
+                      </a>`
                     : ""
                 }
               </div>
@@ -3497,7 +3503,10 @@
       `;
 
       const openBtn = card.querySelector('[data-action="open-in-results"]');
-      openBtn?.addEventListener("click", () => highlightResultCard(flight.id));
+      openBtn?.addEventListener("click", (event) => {
+        event.preventDefault();
+        highlightResultCard(flight.id);
+      });
 
       yuviaTopList.appendChild(card);
     });
