@@ -1165,7 +1165,7 @@ button:focus,
   border: 0;
   cursor: pointer;
 
-  font-size: 12px;
+  font-size: 11px;
   line-height: 1.1;
   font-weight: 600;
   letter-spacing: 0.01em;
@@ -1267,35 +1267,23 @@ button:focus,
 /* ===== variants ===== */
 
 /* Champagne: “Открыть в выдаче” */
-.topcard .ticket-actions .btn-spark--champagne{
-  --bg: linear-gradient(
-    180deg,
-    rgba(248,240,226,0.86),
-    rgba(245,236,222,0.62)
-  );
-  --border: rgba(160,130,75,0.18);
-  --shadow: 0 10px 20px rgba(160,130,75,0.12);
-
-  --text1: rgba(92,64,24,0.9);
-  --text1h: rgba(92,64,24,0.96);
-
-  --spark-color: rgba(160,130,75,0.22);
+.topcard .ticket-actions .btn-spark--champagne {
+    --bg: linear-gradient(180deg, rgb(248 240 226 / 12%), rgb(251 250 246 / 73%));
+    --border: rgb(160 130 75 / 5%);
+    --shadow: 0 10px 20px rgba(160, 130, 75, 0.12);
+    --text1: rgb(79 57 14 / 79%);
+    --text1h: rgb(79 57 14 / 90%);
+    --spark-color: rgba(160, 130, 75, 0.22);
 }
 
 /* Mint: “Купить на Aviasales” */
-.topcard .ticket-actions .btn-spark--mint{
-  --bg: linear-gradient(
-    180deg,
-    rgba(222,242,235,0.9),
-    rgba(203,233,222,0.65)
-  );
-  --border: rgba(37,110,94,0.2);
-  --shadow: 0 10px 22px rgba(21,92,76,0.14);
-
-  --text1: rgba(28,78,64,0.92);
-  --text1h: rgba(22,70,58,0.98);
-
-  --spark-color: rgba(37,110,94,0.25);
+.topcard .ticket-actions .btn-spark--mint {
+    --bg: linear-gradient(170deg, rgb(254 255 254 / 84%), rgb(116 162 150 / 14%), rgb(124 180 166 / 34%));
+    --border: rgb(37 110 94 / 0%);
+    --shadow: 0 10px 22px rgba(21, 92, 76, 0.14);
+    --text1: rgb(67 101 92);
+    --text1h: rgba(22, 70, 58, 0.98);
+    --spark-color: rgba(37, 110, 94, 0.25);
 }
 
 .matrix-calendar {
