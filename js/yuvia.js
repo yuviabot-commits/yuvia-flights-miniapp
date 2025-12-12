@@ -358,6 +358,16 @@
     return parts.join(" ");
   }
 
+  function formatDurationCompact(minutes) {
+    if (!minutes) return "—";
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    const parts = [];
+    if (hours) parts.push(`${hours}ч`);
+    if (mins || !hours) parts.push(`${mins}м`);
+    return parts.join(" ");
+  }
+
   function clamp(value, min, max) {
     return Math.min(Math.max(value, min), max);
   }
@@ -3313,58 +3323,48 @@
         return flight.airlineName || flight.airline || "—";
       };
 
-      const renderDirectionColumn = (title, segment) => {
+      const getDirectionShortAirline = (segment) => {
+        const names = getDirectionAirlines(segment);
+        if (!names) return "";
+        return names
+          .split(/,\s*/)[0]
+          .replace(/Авиакомпания\s+/i, "")
+          .trim();
+      };
+
+      const renderDirectionLeg = (title, segment) => {
         if (!segment) return "";
 
         const durationText = segment?.durationMinutes
-          ? formatDuration(segment.durationMinutes)
+          ? formatDurationCompact(segment.durationMinutes)
           : "";
 
-        const rows = [
-          {
-            key: "Пересадки",
-            value: formatTransferShort(segment?.transfers || 0),
-          },
-          durationText
-            ? {
-                key: "В пути",
-                value: durationText,
-              }
-            : null,
-          {
-            key: "Авиакомпании",
-            value: getDirectionAirlines(segment) || "",
-          },
-        ].filter(Boolean);
+        const legText = [
+          formatTransferShort(segment?.transfers || 0),
+          durationText,
+          getDirectionShortAirline(segment),
+        ]
+          .filter(Boolean)
+          .join(" • ");
 
-        if (!rows.length) return "";
-
-        const rowsHtml = rows
-          .map(
-            ({ key, value }) => `
-                <div class="ticket-info-row">
-                  <span class="ticket-info-k">${key}</span>
-                  <span class="ticket-info-v">${escapeHtml(value)}</span>
-                </div>`,
-          )
-          .join("");
+        if (!legText) return "";
 
         return `
-              <div class="ticket-info-col">
-                <div class="ticket-info-title">${title}</div>
-                ${rowsHtml}
+              <div class="ticket-leg">
+                <div class="ticket-leg-label">${title}</div>
+                <div class="ticket-leg-text">${escapeHtml(legText)}</div>
               </div>`;
       };
 
-      const infoColumns = [
-        renderDirectionColumn("Туда", outboundSlice),
-        hasReturnSegment ? renderDirectionColumn("Обратно", returnSlice) : "",
+      const ticketLegs = [
+        renderDirectionLeg("Туда", outboundSlice),
+        hasReturnSegment ? renderDirectionLeg("Обратно", returnSlice) : "",
       ]
         .filter(Boolean)
         .join("");
 
-      const directionsBlock = infoColumns
-        ? `<div class="ticket-info-grid">${infoColumns}</div>`
+      const directionsBlock = ticketLegs
+        ? `<div class="ticket-legs">${ticketLegs}</div>`
         : "";
 
         // Город вылета
