@@ -862,6 +862,9 @@ button:focus,
   flex-direction: column;
   align-items: center;
   position: relative;
+  --transition: 0.25s;
+  --spark: 1.8s;
+  --speed: 1.2s;
 }
 
 .topcard::before {
@@ -1088,15 +1091,19 @@ button:focus,
   gap: 8px;
   flex-wrap: wrap;
   align-items: stretch;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .topcard .ticket-actions.action-bar {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.86), rgba(219, 240, 233, 0.92));
-  border: 1px solid rgba(7, 94, 84, 0.12);
-  border-radius: 16px;
-  padding: 8px;
-  box-shadow: 0 10px 26px rgba(7, 94, 84, 0.12);
-  backdrop-filter: blur(5px);
+  background: transparent;
+  border: 0;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .topcard .ticket-actions .btn {
@@ -1135,6 +1142,116 @@ button:focus,
   background: linear-gradient(135deg, #d7f3e9, #b8e4d4);
   border-color: rgba(7, 94, 84, 0.34);
   box-shadow: 0 12px 26px rgba(7, 94, 84, 0.2);
+}
+
+.topcard .ticket-actions .btn-spark {
+  --cut: 0.1em;
+  --active: 0;
+  --bg:
+    radial-gradient(40% 50% at center 100%, hsl(270 0% 72% / 0.05), transparent),
+    radial-gradient(80% 100% at center 120%, hsl(260 0% 70% / 0.1), transparent),
+    hsl(260 0% 12%);
+
+  background: var(--bg);
+  font-weight: 600;
+  border: 0;
+  cursor: pointer;
+
+  font-size: 13px;
+  padding: 10px 14px;
+
+  display: grid;
+  place-items: center;
+  white-space: nowrap;
+
+  border-radius: 999px;
+  position: relative;
+  overflow: hidden;
+
+  box-shadow:
+    0 0.05em 0 0 hsl(260 0% 50%) inset,
+    0 -0.05em 0 0 hsl(260 0% 0%) inset;
+
+  transition: box-shadow var(--transition), transform var(--transition), background var(--transition);
+  transform: scale(calc(1 + (var(--active) * 0.06)));
+  color: #fff;
+  text-decoration: none;
+}
+
+.topcard .ticket-actions .btn-spark:active {
+  transform: scale(1);
+}
+
+.topcard .ticket-actions .btn-spark:hover,
+.topcard .ticket-actions .btn-spark:focus-visible {
+  --active: 1;
+}
+
+.topcard .ticket-actions .btn-spark .spark {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  rotate: 0deg;
+  overflow: hidden;
+  mask: linear-gradient(white, transparent 50%);
+  animation: flip calc(var(--spark) * 2) infinite steps(2, end);
+}
+
+@keyframes flip {
+  to {
+    rotate: 360deg;
+  }
+}
+
+.topcard .ticket-actions .btn-spark .spark:before {
+  content: "";
+  position: absolute;
+  width: 200%;
+  aspect-ratio: 1;
+  inset: 0 auto auto 50%;
+  z-index: -1;
+  translate: -50% -15%;
+  transform: rotate(-90deg);
+  opacity: 1;
+  background: conic-gradient(from 0deg, transparent 0 340deg, white 360deg);
+  transition: opacity var(--transition);
+  animation: rotate var(--spark) linear infinite both;
+}
+
+@keyframes rotate {
+  to {
+    transform: rotate(90deg);
+  }
+}
+
+.topcard .ticket-actions .btn-spark .spark:after {
+  content: "";
+  position: absolute;
+  inset: var(--cut);
+  border-radius: 999px;
+}
+
+.topcard .ticket-actions .btn-spark .backdrop {
+  position: absolute;
+  inset: var(--cut);
+  background: var(--bg);
+  border-radius: 999px;
+  transition: background var(--transition), opacity var(--transition);
+}
+
+.topcard .ticket-actions .btn-spark .text {
+  position: relative;
+  z-index: 2;
+  translate: 2% -6%;
+  letter-spacing: 0.01ch;
+  background: linear-gradient(
+    90deg,
+    hsl(0 0% calc((var(--active) * 100%) + 65%)),
+    hsl(0 0% calc((var(--active) * 100%) + 26%))
+  );
+  -webkit-background-clip: text;
+  color: transparent;
+  transition: background var(--transition);
 }
 
 .matrix-calendar {
