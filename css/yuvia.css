@@ -865,7 +865,7 @@ button:focus,
 .topcard .container {
   margin: 0 auto;
   width: 300px;
-  background-color: #ffffff;
+  background-color: #ffffffc4;
   position: relative;
   overflow: hidden;
 }
@@ -922,7 +922,7 @@ button:focus,
 /* Строка с городами и самолётиком */
 .topcard .ticket-route-row {
   display: flex;            /* ставим элементы в ряд: город – самолёт – город */
-  align-items: flex-end;    /* выравниваем по нижней линии, как в макете */
+  align-items: center;     /* выравниваем по центру  */
   justify-content: space-between; /* левый и правый города по краям */
   gap: 6px;                /* запас на случай, если билеты ужмём */
   margin-bottom: 10px;      /* отступ вниз, дальше пойдет текст про аэропорты и т.д. */
