@@ -964,66 +964,69 @@ button:focus,
   padding: 0 6px;           /* немного воздуха слева/справа */
 }
 
-.topcard .ticket-directions {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  justify-content: space-between;
+.topcard .ticket-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px 16px;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(7, 94, 84, 0.35);
 }
 
-.topcard .ticket-direction {
-  flex: 1 1 48%;
-  border: 1px dashed rgba(7, 94, 84, 0.28);
-  background: #f3fbf8;
-  border-radius: 10px;
-  padding: 8px 10px;
+.topcard .ticket-info-col {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.topcard .direction-title {
+.topcard .ticket-info-title {
   font-weight: 700;
   font-size: 12px;
   letter-spacing: 0.02em;
   color: #064e3b;
 }
 
-.topcard .direction-row {
+.topcard .ticket-info-row {
   display: flex;
   justify-content: space-between;
   gap: 8px;
   font-size: 12px;
+  align-items: baseline;
 }
 
-.topcard .direction-key {
+.topcard .ticket-info-k {
   color: var(--muted);
   white-space: nowrap;
 }
 
-.topcard .direction-value {
+.topcard .ticket-info-v {
   color: #0f3f33;
   text-align: right;
 }
 
-.topcard .ticket-actions {
+.topcard .ticket-stub {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
   gap: 12px;
+  align-items: stretch;
 }
 
 .topcard .ticket-price {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   color: #0b3d31;
 }
 
-.topcard .ticket-buttons {
+.topcard .ticket-actions {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: wrap;
-  justify-content: flex-end;
+  align-items: stretch;
+}
+
+.topcard .ticket-actions .btn {
+  flex: 1 1 0;
+  min-width: 0;
+  text-align: center;
 }
 
 .matrix-calendar {
