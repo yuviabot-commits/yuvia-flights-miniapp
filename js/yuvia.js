@@ -2242,18 +2242,18 @@
       context.destination ||
       "";
     const originCityResolved =
-      getCityName(originAirportCode) ||
       context.originCity ||
       raw.origin_name ||
       raw.originCity ||
       raw.origin_city ||
+      getCityName(originAirportCode) ||
       "";
     const destCityResolved =
-      getCityName(destAirportCode) ||
       context.destCity ||
       raw.destination_name ||
       raw.destCity ||
       raw.dest_city ||
+      getCityName(destAirportCode) ||
       "";
 
     if (hasCompactAviasalesFields) {
@@ -3035,23 +3035,28 @@
       direction === "return" ? flight.return : flight.outbound || flight;
     const originCity =
       segment?.start?.city ||
+      segment?.start?.originCity ||
       (direction === "return" ? flight.destCity : flight.originCity) ||
       "";
     const destCity =
       segment?.end?.city ||
+      segment?.end?.destCity ||
       (direction === "return" ? flight.originCity : flight.destCity) ||
       "";
     const originAirport =
       segment?.start?.airportCode ||
       segment?.start?.airport ||
+      segment?.start?.originAirport ||
       flight.originIATA ||
       flight.originAirport ||
       "";
     const destAirport =
       segment?.end?.airportCode ||
       segment?.end?.airport ||
+      segment?.end?.destAirport ||
       flight.destIATA ||
       flight.destinationAirport ||
+      flight.destAirport ||
       "";
     const departAt = segment?.start?.departAt || flight.departAt;
     const arriveAt = segment?.end?.arriveAt || flight.arriveAt;
@@ -3269,26 +3274,31 @@
         ? getDirectionSlice(flight, "return")
         : null;
 
-     // Город вылета
-const originCity =
-  outboundSlice.originCity ||                           // 1. город из нормализованных данных
-  flight.originCity ||                                  // 2. город на уровне рейса
-  formState.originName ||                               // 3. что писал пользователь в форме
-  getCityName(outboundSlice.originAirport ||            // 4. крайний случай: пытаемся по коду
-              flight.originAirport) ||
-  "";
+        // Город вылета
+        const originCity =
+          outboundSlice.originCity || // 1. город из нормализованных данных
+          flight.originCity || // 2. город на уровне рейса
+          formState.originName || // 3. что писал пользователь в форме
+          getCityName(
+            outboundSlice.originAirport || // 4. крайний случай: пытаемся по коду
+              flight.originAirport,
+          ) ||
+          "";
 
-// Город прилёта
-const destCity =
-  outboundSlice.destCity ||                             // 1. город из нормализованных данных
-  flight.destCity ||                                    // 2. город на уровне рейса
-  formState.destName ||                                 // 3. что писал пользователь
-  getCityName(outboundSlice.destAirport ||              // 4. в самом конце — по коду
-              flight.destAirport) ||
-  "";
+        // Город прилёта
+        const destCity =
+          outboundSlice.destCity || // 1. город из нормализованных данных
+          flight.destCity || // 2. город на уровне рейса
+          formState.destName || // 3. что писал пользователь
+          getCityName(
+            outboundSlice.destAirport || // 4. в самом конце — по коду
+              flight.destAirport,
+          ) ||
+          "";
 
-      const originCode = outboundSlice.originAirport || flight.originAirport || "";
-const destCode = outboundSlice.destAirport || flight.destAirport || "";
+        const originCode =
+          outboundSlice.originAirport || flight.originAirport || "";
+        const destCode = outboundSlice.destAirport || flight.destAirport || "";
 
 
       const routeLine =
@@ -3336,50 +3346,45 @@ const destCode = outboundSlice.destAirport || flight.destAirport || "";
       const stressText = getStressText(flight.stressLevel);
       const currency = flight.currency || lastCurrency;
 
-card.innerHTML = `
-  <div class="container first">
-    <div class="top left corner"></div>
-    <div class="top right corner"></div>
-    <div class="bottom left corner"></div>
-    <div class="bottom right corner"></div>
+      card.innerHTML = `
+        <div class="container first">
+          <div class="top left corner"></div>
+          <div class="top right corner"></div>
+          <div class="bottom left corner"></div>
+          <div class="bottom right corner"></div>
 
-    <div class="spacer">
-     <!-- 1. Лейбл (ЗОЛОТАЯ СЕРЕДИНА / САМЫЙ БЫСТРЫЙ и т.п.) -->
-     <div class="ticket-label">
-      ${(flight.topLabel || "Рекомендация Yuvia").toUpperCase()}
-      
-  <!-- 2. Города + самолётик -->
-  <div class="ticket-route-row">
-    <!-- Левый город (откуда) -->
-    <div class="ticket-city ticket-city--from">
-      <div class="ticket-city-code">${originCode || "—"}</div>
-      <div class="ticket-city-name">${originCity}</div>
-    </div>
+          <div class="spacer">
+            <div class="ticket-label">
+              ${(flight.topLabel || "Рекомендация Yuvia").toUpperCase()}
+            </div>
 
-    <!-- Самолётик по центру -->
-    <div class="ticket-plane">✈</div>
+            <div class="ticket-route-row">
+              <div class="ticket-city ticket-city--from">
+                <div class="ticket-city-code">${originCode || "—"}</div>
+                <div class="ticket-city-name">${originCity}</div>
+              </div>
 
-    <!-- Правый город (куда) -->
-    <div class="ticket-city ticket-city--to">
-      <div class="ticket-city-code">${destCode || "—"}</div>
-      <div class="ticket-city-name">${destCity}</div>
-      </div>
-    </div>
-  </div>
+              <div class="ticket-plane">✈</div>
 
-  <div class="container second">
-    <div class="top left corner"></div>
-    <div class="top right corner"></div>
-    <div class="bottom left corner"></div>
-    <div class="bottom right corner"></div>
+              <div class="ticket-city ticket-city--to">
+                <div class="ticket-city-code">${destCode || "—"}</div>
+                <div class="ticket-city-name">${destCity}</div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-    <div class="spacer2">
-      <!-- нижняя часть билета (stub), наполнение тоже потом -->
-    </div>
-  </div>
-`;
+        <div class="container second">
+          <div class="top left corner"></div>
+          <div class="top right corner"></div>
+          <div class="bottom left corner"></div>
+          <div class="bottom right corner"></div>
 
-
+          <div class="spacer2">
+            <!-- нижняя часть билета (stub), наполнение тоже потом -->
+          </div>
+        </div>
+      `;
 
       const openBtn = card.querySelector('[data-action="open-in-results"]');
       openBtn?.addEventListener("click", () => highlightResultCard(flight.id));
