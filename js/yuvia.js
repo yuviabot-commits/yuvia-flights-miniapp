@@ -3481,7 +3481,7 @@
           <div class="spacer2">
             <div class="ticket-stub">
               <div class="ticket-price">${escapeHtml(priceText)}</div>
-              <div class="ticket-actions">
+              <div class="ticket-actions action-bar">
                 <button type="button" class="btn btn-secondary btn-sm" data-action="open-in-results">
                   Открыть в выдаче
                 </button>
