@@ -930,10 +930,10 @@ button:focus,
 /* Лейбл сверху билета (ЗОЛОТАЯ СЕРЕДИНА и т.п.) */
 .topcard .ticket-label {
   font-size: 10px;           /* мелкий текст */
-  letter-spacing: 0.16em;    /* буквы чуть "расползлись" — как печать */
+  letter-spacing: 0.06em;    /* буквы чуть "расползлись" — как печать */
   text-transform: uppercase; /* на всякий случай, если забудем .toUpperCase() */
   font-weight: 700;          /* пожирнее */
-  color: #a27927;         /* наш золотой цвет из палитры */
+  color: #805e1a;         /* наш золотой цвет из палитры */
   margin-bottom: 16px;       /* отступ вниз, чтобы отделить от городов */
 }
 
@@ -956,11 +956,11 @@ button:focus,
 
 /* Крупные коды городов: BUD / LTN */
 .topcard .ticket-city-code {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 17px;
+  font-weight: 800;
   align-items: center;
   letter-spacing: 0.06em;
-  color: var(--ink);        /* тёмно-зелёный */
+  color: rgba(5, 50, 39, 0.72);        /* тёмно-зелёный */
 }
 
 /* Подписи под кодами: Budapest / Luton Airport */
