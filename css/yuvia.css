@@ -1165,15 +1165,17 @@ button:focus,
   border: 0;
   cursor: pointer;
 
-  font-size: 12px;                 /* меньше */
+  font-size: 12px;
   line-height: 1.1;
-  padding: 9px 12px;               /* компактнее */
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  padding: 9px 12px;
 
   display: grid;
   place-items: center;
   white-space: nowrap;
 
-  border-radius: 999px;
+  border-radius: 14px;
   position: relative;
   overflow: hidden;
   transform: scale(1);
@@ -1185,20 +1187,18 @@ button:focus,
   position: absolute;
   inset: var(--cut);
   background: var(--bg);
-  border-radius: 999px;
+  border-radius: 12px;
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
-  transition: filter 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  transition: filter 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease;
 }
 
 .topcard .ticket-actions .btn-spark .text{
   position: relative;
   z-index: 2;
-  letter-spacing: 0.01ch;
-  background: linear-gradient(90deg, var(--text1), var(--text2));
-  -webkit-background-clip: text;
-  color: transparent;
-  transition: background 0.18s ease;
+  color: var(--text1);
+  text-shadow: 0 0 1px rgba(0, 0, 0, 0.06);
+  transition: color 0.18s ease;
 }
 
 /* hover / focus */
@@ -1209,23 +1209,29 @@ button:focus,
 
 .topcard .ticket-actions .btn-spark:hover .backdrop,
 .topcard .ticket-actions .btn-spark:focus-visible .backdrop{
-  filter: brightness(1.03);
-  box-shadow: 0 12px 26px rgba(7,94,84,0.14);
+  filter: brightness(1.02);
+  box-shadow: 0 12px 22px rgba(7,94,84,0.12);
 }
 
 .topcard .ticket-actions .btn-spark:hover .text,
 .topcard .ticket-actions .btn-spark:focus-visible .text{
-  background: linear-gradient(90deg, var(--text1h), var(--text2h));
+  color: var(--text1h);
+}
+
+.topcard .ticket-actions .btn-spark:active{
+  transform: translateY(0);
+  filter: brightness(0.99);
+  box-shadow: 0 6px 14px rgba(7,94,84,0.12);
 }
 
 /* ===== spark effect ===== */
 .topcard .ticket-actions .btn-spark .spark{
   position: absolute;
   inset: 0;
-  border-radius: 999px;
+  border-radius: 14px;
   rotate: 0deg;
   overflow: hidden;
-  mask: linear-gradient(white, transparent 55%);
+  mask: linear-gradient(white, transparent 65%);
   animation: topcard-spark-flip calc(var(--spark) * 2) infinite steps(2, end);
   pointer-events: none;
 }
@@ -1240,7 +1246,7 @@ button:focus,
   inset: 0 auto auto 50%;
   translate: -50% -18%;
   transform: rotate(-90deg);
-  opacity: 0.55; /* мягче, не кричит */
+  opacity: 0.2; /* мягче, не кричит */
   background: conic-gradient(
     from 0deg,
     transparent 0 330deg,
@@ -1255,7 +1261,7 @@ button:focus,
   content: "";
   position: absolute;
   inset: var(--cut);
-  border-radius: 999px;
+  border-radius: 12px;
 }
 
 /* ===== variants ===== */
@@ -1264,36 +1270,32 @@ button:focus,
 .topcard .ticket-actions .btn-spark--champagne{
   --bg: linear-gradient(
     180deg,
-    rgba(252,250,246,0.92),
-    rgba(250,244,232,0.72)
+    rgba(248,240,226,0.86),
+    rgba(245,236,222,0.62)
   );
-  --border: rgba(162,121,39,0.28);
-  --shadow: 0 12px 26px rgba(162,121,39,0.10);
+  --border: rgba(160,130,75,0.18);
+  --shadow: 0 10px 20px rgba(160,130,75,0.12);
 
-  --text1: rgba(122,78,18,0.92);
-  --text2: rgba(122,78,18,0.72);
-  --text1h: rgba(122,78,18,0.98);
-  --text2h: rgba(122,78,18,0.78);
+  --text1: rgba(92,64,24,0.9);
+  --text1h: rgba(92,64,24,0.96);
 
-  --spark-color: rgba(162,121,39,0.55);
+  --spark-color: rgba(160,130,75,0.22);
 }
 
 /* Mint: “Купить на Aviasales” */
 .topcard .ticket-actions .btn-spark--mint{
   --bg: linear-gradient(
     180deg,
-    rgba(241,249,247,0.96),
-    rgba(223,247,240,0.72)
+    rgba(222,242,235,0.9),
+    rgba(203,233,222,0.65)
   );
-  --border: rgba(7,94,84,0.22);
-  --shadow: 0 12px 26px rgba(7,94,84,0.12);
+  --border: rgba(37,110,94,0.2);
+  --shadow: 0 10px 22px rgba(21,92,76,0.14);
 
-  --text1: rgba(5,50,39,0.95);
-  --text2: rgba(5,50,39,0.72);
-  --text1h: rgba(5,50,39,1);
-  --text2h: rgba(5,50,39,0.78);
+  --text1: rgba(28,78,64,0.92);
+  --text1h: rgba(22,70,58,0.98);
 
-  --spark-color: rgba(7,94,84,0.55);
+  --spark-color: rgba(37,110,94,0.25);
 }
 
 .matrix-calendar {
