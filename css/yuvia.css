@@ -878,7 +878,7 @@ button:focus,
 
 .topcard .second {
   min-height: 60px;   /* «хвостик» / stub */
-  height: auto;
+  height: 70px;
   border-top: 2px solid rgba(241, 249, 247, 0.94);
 }
 /* Общие правила для всех кружочков-уголков билета */
@@ -908,7 +908,7 @@ button:focus,
   padding: 7px 10px 10px 10px;
 }
 .topcard .spacer2 {
-  padding: 15px 20px 20px 20px;
+  padding: 5px 10px 5px 5px;
 }
 /* Лейбл сверху билета (ЗОЛОТАЯ СЕРЕДИНА и т.п.) */
 .topcard .ticket-label {
@@ -1009,12 +1009,13 @@ button:focus,
 .topcard .ticket-stub {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 2px;
   align-items: stretch;
 }
 
 .topcard .ticket-price {
-  font-size: 20px;
+  text-align: right;
+  font-size: 16px;
   font-weight: 700;
   color: #0b3d31;
 }
