@@ -473,7 +473,7 @@ button:focus,
       .filters-block .label {
         font-size: 14px;
         font-weight: 500;
-        color: var(--muted); /* мягкий серый вместо почти чёрного */
+        color: #3c5f56eb; /* мягкий серый вместо почти чёрного */
         margin-bottom: 4px;
       }
       .filter-option {
