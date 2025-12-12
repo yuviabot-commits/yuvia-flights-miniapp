@@ -3274,6 +3274,90 @@
         ? getDirectionSlice(flight, "return")
         : null;
 
+      const formatTransferShort = (value) => {
+        if (!value) return "прямой";
+        if (value === 1) return "1 пересадка";
+        return `${value} пересадки`;
+      };
+
+      const getDirectionAirlines = (segment) => {
+        const airlinesMeta = Array.isArray(segment?.airlinesMeta)
+          ? segment.airlinesMeta
+          : Array.isArray(segment?.airlinesMetaAll)
+            ? segment.airlinesMetaAll
+            : Array.isArray(flight.airlinesMetaAll)
+              ? flight.airlinesMetaAll
+              : null;
+        if (airlinesMeta?.length) {
+          return airlinesMeta
+            .map(({ code, name }) =>
+              resolveAirlineName(code, name, flight.airlineName),
+            )
+            .filter(Boolean)
+            .join(", ");
+        }
+
+        const airlinesAll = Array.isArray(segment?.airlinesAll)
+          ? segment.airlinesAll
+          : Array.isArray(segment?.airlines)
+            ? segment.airlines
+            : Array.isArray(flight.airlinesAll)
+              ? flight.airlinesAll
+              : [];
+        if (airlinesAll.length) {
+          return airlinesAll
+            .map((code) => resolveAirlineName(code, "", flight.airlineName))
+            .filter(Boolean)
+            .join(", ");
+        }
+        return flight.airlineName || flight.airline || "—";
+      };
+
+      const renderDirectionColumn = (title, segment) => {
+        const durationText = segment?.durationMinutes
+          ? formatDuration(segment.durationMinutes)
+          : "";
+        return `
+              <div class="ticket-direction">
+                <div class="direction-title">${title}</div>
+                <div class="direction-row">
+                  <span class="direction-key">Пересадки</span>
+                  <span class="direction-value">${escapeHtml(
+                    formatTransferShort(segment?.transfers || 0),
+                  )}</span>
+                </div>
+                ${
+                  durationText
+                    ? `
+                <div class="direction-row">
+                  <span class="direction-key">В пути</span>
+                  <span class="direction-value">${escapeHtml(
+                    durationText,
+                  )}</span>
+                </div>
+                `
+                    : ""
+                }
+                <div class="direction-row">
+                  <span class="direction-key">Авиакомпании</span>
+                  <span class="direction-value">${escapeHtml(
+                    getDirectionAirlines(segment) || "",
+                  )}</span>
+                </div>
+              </div>`;
+      };
+
+      const directionColumns = [
+        renderDirectionColumn("Туда", outboundSlice),
+        hasReturnSegment ? renderDirectionColumn("Обратно", returnSlice) : "",
+      ]
+        .filter(Boolean)
+        .join("");
+
+      const directionsBlock = directionColumns
+        ? `<div class="ticket-directions">${directionColumns}</div>`
+        : "";
+
         // Город вылета
         const originCity =
           outboundSlice.originCity || // 1. город из нормализованных данных
@@ -3345,6 +3429,10 @@
 
       const stressText = getStressText(flight.stressLevel);
       const currency = flight.currency || lastCurrency;
+      const priceValue = Number(flight.price);
+      const priceText = Number.isFinite(priceValue)
+        ? formatCurrency(priceValue, currency)
+        : flight.price || "—";
 
       card.innerHTML = `
         <div class="container first">
@@ -3371,6 +3459,7 @@
                 <div class="ticket-city-name">${destCity}</div>
               </div>
             </div>
+            ${directionsBlock}
           </div>
         </div>
 
@@ -3381,7 +3470,19 @@
           <div class="bottom right corner"></div>
 
           <div class="spacer2">
-            <!-- нижняя часть билета (stub), наполнение тоже потом -->
+            <div class="ticket-actions">
+              <div class="ticket-price">${escapeHtml(priceText)}</div>
+              <div class="ticket-buttons">
+                <button type="button" class="btn btn-secondary btn-sm" data-action="open-in-results">
+                  Открыть в выдаче
+                </button>
+                ${
+                  ticketUrl
+                    ? `<a class="btn btn-primary btn-sm" href="${ticketUrl}" target="_blank" rel="noopener noreferrer">Купить на Aviasales</a>`
+                    : ""
+                }
+              </div>
+            </div>
           </div>
         </div>
       `;
