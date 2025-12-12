@@ -864,14 +864,14 @@ button:focus,
 
 .topcard .container {
   margin: 0 auto;
-  width: 300px;
-  background-color: #ffffffc4;
+  width: 250px;
+  background-color: #ffffffd4;
   position: relative;
   overflow: hidden;
 }
 .topcard .first {
   min-height: 150px;  /* верхняя часть билета */
-  height: 150px;      /* фиксируем высоту, чтобы stub не "заезжал" */
+  height: 180px;      /* фиксируем высоту, чтобы stub не "заезжал" */
   overflow: hidden;
 }
 
@@ -939,6 +939,7 @@ button:focus,
 .topcard .ticket-city-code {
   font-size: 16px;
   font-weight: 600;
+  align-items: center;
   letter-spacing: 0.06em;
   color: var(--ink);        /* тёмно-зелёный */
 }
@@ -946,6 +947,7 @@ button:focus,
 /* Подписи под кодами: Budapest / Luton Airport */
 .topcard .ticket-city-name {
   font-size: 12px;
+  align-items: center;
   color: rgba(5, 50, 39, 0.75); /* тот же зелёный, но посветлее и прозрачнее */
 }
 
