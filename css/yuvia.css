@@ -965,17 +965,14 @@ button:focus,
 
 .topcard .ticket-info-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 10px 16px;
-  padding-top: 10px;
-  border-top: 1px dashed rgba(7, 94, 84, 0.35);
+  grid-template-columns: 1fr 1fr; /* всегда 2 колонки */
+  column-gap: 10px;              /* меньше расстояние — больше места тексту */
+  row-gap: 10px;
+}
+.topcard .ticket-info-col { 
+  min-width: 0;                  /* критично для переноса текста внутри колонки */
 }
 
-.topcard .ticket-info-col {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
 
 .topcard .ticket-info-title {
   font-weight: 700;
@@ -986,21 +983,28 @@ button:focus,
 
 .topcard .ticket-info-row {
   display: flex;
-  justify-content: space-between;
-  gap: 8px;
+  flex-direction: column;      /* ключ и значение — столбиком */
+  align-items: flex-start;
+  gap: 2px;                    /* маленький зазор между строками */
   font-size: 12px;
-  align-items: baseline;
+  line-height: 1.2;
 }
+
 
 .topcard .ticket-info-k {
   color: var(--muted);
-  white-space: nowrap;
+  white-space: normal;         /* можно переносить */
+  overflow-wrap: anywhere;     /* даже длинные слова/названия */
 }
 
 .topcard .ticket-info-v {
   color: #0f3f33;
-  text-align: right;
+  text-align: left;            /* теперь это строка под подписью */
+  white-space: normal;
+  overflow-wrap: anywhere;
+  font-weight: 600;            /* чтобы визуально читалось как “значение” */
 }
+
 
 .topcard .ticket-stub {
   display: flex;
